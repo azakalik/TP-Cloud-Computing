@@ -11,12 +11,12 @@ import {
  } from '@mantine/core';
  import { useDisclosure } from '@mantine/hooks';
  import classes from '../css-modules/NavBar.module.css';
-import { SignInButton } from '../components/SignInButton';
+import { SignInButton } from './SignInButton';
  
  export function NavBar() {
    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
    return (
-     <Box pb={120}>
+     <Box pb={40}>
        <header className={classes.header}>
          <Group justify="space-between" h="100%">
            <Image src="/logo.jpeg" alt="eZAuction" h={50}/>

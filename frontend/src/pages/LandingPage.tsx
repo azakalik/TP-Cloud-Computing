@@ -1,12 +1,10 @@
-import { NavBar } from './NavBar';
+import BidsContainer from '../components/BidsContainer';
 
 const LandingPage = () => {
 
   return (
     <>
-      <NavBar/>
-
-      
+      <BidsContainer/>      
     </>
   );
 };

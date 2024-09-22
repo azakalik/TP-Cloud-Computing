@@ -2,24 +2,21 @@ import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
 import LandingPage from "./pages/LandingPage";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-const router = createBrowserRouter([
-  {
-    path: "/",
-    element: <LandingPage />,
-  },
-  {
-    path: "/test",
-    element: <div>Test</div>,
-  }
-]);
+import { NavBar } from "./components/NavBar";
+import BidDetail from "./pages/BidDetail";
 
 export default function App() {
   return <MantineProvider theme={theme}>
-    <RouterProvider router={router} />
+    <>
+    <NavBar/>
+    <Router>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/bid/:id" element={<BidDetail />} />
+        </Routes>
+      </Router>
+    </>
   </MantineProvider>;
 }

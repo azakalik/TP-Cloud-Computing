@@ -8,9 +8,17 @@ import AuctionDetailType from '../types/AuctionDetailType';
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
   const [auctionDetail, setAuctionDetail] = useState<AuctionDetailType | null>(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    fetchAuctionDetail(id!).then((data) => setAuctionDetail(data)); // Fetch the bid details when the component mounts
+    fetchAuctionDetail(id!).then((data) => {
+      setAuctionDetail(data)
+      setLoading(false)
+    }); // Fetch the bid details when the component mounts
   }, [id]);
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
 
   if (!auctionDetail) {
     return <Text>Bid not found!</Text>;

@@ -40,86 +40,89 @@ const AuctionDetailPage: React.FC = () => {
   return (
     <Container mb='30'>
       <Card shadow="sm" padding="lg" radius="md" withBorder>
-        <Card.Section>
-          <Image src={auctionDetail.imageUrls} height={300} alt={auctionDetail.title} />
-        </Card.Section>
-
-        <Group mt="md" mb="xs">
-          <Title>{auctionDetail.title}</Title>
-          <Badge color="blue" variant="light">
-            {auctionDetail.countryFlag}
-          </Badge>
-        </Group>
-
-        <Text size="md" color="dimmed" style={{ lineHeight: 1.8 }}>
-          {auctionDetail.description}
-        </Text>
-
-        <Divider my="lg" />
-
-        <Grid>
-          <Grid.Col span={2}>
-            <Stack align="center" spacing={5}>
-              <IconMoneybag size={32} color="#27AE60" />
-              <Text size="lg" weight={600} color="#27AE60">
-                Initial Price
-              </Text>
-              <Text size="lg">${auctionDetail.initialPrice}</Text>
-            </Stack>
+        <Grid align="center">
+          <Grid.Col span={4.5}>
+            <Image src={auctionDetail.imageUrls} alt={auctionDetail.title} />
           </Grid.Col>
+          <Grid.Col span={0.5} />
+          <Grid.Col span={7}>
+            <Group mt="md" mb="xs">
+              <Title>{auctionDetail.title}</Title>
+              <Badge color="blue" variant="light">
+                {auctionDetail.countryFlag}
+              </Badge>
+            </Group>
 
-          <Grid.Col span={2}>
-            <Stack align="center" spacing={5}>
-              <IconMoneybag size={32} color="#F39C12" />
-              <Text size="lg" weight={600} color="#F39C12">
-                Last Bid
-              </Text>
-              <Text size="lg">${auctionDetail.lastBid}</Text>
-            </Stack>
-          </Grid.Col>
+            <Text size="md" color="dimmed" style={{ lineHeight: 1.8 }}>
+              {auctionDetail.description}
+            </Text>
 
-          {/* Vertical Divider between price and date sections */}
-          <Grid.Col span={0.5}/>
-          <Divider orientation="vertical" />
-          <Grid.Col span={0.5}/>
+            <Divider my="lg" />
 
-          <Grid.Col span={3}>
-            <Stack align="center" spacing={5}>
-              <IconClock size={32} color="#0984e3" />
-              <Text size="lg" weight={600} color="#0984e3">
-                Start Date
-              </Text>
-              <Text size="lg">{auctionDetail.initialTime}</Text>
-            </Stack>
-          </Grid.Col>
+            <Grid>
+              <Grid.Col span={6}>
+                <Stack align="center" spacing={5}>
+                  <IconMoneybag size={32} color="#27AE60" />
+                  <Text size="lg" weight={600} color="#27AE60">
+                    Initial Price
+                  </Text>
+                  <Text size="lg">${auctionDetail.initialPrice}</Text>
+                </Stack>
+              </Grid.Col>
 
-          <Grid.Col span={3}>
-            <Stack align="center" spacing={5}>
-              <IconClock size={32} color="#d63031" />
-              <Text size="lg" weight={600} color="#d63031">
-                End Date
-              </Text>
-              <Text size="lg">{auctionDetail.endTime}</Text>
-            </Stack>
+              <Grid.Col span={6}>
+                <Stack align="center" spacing={5}>
+                  <IconMoneybag size={32} color="#F39C12" />
+                  <Text size="lg" weight={600} color="#F39C12">
+                    Last Bid
+                  </Text>
+                  <Text size="lg">${auctionDetail.lastBid}</Text>
+                </Stack>
+              </Grid.Col>
+
+              <Grid.Col span={12}>
+                <Divider my="lg" />
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Stack align="center" spacing={5}>
+                  <IconClock size={32} color="#0984e3" />
+                  <Text size="lg" weight={600} color="#0984e3">
+                    Start Date
+                  </Text>
+                  <Text size="lg">{auctionDetail.initialTime}</Text>
+                </Stack>
+              </Grid.Col>
+
+              <Grid.Col span={6}>
+                <Stack align="center" spacing={5}>
+                  <IconClock size={32} color="#d63031" />
+                  <Text size="lg" weight={600} color="#d63031">
+                    End Date
+                  </Text>
+                  <Text size="lg">{auctionDetail.endTime}</Text>
+                </Stack>
+              </Grid.Col>
+            </Grid>
+
+            <Divider my="lg" />
+
+            {/* Call to Action */}
+            <Button
+              size="xl"
+              radius="xl"
+              fullWidth
+              style={{
+                background: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
+                fontWeight: "bold",
+                fontSize: "18px",
+                padding: "12px 40px",
+              }}
+            >
+              Bid Now
+            </Button>
           </Grid.Col>
         </Grid>
-
-        <Divider my="lg" />
-
-        {/* Call to Action */}
-        <Button
-          size="xl"
-          radius="xl"
-          fullWidth
-          style={{
-            background: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
-            fontWeight: "bold",
-            fontSize: "18px",
-            padding: "12px 40px",
-          }}
-        >
-          Bid Now
-        </Button>
       </Card>
     </Container>
   );

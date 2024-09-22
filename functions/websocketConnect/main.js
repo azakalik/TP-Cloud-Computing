@@ -1,10 +1,14 @@
 // Import necessary clients and commands from AWS SDK v3
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'; // Import Lambda SDK
 
 // Initialize DynamoDB Client
 const ddbClient = new DynamoDBClient({ region: 'us-east-1' });  // Replace with your region
 const ddb = DynamoDBDocumentClient.from(ddbClient);
+
+// Initialize Lambda Client
+const lambdaClient = new LambdaClient({ region: 'us-east-1' });  // Replace with your region
 
 export const handler = async (event) => {
     const { requestContext, queryStringParameters } = event;
@@ -52,15 +56,28 @@ export const handler = async (event) => {
     // Execute the transactional write using TransactWriteCommand
     try {
         await ddb.send(new TransactWriteCommand(params));
+        console.log('Connection ID stored successfully.');
+
+        // Now call the second Lambda asynchronously (non-blocking)
+        const lambdaParams = {
+            FunctionName: 'maxPriceGetter', // Replace with your second Lambda's name
+            InvocationType: 'Event', // Asynchronous invocation
+            Payload: JSON.stringify({ connectionId }) // Pass the connectionId
+        };
+
+        // Invoke the second Lambda asynchronously and await the invocation to complete
+        const response = await lambdaClient.send(new InvokeCommand(lambdaParams));
+        console.log('Second Lambda invoked asynchronously.', response);
+
         return {
             statusCode: 200,
-            body: 'Connection ID stored successfully.'
+            body: 'Connection ID stored successfully, and second Lambda invoked.'
         };
     } catch (err) {
-        console.error('Error storing connection:', err);
+        console.error('Error storing connection or invoking Lambda:', err);
         return {
             statusCode: 500,
-            body: 'Error storing connection ID: ' + JSON.stringify(err)
+            body: 'Error storing connection ID or invoking Lambda: ' + JSON.stringify(err)
         };
     }
 };

@@ -14,11 +14,11 @@ export default function App() {
   return <MantineProvider theme={theme}>
     <>
     <NavBar/>
-    <Center>
+    <Center mx='30'>
       <Router>
           <Routes>
             <Route path="/" element={<LandingPage />} />
-            <Route path="/bid/:id" element={<AuctionDetailPage />} />
+            <Route path="/auction/:id" element={<AuctionDetailPage />} />
             <Route path="my_auctions" element={<MyAuctionsPage />} />
             <Route path="new_auction" element={<NewAuctionPage />} />
             <Route path="about_us" element={<AboutUsPage />} />

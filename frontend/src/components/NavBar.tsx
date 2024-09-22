@@ -29,7 +29,7 @@ import { SignInButton } from './SignInButton';
               My auctions
              </a>
              <a href="new_auction" className={classes.link}>
-               Add a bid
+               Add an auction
              </a>
              <a href="about_us" className={classes.link}>
                About us

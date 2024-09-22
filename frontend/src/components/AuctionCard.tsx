@@ -27,12 +27,7 @@ const BidCard: React.FC<BidCardProps> = ({
   const navigate = useNavigate();
 
   const handleSeeDetailsClick = () => {
-    navigate(`/bid/${id}`);
-  };
-
-  const handleBidNowClick = () => {
-    // You can handle the "Bid now" action here, like showing a bid form or modal
-    alert(`Bid placed for: ${title}`);
+    navigate(`/auction/${id}`);
   };
 
   return (

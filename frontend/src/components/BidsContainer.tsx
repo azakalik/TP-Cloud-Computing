@@ -1,24 +1,16 @@
 import React from 'react';
 import { Flex, Title } from '@mantine/core';
-import BidCard from './BidCard';
+import BidCard from './AuctionCard';
+import AuctionCardType from '../types/AuctionCardType';
 
-interface Bid {
-  id: string;
-  imageUrl: string;
-  title: string;
-  description: string;
-  countryFlag: string;
-  initialPrice: string;
-  initialTime: string;
-  endTime: string;
-}
+
 
 interface BidsContainerProps {
    pageTitle: string;
-   bids: Bid[];
+   auctions: AuctionCardType[];
 }
 
-const BidsContainer: React.FC<BidsContainerProps> = ({ pageTitle, bids }) => {
+const BidsContainer: React.FC<BidsContainerProps> = ({ pageTitle, auctions: bids }) => {
   return (
    <>
       <Title order={1} mb='20'>{pageTitle}</Title>

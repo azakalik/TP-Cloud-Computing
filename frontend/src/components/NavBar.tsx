@@ -22,16 +22,16 @@ import { SignInButton } from './SignInButton';
            <Image src="/logo.jpeg" alt="eZAuction" h={50}/>
  
            <Group h="100%" gap={0} visibleFrom="sm">
-             <a href="#" className={classes.link}>
+             <a href="/" className={classes.link}>
                Home
              </a>
-             <a href="#" className={classes.link}>
+             <a href="my_bids" className={classes.link}>
                Your bids
              </a>
-             <a href="#" className={classes.link}>
+             <a href="new_bid" className={classes.link}>
                Add a bid
              </a>
-             <a href="#" className={classes.link}>
+             <a href="about_us" className={classes.link}>
                About us
              </a>
            </Group>

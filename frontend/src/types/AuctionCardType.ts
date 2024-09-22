@@ -4,7 +4,7 @@ type AuctionCardType = {
    title: string;
    description: string;
    countryFlag: string;
-   initialPrice: string;
+   initialPrice: number;
    initialTime: string;
    endTime: string;
  }

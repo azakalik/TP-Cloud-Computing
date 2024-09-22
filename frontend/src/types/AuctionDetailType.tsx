@@ -4,8 +4,8 @@ type AuctionDetailType = {
    title: string;
    description: string;
    countryFlag: string;
-   initialPrice: string;
-   lastBid: string;
+   initialPrice: number;
+   highestBid: number;
    initialTime: string;
    endTime: string;
  }

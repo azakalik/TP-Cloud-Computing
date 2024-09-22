@@ -12,6 +12,8 @@ import {
   Stack,
   Grid,
   Divider,
+  Modal,
+  NumberInput,
 } from "@mantine/core";
 import { IconClock, IconMoneybag } from "@tabler/icons-react";
 import { fetchAuctionDetail } from "../api";
@@ -19,8 +21,43 @@ import AuctionDetailType from "../types/AuctionDetailType";
 
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
-  const [auctionDetail, setAuctionDetail] = useState<AuctionDetailType | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [auctionDetail, setAuctionDetail] = useState<AuctionDetailType | null>(
+    null
+  );
+  const [loading, setLoading] = useState<boolean>(true);
+  const [bidModalOpened, setBidModalOpened] = useState<boolean>(false);
+  const [minBidAmount, setMinBidAmount] = useState<number>(0);
+  const [bidAmount, setBidAmount] = useState<number|string>('');
+  const [uploadingBid, setUploadingBid] = useState<boolean>(false);
+  const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
+  const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
+
+  const handleBid = async () => {
+    setUploadingBid(true);
+    // Simulate an API call
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setUploadingBid(false);
+    setBidSuccessful(true);
+  };
+
+  const handleCloseModal = () => {
+    setBidModalOpened(false);
+    setBidAmount('');
+    setBidSuccessful(false);
+  };
+
+  useEffect(() => {
+    const handleDisableBidButton = () => {
+      if (typeof bidAmount === "string") {
+        return true;
+      }
+      if (bidAmount <= minBidAmount) {
+        return true;
+      }
+      return false;
+    }
+    setDisableBidButton(handleDisableBidButton());
+  }, [bidAmount, minBidAmount]);
 
   useEffect(() => {
     fetchAuctionDetail(id!).then((data) => {
@@ -28,6 +65,18 @@ const AuctionDetailPage: React.FC = () => {
       setLoading(false);
     }); // Fetch the bid details when the component mounts
   }, [id]);
+
+  // Set the initial bid amount when the auction details are loaded
+  useEffect(() => {
+    if (!auctionDetail) {
+      return;
+    }
+    if (auctionDetail.highestBid === null) {
+      return;
+    }
+
+    setMinBidAmount(auctionDetail.highestBid);
+  }, [auctionDetail, bidAmount]);
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -38,7 +87,7 @@ const AuctionDetailPage: React.FC = () => {
   }
 
   return (
-    <Container mb='30'>
+    <Container mb="30">
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Grid align="center">
           <Grid.Col span={4.5}>
@@ -61,9 +110,9 @@ const AuctionDetailPage: React.FC = () => {
 
             <Grid>
               <Grid.Col span={6}>
-                <Stack align="center" spacing={5}>
+                <Stack align="center">
                   <IconMoneybag size={32} color="#27AE60" />
-                  <Text size="lg" weight={600} color="#27AE60">
+                  <Text size="lg" color="#27AE60">
                     Initial Price
                   </Text>
                   <Text size="lg">${auctionDetail.initialPrice}</Text>
@@ -71,12 +120,12 @@ const AuctionDetailPage: React.FC = () => {
               </Grid.Col>
 
               <Grid.Col span={6}>
-                <Stack align="center" spacing={5}>
+                <Stack align="center">
                   <IconMoneybag size={32} color="#F39C12" />
-                  <Text size="lg" weight={600} color="#F39C12">
-                    Last Bid
+                  <Text size="lg" color="#F39C12">
+                    Highest Bid
                   </Text>
-                  <Text size="lg">${auctionDetail.lastBid}</Text>
+                  <Text size="lg">${auctionDetail.highestBid}</Text>
                 </Stack>
               </Grid.Col>
 
@@ -85,9 +134,9 @@ const AuctionDetailPage: React.FC = () => {
               </Grid.Col>
 
               <Grid.Col span={6}>
-                <Stack align="center" spacing={5}>
+                <Stack align="center">
                   <IconClock size={32} color="#0984e3" />
-                  <Text size="lg" weight={600} color="#0984e3">
+                  <Text size="lg" color="#0984e3">
                     Start Date
                   </Text>
                   <Text size="lg">{auctionDetail.initialTime}</Text>
@@ -95,9 +144,9 @@ const AuctionDetailPage: React.FC = () => {
               </Grid.Col>
 
               <Grid.Col span={6}>
-                <Stack align="center" spacing={5}>
+                <Stack align="center">
                   <IconClock size={32} color="#d63031" />
-                  <Text size="lg" weight={600} color="#d63031">
+                  <Text size="lg" color="#d63031">
                     End Date
                   </Text>
                   <Text size="lg">{auctionDetail.endTime}</Text>
@@ -112,6 +161,7 @@ const AuctionDetailPage: React.FC = () => {
               size="xl"
               radius="xl"
               fullWidth
+              onClick={() => setBidModalOpened(true)} // Open the modal on click
               style={{
                 background: "linear-gradient(135deg, #74b9ff 0%, #0984e3 100%)",
                 fontWeight: "bold",
@@ -123,6 +173,59 @@ const AuctionDetailPage: React.FC = () => {
             </Button>
           </Grid.Col>
         </Grid>
+
+        {/* Modal for bidding */}
+        <Modal
+          opened={bidModalOpened}
+          onClose={() => {}} // don't allow closing by clicking outside
+          withCloseButton={false}
+        >
+          {bidSuccessful ? (
+            <>
+              <Title order={2}>Bid successful!</Title>
+              <Divider my="20" />
+              <Text size="lg">
+                Your bid of ${bidAmount} has been successfully placed.
+              </Text>
+              <Group mt="md">
+                <Button onClick={handleCloseModal}>Close</Button>
+              </Group>
+            </>
+          ) : (
+            <>
+              <Title order={2}>Enter your bid</Title>
+              <Divider my="20" />
+              <NumberInput
+                label="Bid Amount ($)"
+                onChange={setBidAmount}
+                value={bidAmount}
+                placeholder="Enter amount"
+                min={minBidAmount}
+                prefix="$"
+                allowNegative={false}
+                decimalScale={2} // Allow only 2 decimal places
+                defaultValue={2.2}
+                decimalSeparator="."
+                thousandSeparator=","
+                leftSection={<IconMoneybag />}
+                hideControls
+                error={disableBidButton && typeof bidAmount === "number" ? "Bid amount must be greater than the highest bid" : null}
+              />
+              <Group mt="md">
+                <Button
+                  variant="outline"
+                  onClick={handleCloseModal}
+                  disabled={uploadingBid}
+                >
+                  Cancel
+                </Button>
+                <Button onClick={handleBid} loading={uploadingBid} disabled={disableBidButton}>
+                  Bid
+                </Button>
+              </Group>
+            </>
+          )}
+        </Modal>
       </Card>
     </Container>
   );

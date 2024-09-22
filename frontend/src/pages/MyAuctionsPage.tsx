@@ -34,15 +34,15 @@ const myBids = [
     initialTime: '2024-09-15 09:00 AM',
     endTime: '2024-09-22 09:00 AM',
   },
-  // Add more bids if necessary
+  // Add more auctions if necessary
 ];
 
-const MyBidsPage = () => {
+const MyAuctionsPage = () => {
   return (
     <div>
-      <BidsContainer pageTitle="My Bids" bids={myBids} />
+      <BidsContainer pageTitle="My Auctions" bids={myBids} />
     </div>
   );
 };
 
-export default MyBidsPage;
+export default MyAuctionsPage;

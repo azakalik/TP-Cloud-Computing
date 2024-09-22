@@ -57,10 +57,7 @@ const BidCard: React.FC<BidCardProps> = ({
       </Group>
 
       <Group mt="md" position="apart">
-        <Button color="blue" size="xs" onClick={handleBidNowClick}>
-          Bid now
-        </Button>
-        <Button variant="outline" color="blue" size="xs" onClick={handleSeeDetailsClick}>
+        <Button color="blue" size="xs" onClick={handleSeeDetailsClick}>
           See details
         </Button>
       </Group>

@@ -37,7 +37,7 @@ const fakeBids = [
   // Add more bids as needed
 ];
 
-const BiddingPage = () => {
+const ListAuctionsPage = () => {
   return (
     <div>
       <BidsContainer pageTitle='Available Bids' bids={fakeBids} />
@@ -45,4 +45,4 @@ const BiddingPage = () => {
   );
 };
 
-export default BiddingPage;
+export default ListAuctionsPage;

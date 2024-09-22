@@ -25,10 +25,10 @@ import { SignInButton } from './SignInButton';
              <a href="/" className={classes.link}>
                Home
              </a>
-             <a href="my_bids" className={classes.link}>
-               Your bids
+             <a href="my_auctions" className={classes.link}>
+              My auctions
              </a>
-             <a href="new_bid" className={classes.link}>
+             <a href="new_auction" className={classes.link}>
                Add a bid
              </a>
              <a href="about_us" className={classes.link}>

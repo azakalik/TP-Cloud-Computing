@@ -29,7 +29,7 @@ const fakeBidData = {
   // Add more bid details as necessary
 };
 
-const BidDetail: React.FC = () => {
+const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
   const bid = fakeBidData[id as keyof typeof fakeBidData]; // Fetch the corresponding bid data
 
@@ -84,4 +84,4 @@ const BidDetail: React.FC = () => {
   );
 };
 
-export default BidDetail;
+export default AuctionDetailPage;

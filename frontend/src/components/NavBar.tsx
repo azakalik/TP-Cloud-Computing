@@ -12,6 +12,7 @@ import {
  import { useDisclosure } from '@mantine/hooks';
  import classes from '../css-modules/NavBar.module.css';
 import { SignInButton } from './SignInButton';
+import { Link } from 'react-router-dom';
  
  export function NavBar() {
    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
@@ -22,18 +23,10 @@ import { SignInButton } from './SignInButton';
            <Image src="/logo.jpeg" alt="eZAuction" h={50}/>
  
            <Group h="100%" gap={0} visibleFrom="sm">
-             <a href="/" className={classes.link}>
-               Home
-             </a>
-             <a href="my_auctions" className={classes.link}>
-              My auctions
-             </a>
-             <a href="new_auction" className={classes.link}>
-               Add an auction
-             </a>
-             <a href="about_us" className={classes.link}>
-               About us
-             </a>
+              <Link to='/' className={classes.link}>Home</Link>
+              <Link to='/my_auctions' className={classes.link}>My auctions</Link>
+              <Link to='/new_auction' className={classes.link}>Add an auction</Link>
+              <Link to='/about_us' className={classes.link}>About us</Link>
            </Group>
  
            <Group visibleFrom="sm">

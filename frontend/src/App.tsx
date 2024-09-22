@@ -15,15 +15,15 @@ export default function App() {
     <>
     <NavBar/>
     <Center>
-    <Router>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/bid/:id" element={<AuctionDetailPage />} />
-          <Route path="my_auctions" element={<MyAuctionsPage />} />
-          <Route path="new_auction" element={<NewAuctionPage />} />
-          <Route path="about_us" element={<AboutUsPage />} />
-        </Routes>
-      </Router>
+      <Router>
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/bid/:id" element={<AuctionDetailPage />} />
+            <Route path="my_auctions" element={<MyAuctionsPage />} />
+            <Route path="new_auction" element={<NewAuctionPage />} />
+            <Route path="about_us" element={<AboutUsPage />} />
+          </Routes>
+        </Router>
     </Center>
     </>
   </MantineProvider>;

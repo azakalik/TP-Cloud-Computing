@@ -1,65 +1,68 @@
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
-import { v4 as uuidv4 } from 'uuid';
+const { DynamoDBClient, PutItemCommand } = require('@aws-sdk/client-dynamodb');
+const { v4: uuidv4 } = require('uuid');
 
-const dynamoDB = new DynamoDBClient({ region: "your-region" });
+const dynamoDB = new DynamoDBClient({ region: "us-east-1" });
 
 exports.handler = async (event) => {
-    // Parse the incoming request body
-    const { user, initialPrice, dueTime, title, description } = JSON.parse(event.body);
     
-    // Generate a unique publication ID
-    const publicationId = `PUBID#${uuidv4()}`;
-    
-    // Get the current date/time
-    const createdTime = new Date().toISOString();
-    
-    // Convert dueTime to ISO format (if necessary)
-    const dueTimeISO = new Date(dueTime).toISOString();
-    
-    // Define the three items to insert into DynamoDB
-    const item1 = {
-        TableName: "your-table-name",
-        Item: {
-            PK: { S: publicationId },
-            SK: { S: publicationId }, // Or leave it empty if you wish
-            User: { S: user },
-            InitialPrice: { N: initialPrice.toString() },
-            DueTime: { S: dueTimeISO },
-            Title: { S: title },
-            Description: { S: description },
-            Created: { S: createdTime }
-        }
-    };
+    let publicationId, createdTime, dueTimeISO, tableName, item1, item2, item3;
+    try{
+        const { user, initialPrice, dueTime, title, description } = JSON.parse(event.body);
+        publicationId = `PUBID#${uuidv4()}`;
+        createdTime = new Date().toISOString();
+        dueTimeISO = new Date(dueTime).toISOString();
+        tableName = "PUBLICATIONS";
 
-    const item2 = {
-        TableName: "your-table-name",
-        Item: {
-            PK: { S: "STATUS#ACTIVE" },
-            SK: { S: `DUE_TIME#${dueTimeISO}, PUBID#${publicationId}` },
-            User: { S: user },
-            InitialPrice: { N: initialPrice.toString() },
-            DueTime: { S: dueTimeISO },
-            Title: { S: title },
-            Description: { S: description },
-            Created: { S: createdTime }
-        }
-    };
-
-    const item3 = {
-        TableName: "your-table-name",
-        Item: {
-            PK: { S: "STATUS#ACTIVE" },
-            SK: { S: `CREATED#${createdTime}, PUBID#${publicationId}` },
-            User: { S: user },
-            InitialPrice: { N: initialPrice.toString() },
-            DueTime: { S: dueTimeISO },
-            Title: { S: title },
-            Description: { S: description },
-            Created: { S: createdTime }
-        }
-    };
+        item1 = {
+            TableName: "PUBLICATIONS",
+            Item: {
+                PK: { S: publicationId },
+                SK: { S: publicationId },
+                User: { S: user },
+                InitialPrice: { N: initialPrice.toString() },
+                DueTime: { S: dueTimeISO },
+                Title: { S: title },
+                Description: { S: description },
+                Created: { S: createdTime }
+            }
+        };
     
-    // Insert all three items into DynamoDB
+        item2 = {
+            TableName: "PUBLICATIONS",
+            Item: {
+                PK: { S: "STATUS#ACTIVE" },
+                SK: { S: `DUE_TIME#${dueTimeISO}, PUBID#${publicationId}` },
+                User: { S: user },
+                InitialPrice: { N: initialPrice.toString() },
+                DueTime: { S: dueTimeISO },
+                Title: { S: title },
+                Description: { S: description },
+                Created: { S: createdTime }
+            }
+        };
+    
+        item3 = {
+            TableName: "PUBLICATIONS",
+            Item: {
+                PK: { S: "STATUS#ACTIVE" },
+                SK: { S: `CREATED#${createdTime}, PUBID#${publicationId}` },
+                User: { S: user },
+                InitialPrice: { N: initialPrice.toString() },
+                DueTime: { S: dueTimeISO },
+                Title: { S: title },
+                Description: { S: description },
+                Created: { S: createdTime }
+            }
+        };
+    } catch (error){
+        console.error(error);
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ message: "Could not read JSON data", error })
+        };
+    }
+    
+
     try {
         await dynamoDB.send(new PutItemCommand(item1));
         await dynamoDB.send(new PutItemCommand(item2));

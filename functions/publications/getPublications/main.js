@@ -1,8 +1,8 @@
 import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 
-const dynamoDB = new DynamoDBClient({ region: "your-region" });
+const dynamoDB = new DynamoDBClient({ region: "us-east-1" });
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
     // Extract the publicationId from query string parameters
     const publicationId = event.queryStringParameters?.publicationId;
 
@@ -15,10 +15,10 @@ exports.handler = async (event) => {
 
     // Define the key for querying DynamoDB (PK is the publication ID)
     const params = {
-        TableName: "your-table-name",
+        TableName: "PUBLICATIONS",
         Key: {
             PK: { S: `PUBID#${publicationId}` },
-            SK: { S: `PUBID#${publicationId}` } // assuming SK is set the same as PK
+            SK: { S: `PUBID#${publicationId}` } 
         }
     };
 

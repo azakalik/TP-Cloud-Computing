@@ -39,21 +39,19 @@ const AuctionDetailPage: React.FC = () => {
 
   return (
     <Container mb='30'>
-      <Title mb="30">{auctionDetail.title}</Title>
-
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Card.Section>
           <Image src={auctionDetail.imageUrls} height={300} alt={auctionDetail.title} />
         </Card.Section>
 
         <Group mt="md" mb="xs">
-          <Text>{auctionDetail.title}</Text>
+          <Title>{auctionDetail.title}</Title>
           <Badge color="blue" variant="light">
             {auctionDetail.countryFlag}
           </Badge>
         </Group>
 
-        <Text size="sm" color="dimmed" style={{ lineHeight: 1.8 }}>
+        <Text size="md" color="dimmed" style={{ lineHeight: 1.8 }}>
           {auctionDetail.description}
         </Text>
 

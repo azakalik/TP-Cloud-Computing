@@ -110,7 +110,7 @@ const fakeUserAuctions: AuctionCardType[] = [
 
 const fakeAuctionDetail: AuctionDetailType = {
   id: '1',
-  imageUrls: ['https://via.placeholder.com/300', 'https://via.placeholder.com/300'],
+  imageUrls: ['https://images-cdn.ubuy.co.in/633b8edadb0c2179127cc52b-custom-giant-luxury-wrist-watch-for.jpg', 'https://via.placeholder.com/300'],
   title: 'Luxury Watch',
   description: 'A high-end luxury watch with diamonds and gold.',
   countryFlag: '🇨🇭',

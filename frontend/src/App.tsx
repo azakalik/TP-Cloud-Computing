@@ -1,10 +1,9 @@
 import "@mantine/core/styles.css";
-import { Center, MantineProvider } from "@mantine/core";
+import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
 import LandingPage from "./pages/ListAuctionsPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-import { NavBar } from "./components/NavBar";
 import { Layout } from "./layout";
 import AuctionDetailPage from "./pages/AuctionDetailPage";
 import MyAuctionsPage from "./pages/MyAuctionsPage";

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -16,12 +16,13 @@ import {
   NumberInput,
 } from "@mantine/core";
 import { IconClock, IconMoneybag } from "@tabler/icons-react";
-import { fetchAuctionDetail } from "../api";
+import { fetchAuctionDetail, uploadBid } from "../api";
 import AuctionDetailType from "../types/AuctionDetailType";
-import createHighestBidWebsocket from "../websocket";
+import {createHighestBidWebsocket, destroyHighestBidWebsocket} from "../websocket";
 
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
+
   const [auctionDetail, setAuctionDetail] = useState<AuctionDetailType | null>(
     null
   );
@@ -33,20 +34,10 @@ const AuctionDetailPage: React.FC = () => {
   const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number|null>(null);
+  
 
-  const handleBid = async () => {
-    setUploadingBid(true);
-    // Simulate an API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setUploadingBid(false);
-    setBidSuccessful(true);
-  };
-
-  const handleCloseModal = () => {
-    setBidModalOpened(false);
-    setBidAmount('');
-    setBidSuccessful(false);
-  };
+  // useRef for the WebSocket connection
+  const websocketRef = useRef<WebSocket | null>(null);
 
   // Keep the min bid amount in sync with the highest bid
   useEffect(() => {
@@ -76,12 +67,25 @@ const AuctionDetailPage: React.FC = () => {
     }
   }, [highestBid]);
 
-    // WebSocket connection to get the latest highest bid and start auto-updating it when the component mounts
-    useEffect(() => {
-      createHighestBidWebsocket(id!, setHighestBid);
-    }, [id]);
-  
+  useEffect(() => {
+    if (!id) {
+      return
+    }
 
+    // Create the WebSocket when the component mounts
+    websocketRef.current = createHighestBidWebsocket(setHighestBid, id);
+
+    // Cleanup the WebSocket when the component unmounts
+    return () => {
+      if (websocketRef.current) {
+        destroyHighestBidWebsocket(websocketRef.current);
+      }
+    };
+  }, [id]); // Add publicationId to the dependency array if it can change
+
+  if (!id) {
+    return <Text>Bid not found!</Text>;
+  }
   if (loading) {
     return <Text>Loading...</Text>;
   }
@@ -89,6 +93,19 @@ const AuctionDetailPage: React.FC = () => {
   if (!auctionDetail) {
     return <Text>Bid not found!</Text>;
   }
+
+  const handleBid = async () => {
+    setUploadingBid(true);
+    await uploadBid(id!, bidAmount as number);
+    setUploadingBid(false);
+    setBidSuccessful(true);
+  };
+
+  const handleCloseModal = () => {
+    setBidModalOpened(false);
+    setBidAmount('');
+    setBidSuccessful(false);
+  };
 
   return (
     <Container mb="30">

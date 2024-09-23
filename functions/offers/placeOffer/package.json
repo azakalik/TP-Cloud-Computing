@@ -1,0 +1,19 @@
+{
+  "name": "offers-placeoffer",
+  "version": "1.0.0",
+  "description": "AWS placeOffer lambda",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1691.0",
+    "pg": "^8.13.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.6.2"
+  }
+}

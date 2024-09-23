@@ -18,6 +18,7 @@ import {
 import { IconClock, IconMoneybag } from "@tabler/icons-react";
 import { fetchAuctionDetail } from "../api";
 import AuctionDetailType from "../types/AuctionDetailType";
+import createHighestBidWebsocket from "../websocket";
 
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
@@ -31,6 +32,7 @@ const AuctionDetailPage: React.FC = () => {
   const [uploadingBid, setUploadingBid] = useState<boolean>(false);
   const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
+  const [highestBid, setHighestBid] = useState<number|null>(null);
 
   const handleBid = async () => {
     setUploadingBid(true);
@@ -46,6 +48,7 @@ const AuctionDetailPage: React.FC = () => {
     setBidSuccessful(false);
   };
 
+  // Keep the min bid amount in sync with the highest bid
   useEffect(() => {
     const handleDisableBidButton = () => {
       if (typeof bidAmount === "string") {
@@ -68,15 +71,16 @@ const AuctionDetailPage: React.FC = () => {
 
   // Set the initial bid amount when the auction details are loaded
   useEffect(() => {
-    if (!auctionDetail) {
-      return;
+    if (highestBid !== null){
+      setMinBidAmount(highestBid);
     }
-    if (auctionDetail.highestBid === null) {
-      return;
-    }
+  }, [highestBid]);
 
-    setMinBidAmount(auctionDetail.highestBid);
-  }, [auctionDetail, bidAmount]);
+    // WebSocket connection to get the latest highest bid and start auto-updating it when the component mounts
+    useEffect(() => {
+      createHighestBidWebsocket(id!, setHighestBid);
+    }, [id]);
+  
 
   if (loading) {
     return <Text>Loading...</Text>;
@@ -125,7 +129,7 @@ const AuctionDetailPage: React.FC = () => {
                   <Text size="lg" color="#F39C12">
                     Highest Bid
                   </Text>
-                  <Text size="lg">${auctionDetail.highestBid}</Text>
+                  <Text size="lg">${highestBid}</Text>
                 </Stack>
               </Grid.Col>
 

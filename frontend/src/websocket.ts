@@ -1,61 +1,65 @@
-type WebSocketMessage = {
-  highestBid?: number; // Adjust this based on the expected data structure from your WebSocket
+import { HIGHEST_BID_WS_URL } from "./constants";
+
+type HighestBidWebSocketMessage = {
+  highestBid: number;
+  userId: string;
 };
 
 type SetHighestBid = (bid: number) => void;
+type SetUserId = (userId: string) => void;
 
-function createHighestBidWebsocket(
-  url: string,
+export function createHighestBidWebsocket(
   setHighestBid: SetHighestBid,
-  reconnectInterval: number = 5000
-): () => void {
-  let websocket: WebSocket | null = null;
-  let reconnectTimeout: number | null = null;
+  setUserId: SetUserId,
+  publicationId: string, // Accept publicationId as a parameter
+  url: string = HIGHEST_BID_WS_URL
+): WebSocket {
+  // Append publicationId as a query parameter to the WebSocket URL
+  let char;
+  if (url.includes("?")) {
+    char = "&";
+  } else {
+    char = "?";
+  }
 
-  const connectWebSocket = () => {
-    websocket = new WebSocket(url);
+  const wsUrlWithParams = `${url}${char}publicationId=${encodeURIComponent(
+    publicationId
+  )}`;
+  
 
-    websocket.onopen = () => {
-      console.log("WebSocket connected");
-    };
+  const websocket = new WebSocket(wsUrlWithParams);
 
-    websocket.onmessage = (event: MessageEvent) => {
-      try {
-        const parsedData: WebSocketMessage = JSON.parse(event.data);
-        if (parsedData.highestBid !== undefined) {
-          setHighestBid(parsedData.highestBid);
-        }
-      } catch (error) {
-        console.error("Error parsing WebSocket message:", error);
+  websocket.onopen = () => {
+    console.log("WebSocket connected to", wsUrlWithParams);
+  };
+
+  websocket.onmessage = (event: MessageEvent) => {
+    try {
+      console.log("WebSocket message received:", event.data);
+      const parsedData: HighestBidWebSocketMessage = JSON.parse(event.data);
+      if (parsedData.highestBid !== undefined) {
+        setUserId(parsedData.userId);
+        setHighestBid(parsedData.highestBid);
       }
-    };
-
-    websocket.onclose = () => {
-      console.log("WebSocket connection closed. Attempting to reconnect...");
-      attemptReconnect();
-    };
-
-    websocket.onerror = (error: Event) => {
-      console.error("WebSocket error:", error);
-      websocket?.close(); // Close the connection on error
-    };
+    } catch (error) {
+      console.error("Error parsing WebSocket message:", error);
+    }
   };
 
-  const attemptReconnect = () => {
-    if (reconnectTimeout) clearTimeout(reconnectTimeout);
-    reconnectTimeout = setTimeout(() => {
-      connectWebSocket();
-    }, reconnectInterval);
+  websocket.onclose = () => {
+    console.log("WebSocket connection closed.");
   };
 
-  // Initiate the connection
-  connectWebSocket();
-
-  // Return a cleanup function to close WebSocket when needed
-  return () => {
-    if (websocket) websocket.close();
-    if (reconnectTimeout) clearTimeout(reconnectTimeout);
+  websocket.onerror = (error: Event) => {
+    console.error("WebSocket error:", error);
+    websocket?.close(); // Close the connection on error
   };
+
+  return websocket;
 }
 
-export default createHighestBidWebsocket;
+export function destroyHighestBidWebsocket(websocket: WebSocket): void {
+  // Cleanup WebSocket connection
+  console.log("Closing WebSocket connection...");
+  websocket.close();
+}

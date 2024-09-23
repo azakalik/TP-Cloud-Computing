@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import {
   Card,
@@ -14,39 +14,36 @@ import {
   Divider,
   Modal,
   NumberInput,
+  Loader
 } from "@mantine/core";
 import { IconClock, IconMoneybag } from "@tabler/icons-react";
-import { fetchAuctionDetail } from "../api";
+import { fetchAuctionDetail, uploadBid } from "../api";
 import AuctionDetailType from "../types/AuctionDetailType";
-import createHighestBidWebsocket from "../websocket";
+import {
+  createHighestBidWebsocket,
+  destroyHighestBidWebsocket,
+} from "../websocket";
 
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
+
   const [auctionDetail, setAuctionDetail] = useState<AuctionDetailType | null>(
     null
   );
   const [loading, setLoading] = useState<boolean>(true);
   const [bidModalOpened, setBidModalOpened] = useState<boolean>(false);
   const [minBidAmount, setMinBidAmount] = useState<number>(0);
-  const [bidAmount, setBidAmount] = useState<number|string>('');
+  const [bidAmount, setBidAmount] = useState<number | string>("");
   const [uploadingBid, setUploadingBid] = useState<boolean>(false);
   const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
-  const [highestBid, setHighestBid] = useState<number|null>(null);
+  const [highestBid, setHighestBid] = useState<number | null>(null);
+  const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);
+  const [newHighestBidAnimation, setNewHighestBidAnimation] =
+    useState<boolean>(false);
 
-  const handleBid = async () => {
-    setUploadingBid(true);
-    // Simulate an API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setUploadingBid(false);
-    setBidSuccessful(true);
-  };
-
-  const handleCloseModal = () => {
-    setBidModalOpened(false);
-    setBidAmount('');
-    setBidSuccessful(false);
-  };
+  // useRef for the WebSocket connection
+  const websocketRef = useRef<WebSocket | null>(null);
 
   // Keep the min bid amount in sync with the highest bid
   useEffect(() => {
@@ -58,9 +55,15 @@ const AuctionDetailPage: React.FC = () => {
         return true;
       }
       return false;
-    }
+    };
     setDisableBidButton(handleDisableBidButton());
   }, [bidAmount, minBidAmount]);
+
+  useEffect(() => {
+    setNewHighestBidAnimation(true); // Set the animation to true
+    const timer = setTimeout(() => setNewHighestBidAnimation(false), 500); // Reset animation after 500ms
+    return () => clearTimeout(timer);
+  }, [highestBid]);
 
   useEffect(() => {
     fetchAuctionDetail(id!).then((data) => {
@@ -71,17 +74,30 @@ const AuctionDetailPage: React.FC = () => {
 
   // Set the initial bid amount when the auction details are loaded
   useEffect(() => {
-    if (highestBid !== null){
+    if (highestBid !== null) {
       setMinBidAmount(highestBid);
     }
   }, [highestBid]);
 
-    // WebSocket connection to get the latest highest bid and start auto-updating it when the component mounts
-    useEffect(() => {
-      createHighestBidWebsocket(id!, setHighestBid);
-    }, [id]);
-  
+  useEffect(() => {
+    if (!id) {
+      return;
+    }
 
+    // Create the WebSocket when the component mounts
+    websocketRef.current = createHighestBidWebsocket(setHighestBid, setHighestBidUserId, id);
+
+    // Cleanup the WebSocket when the component unmounts
+    return () => {
+      if (websocketRef.current) {
+        destroyHighestBidWebsocket(websocketRef.current);
+      }
+    };
+  }, [id]); // Add publicationId to the dependency array if it can change
+
+  if (!id) {
+    return <Text>Bid not found!</Text>;
+  }
   if (loading) {
     return <Text>Loading...</Text>;
   }
@@ -89,6 +105,19 @@ const AuctionDetailPage: React.FC = () => {
   if (!auctionDetail) {
     return <Text>Bid not found!</Text>;
   }
+
+  const handleBid = async () => {
+    setUploadingBid(true);
+    await uploadBid(id!, bidAmount as number);
+    setUploadingBid(false);
+    setBidSuccessful(true);
+  };
+
+  const handleCloseModal = () => {
+    setBidModalOpened(false);
+    setBidAmount("");
+    setBidSuccessful(false);
+  };
 
   return (
     <Container mb="30">
@@ -129,7 +158,23 @@ const AuctionDetailPage: React.FC = () => {
                   <Text size="lg" color="#F39C12">
                     Highest Bid
                   </Text>
-                  <Text size="lg">${highestBid}</Text>
+                  <Text
+                    size="lg"
+                    color={newHighestBidAnimation ? "green" : ""}
+                    style={{
+                      transform: newHighestBidAnimation
+                        ? "scale(1.2)"
+                        : "scale(1)",
+                      transition: "transform 0.3s ease, color 0.5s ease",
+                    }}
+                  >
+                    {
+                      highestBid ?
+                      `$${highestBid}` :
+                      <Loader size='md' type="dots" color="#F39C12"/>
+                    }
+                    
+                  </Text>
                 </Stack>
               </Grid.Col>
 
@@ -213,7 +258,11 @@ const AuctionDetailPage: React.FC = () => {
                 thousandSeparator=","
                 leftSection={<IconMoneybag />}
                 hideControls
-                error={disableBidButton && typeof bidAmount === "number" ? "Bid amount must be greater than the highest bid" : null}
+                error={
+                  disableBidButton && typeof bidAmount === "number"
+                    ? "Bid amount must be greater than the highest bid"
+                    : null
+                }
               />
               <Group mt="md">
                 <Button
@@ -223,7 +272,11 @@ const AuctionDetailPage: React.FC = () => {
                 >
                   Cancel
                 </Button>
-                <Button onClick={handleBid} loading={uploadingBid} disabled={disableBidButton}>
+                <Button
+                  onClick={handleBid}
+                  loading={uploadingBid}
+                  disabled={disableBidButton}
+                >
                   Bid
                 </Button>
               </Group>

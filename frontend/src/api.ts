@@ -145,3 +145,12 @@ export const fetchAuctionDetail = async (id: string): Promise<AuctionDetailType>
     }, 1000); // Simulating network delay
   });
 };
+
+export const uploadBid = async (id: string, bidAmount: number): Promise<void> => {
+  console.log('uploadBid called with id:', id, 'and bidAmount:', bidAmount);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, 1000); // Simulating network delay
+  });
+}

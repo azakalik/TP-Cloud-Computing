@@ -19,8 +19,10 @@ exports.handler = async (event) => {
         createdTime = new Date().toISOString();
         dueTimeISO = new Date(dueTime).toISOString();
         
-        // Decode base64 image data
-        const buffer = Buffer.from(image, "base64");
+        
+        const base64Image = image.replace(/^data:image\/\w+;base64,/, "");
+        const buffer = Buffer.from(base64Image, "base64");
+
 
         // S3 upload parameters with public-read ACL for access
         const bucketName = "ezauction-publication-images";

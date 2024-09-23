@@ -4,15 +4,13 @@ import fs from 'fs/promises';
 
 const region = 'us-east-1';
 
-type Event = {
-    body: string;
-};
-
 type Offer = {
     publicationId: string;
     userId: string;
     price: number;
 };
+
+type Event = Offer;
 
 type DbCredentials = {
     password: string;
@@ -60,16 +58,7 @@ const getDbCredentials = async (secretName?: string): Promise<DbCredentials> => 
 
 
 export const handler = async (event: Event) => {
-    let offer: Offer;
-
-    try {
-        offer = JSON.parse(event.body);
-    } catch (error) {
-        return {
-            statusCode: 400,
-            body: JSON.stringify({error: 'Invalid body'}),
-        };
-    }
+    const offer: Offer = event;
 
     const error = validateOffer(offer);
     if (error) {

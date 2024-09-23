@@ -103,7 +103,7 @@ exports.handler = async (event) => {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", imageUrl })
+            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: publicationId })
         };
     } catch (error) {
         console.error(error);

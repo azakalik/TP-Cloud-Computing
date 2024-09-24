@@ -23,6 +23,7 @@ import {
   createHighestBidWebsocket,
   destroyHighestBidWebsocket,
 } from "../websocket";
+import { displayLocalDate } from "../utils";
 
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
@@ -38,7 +39,8 @@ const AuctionDetailPage: React.FC = () => {
   const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number | null>(null);
-  const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);  // todo use this to show the highest bidder
   const [newHighestBidAnimation, setNewHighestBidAnimation] =
     useState<boolean>(false);
 
@@ -188,7 +190,7 @@ const AuctionDetailPage: React.FC = () => {
                   <Text size="lg" color="#0984e3">
                     Start Date
                   </Text>
-                  <Text size="lg">{auctionDetail.initialTime}</Text>
+                  <Text size="lg">{displayLocalDate(auctionDetail.initialTime)}</Text>
                 </Stack>
               </Grid.Col>
 
@@ -198,7 +200,7 @@ const AuctionDetailPage: React.FC = () => {
                   <Text size="lg" color="#d63031">
                     End Date
                   </Text>
-                  <Text size="lg">{auctionDetail.endTime}</Text>
+                  <Text size="lg">{displayLocalDate(auctionDetail.endTime)}</Text>
                 </Stack>
               </Grid.Col>
             </Grid>

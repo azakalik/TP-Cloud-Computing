@@ -1,4 +1,4 @@
-let stage = 'dev';  // Change this to 'prod' for production
+let stage = 'prod';  // Change this to 'prod' for production
 
 let HIGHEST_BID_WS_URL: string;
 let API_GW_URL: string;

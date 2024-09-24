@@ -2,19 +2,10 @@ import React from 'react';
 import { Card, Image, Text, Group, Badge, Button } from '@mantine/core';
 import { IconClock } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
+import AuctionCardType from '../types/AuctionCardType';
+import { displayLocalDate } from '../utils';
 
-interface BidCardProps {
-  id: string;
-  imageUrl: string;
-  title: string;
-  description: string;
-  countryFlag: string;
-  initialPrice: string;
-  initialTime: string;
-  endTime: string;
-}
-
-const BidCard: React.FC<BidCardProps> = ({
+const BidCard: React.FC<AuctionCardType> = ({
   id,
   imageUrl,
   title,
@@ -23,6 +14,7 @@ const BidCard: React.FC<BidCardProps> = ({
   initialPrice,
   initialTime,
   endTime,
+  user
 }) => {
   const navigate = useNavigate();
 
@@ -59,8 +51,8 @@ const BidCard: React.FC<BidCardProps> = ({
 
       <Group mt="md" spacing="xs">
         <IconClock size={16} />
-        <Text size="xs">Start: {initialTime}</Text>
-        <Text size="xs">End: {endTime}</Text>
+        <Text size="xs">Start: {displayLocalDate(initialTime)}</Text>
+        <Text size="xs">End: {displayLocalDate(endTime)}</Text>
       </Group>
     </Card>
   );

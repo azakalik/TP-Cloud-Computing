@@ -1,7 +1,7 @@
-type AuctionCardType = {
+type AuctionDetailType = {
   id: string;
   user: string;
-  imageUrl: string;
+  imageUrls: string[];
   title: string;
   description: string;
   countryFlag: string;
@@ -10,4 +10,4 @@ type AuctionCardType = {
   endTime: string;
 };
 
-export default AuctionCardType;
+export default AuctionDetailType;

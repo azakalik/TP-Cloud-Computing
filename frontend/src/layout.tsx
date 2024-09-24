@@ -8,11 +8,11 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   return (
-    <>
+    <div style={{height:'100%'}}>
       <NavBar />
-      <Container mx='30' fluid>
+      <Container p='30' style ={{backgroundColor: '#f5f5f5'}} size={'100%'}>
         {children}
       </Container>
-    </>
+    </div>
   );
 };

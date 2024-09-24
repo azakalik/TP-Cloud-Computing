@@ -17,14 +17,14 @@ import { Link } from 'react-router-dom';
  export function NavBar() {
    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
    return (
-     <Box pb={40}>
+     <Box>
        <header className={classes.header}>
          <Group justify="space-between" h="100%">
            <Image src="/logo.jpeg" alt="eZAuction" h={50}/>
  
            <Group h="100%" gap={0} visibleFrom="sm">
               <Link to='/' className={classes.link}>Home</Link>
-              <Link to='/my_auctions' className={classes.link}>My auctions</Link>
+              {/* <Link to='/my_auctions' className={classes.link}>My auctions</Link> */}
               <Link to='/new_auction' className={classes.link}>Add an auction</Link>
               <Link to='/about_us' className={classes.link}>About us</Link>
            </Group>

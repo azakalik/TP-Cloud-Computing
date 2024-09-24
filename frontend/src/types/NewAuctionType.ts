@@ -1,7 +1,6 @@
-type AuctionCardType = {
-  id: string;
+type NewAuctionType = {
   user: string;
-  imageUrl: string;
+  images: string[]; // base64 encoded images
   title: string;
   description: string;
   countryFlag: string;
@@ -10,4 +9,4 @@ type AuctionCardType = {
   endTime: string;
 };
 
-export default AuctionCardType;
+export default NewAuctionType;

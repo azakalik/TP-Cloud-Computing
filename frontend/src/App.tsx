@@ -3,7 +3,10 @@ import { MantineProvider } from "@mantine/core";
 import { theme } from "./theme";
 import LandingPage from "./pages/ListAuctionsPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+// Import necessary styles for the DatePicker and Dropzone components
 import '@mantine/dates/styles.css';
+import '@mantine/dropzone/styles.css';
 
 import { Layout } from "./layout";
 import AuctionDetailPage from "./pages/AuctionDetailPage";

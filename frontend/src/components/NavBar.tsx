@@ -24,7 +24,7 @@ import { Link } from 'react-router-dom';
  
            <Group h="100%" gap={0} visibleFrom="sm">
               <Link to='/' className={classes.link}>Home</Link>
-              <Link to='/my_auctions' className={classes.link}>My auctions</Link>
+              {/* <Link to='/my_auctions' className={classes.link}>My auctions</Link> */}
               <Link to='/new_auction' className={classes.link}>Add an auction</Link>
               <Link to='/about_us' className={classes.link}>About us</Link>
            </Group>

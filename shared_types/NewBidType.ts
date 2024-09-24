@@ -1,7 +1,7 @@
 type NewBidType = {
    userId: string;
-   auctionId: string;
-   bidAmount: number;
+   publicationId: string;
+   price: number;
 };
 
 export default NewBidType;

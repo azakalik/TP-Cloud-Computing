@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { Button, TextInput, NumberInput, Textarea, FileInput, Box, Flex } from '@mantine/core';
+import { Button, TextInput, NumberInput, Textarea, Flex, Grid, Stack, Paper, Divider, Title } from '@mantine/core';
 import { DatePicker } from '@mantine/dates';
+import { FileWithPath } from '@mantine/dropzone';
+import ImageDropzone from '../components/ImageDropzone';
 
 const AuctionForm = () => {
   const [user, setUser] = useState('');
@@ -8,18 +10,18 @@ const AuctionForm = () => {
   const [dueTime, setDueTime] = useState<Date | null>(null); // DatePicker state
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<FileWithPath[]>([]); // Accept files as a state
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!file) {
-      alert('Please upload an image');
+    if (files.length === 0) {
+      alert('Please upload at least an image');
       return;
     }
 
     const reader = new FileReader();
-    reader.readAsDataURL(file);
+    reader.readAsDataURL(files[0]); // todo handle multiple files
 
     reader.onloadend = async () => {
       const base64Image = reader.result?.toString();
@@ -31,7 +33,7 @@ const AuctionForm = () => {
         title,
         description,
         image: base64Image,
-        filename: file.name,
+        filename: files[0].name,
       };
 
       try {
@@ -58,126 +60,78 @@ const AuctionForm = () => {
 
 
   return (
-    <Flex justify="center" align="center">
-      <Box w={'80%'}> {/* Set a width for the form to keep it centered */}
-        <form onSubmit={handleSubmit}>
-          <TextInput
-            label="User ID or Email"
-            placeholder="Enter user ID or email"
-            value={user}
-            onChange={(event) => setUser(event.currentTarget.value)}
-            required
-          />
+    <Flex justify="center" align="center" direction='column'>
+    <Title mb='10'>Create new Auction</Title>
+    <Paper w={'50%'} shadow='md' p='lg' mb='lg' withBorder>
+      <form onSubmit={handleSubmit}>
+        <Grid gutter="md"> {/* Use Grid for two-column layout */}
+          <Grid.Col span={7}>
+            <Stack>
+              <TextInput
+                label="User ID or Email"
+                placeholder="Enter user ID or email"
+                value={user}
+                onChange={(event) => setUser(event.currentTarget.value)}
+                required
+              />
+              <TextInput
+              label="Title"
+              placeholder="Enter title"
+              value={title}
+              onChange={(event) => setTitle(event.currentTarget.value)}
+              required
+            />
+            <Textarea
+              label="Description"
+              placeholder="Enter description"
+              value={description}
+              onChange={(event) => setDescription(event.currentTarget.value)}
+              required
+            />
+            <NumberInput
+              label="Initial Price"
+              placeholder="Enter initial price"
+              value={initialPrice}
+              onChange={(value) => setInitialPrice(+value)}
+              required
+            />
+            </Stack>
+          </Grid.Col>
 
-          <NumberInput
-            label="Initial Price"
-            placeholder="Enter initial price"
-            value={initialPrice}
-            onChange={(value) => setInitialPrice(+value)}
-            required
-          />
+          <Grid.Col span={1} /> {/* Add an empty column for spacing */}
 
-          <Flex justify="center" direction="column" align="center">
-            <br />
-            <div>Due date</div>
+          <Grid.Col span={3}>
+            <b>Due Date</b>
             <DatePicker
               value={dueTime}
               onChange={setDueTime} // Update date on change
             />
-          </Flex>
+          </Grid.Col>
 
-          <TextInput
-            label="Title"
-            placeholder="Enter title"
-            value={title}
-            onChange={(event) => setTitle(event.currentTarget.value)}
-            required
-          />
+          <Grid.Col span={12}>
+            <Divider my='15' />
+          </Grid.Col>
 
-          <Textarea
-            label="Description"
-            placeholder="Enter description"
-            value={description}
-            onChange={(event) => setDescription(event.currentTarget.value)}
-            required
-          />
+          <Grid.Col span={12}>
+            <b>Upload image(s)</b>
+            <ImageDropzone
+              files={files}
+              setFiles={setFiles}
+            />
+          </Grid.Col>
 
-          <FileInput
-            label="Upload Image"
-            placeholder="Choose an image"
-            accept="image/*"
-            onChange={(file) => setFile(file)}
-            required
-          />
-
-          <Flex justify="center">
-            <Button type="submit" mt="md">
-              Create Auction
-            </Button>
-          </Flex>
-
-        </form>
-      </Box>
-    </Flex>
+          <Grid.Col span={12}>
+            <Flex justify="center">
+              <Button type="submit" mt="md">
+                Create Auction
+              </Button>
+            </Flex>
+          </Grid.Col>
+        </Grid>
+      </form>
+    </Paper>
+  </Flex>
   )
 }
-
-
-//   return (
-//     <form onSubmit={handleSubmit}>
-//       <TextInput
-//         label="User ID or Email"
-//         placeholder="Enter user ID or email"
-//         value={user}
-//         onChange={(event) => setUser(event.currentTarget.value)}
-//         required
-//       />
-
-//       <NumberInput
-//         label="Initial Price"
-//         placeholder="Enter initial price"
-//         value={initialPrice}
-//         onChange={(value) => setInitialPrice(+value)}
-//         required
-//       />
-
-
-//       <br />
-//       <div>Due date</div>
-//       <DatePicker
-//         value={dueTime}
-//         onChange={setDueTime} // Update date on change
-//       />
-
-//       <TextInput
-//         label="Title"
-//         placeholder="Enter title"
-//         value={title}
-//         onChange={(event) => setTitle(event.currentTarget.value)}
-//         required
-//       />
-
-//       <Textarea
-//         label="Description"
-//         placeholder="Enter description"
-//         value={description}
-//         onChange={(event) => setDescription(event.currentTarget.value)}
-//         required
-//       />
-
-//       <FileInput
-//         label="Upload Image"
-//         placeholder="Choose an image"
-//         accept="image/*"
-//         onChange={(file) => setFile(file)}
-//         required
-//       />
-
-//       <Button type="submit" mt="md">
-//         Submit
-//       </Button>
-//     </form>
-//   );
-// };
 
 export default AuctionForm;

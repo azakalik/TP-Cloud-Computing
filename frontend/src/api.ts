@@ -21,10 +21,8 @@ export const fetchAuctions = async (): Promise<AuctionCardType[]> => {
 
 // todo implement in backend
 export const fetchUserAuctions = async (): Promise<AuctionCardType[]> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(fakeUserAuctions);
-    }, 1000); // Simulating network delay
+  return new Promise(() => {
+    // todo
   });
 };
 

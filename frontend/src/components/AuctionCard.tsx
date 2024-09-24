@@ -14,7 +14,6 @@ const BidCard: React.FC<AuctionCardType> = ({
   initialPrice,
   initialTime,
   endTime,
-  user
 }) => {
   const navigate = useNavigate();
 
@@ -28,8 +27,8 @@ const BidCard: React.FC<AuctionCardType> = ({
         <Image src={imageUrl} height={160} alt={title} />
       </Card.Section>
 
-      <Group position="apart" mt="md" mb="xs">
-        <Text weight={500}>{title}</Text>
+      <Group mt="md" mb="xs">
+        <Text>{title}</Text>
         <Badge color="blue" variant="light">
           {countryFlag}
         </Badge>
@@ -39,17 +38,17 @@ const BidCard: React.FC<AuctionCardType> = ({
         {description}
       </Text>
 
-      <Group mt="md" position="apart">
+      <Group mt="md">
           <Text size="sm">Initial Price: {initialPrice}</Text>
       </Group>
 
-      <Group mt="md" position="apart">
+      <Group mt="md">
         <Button color="blue" size="xs" onClick={handleSeeDetailsClick}>
           See details
         </Button>
       </Group>
 
-      <Group mt="md" spacing="xs">
+      <Group mt="md">
         <IconClock size={16} />
         <Text size="xs">Start: {displayLocalDate(initialTime)}</Text>
         <Text size="xs">End: {displayLocalDate(endTime)}</Text>

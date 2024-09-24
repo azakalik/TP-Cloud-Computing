@@ -9,12 +9,12 @@ export default function AboutUsPage() {
         radius="md"
         style={{ width: "100%", maxWidth: "800px", backgroundColor: '#fff' }}
       >
-        <Title order={1} align="center" mb="lg" style={{ fontFamily: 'Roboto, sans-serif', color: '#2c3e50' }}>
+        <Title order={1} mb="lg" style={{ fontFamily: 'Roboto, sans-serif', color: '#2c3e50' }}>
           About Us
         </Title>
         <Divider size="sm" color="gray" mb="lg" />
 
-        <Group position="center" mb="lg">
+        <Group mb="lg">
           <Image
             radius="md"
             src="https://www.clementsauctions.com/wp-content/uploads/2017/11/auction.jpg"
@@ -23,18 +23,18 @@ export default function AboutUsPage() {
           />
         </Group>
 
-        <Text size="lg" color="dimmed" align="center" mb="lg">
+        <Text size="lg" color="dimmed" mb="lg">
           Welcome to our About Us page! We are a team of passionate individuals committed to delivering
           high-quality solutions. Our mission is to innovate and bring great products to the world, while
           building strong, collaborative relationships with our clients.
         </Text>
 
-        <Text size="md" color="dimmed" align="center">
+        <Text size="md" color="dimmed">
           Our team values creativity, dedication, and excellence, striving to improve and grow together with
           every challenge we encounter.
         </Text>
 
-        <Text align="center" mt="lg" color="dimmed" size="sm">
+        <Text mt="lg" color="dimmed" size="sm">
           © 2024 Our Company. All rights reserved.
         </Text>
       </Paper>

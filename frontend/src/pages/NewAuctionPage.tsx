@@ -25,6 +25,7 @@ const AuctionForm = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState<FileWithPath[]>([]); // Accept files as a state
+  // @ts-ignore
   const [countryFlag, setCountryFlag] = useState(""); // todo: add country flag
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

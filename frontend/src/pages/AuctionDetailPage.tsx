@@ -40,6 +40,7 @@ const AuctionDetailPage: React.FC = () => {
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // @ts-ignore
   const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);  // todo use this to show the highest bidder
   const [newHighestBidAnimation, setNewHighestBidAnimation] =
     useState<boolean>(false);

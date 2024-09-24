@@ -31,7 +31,8 @@ export const handler = async (event) => {
                 title: data.Item.Title.S,
                 description: data.Item.Description.S,
                 created: data.Item.Created.S,
-                image: data.Item.Image.S
+                image: data.Item.Image.S.Array,
+                country: data.Item.Country?.S
             };
 
             return {
@@ -51,10 +52,6 @@ export const handler = async (event) => {
     // If no publicationId, use Scan to retrieve all items where PK starts with PUBID#
     const params = {
         TableName: "PUBLICATIONS",
-        FilterExpression: "begins_with(PK, :pkPrefix)",
-        ExpressionAttributeValues: {
-            ":pkPrefix": { S: "PUBID#" }
-        }
     };
 
     try {
@@ -70,12 +67,13 @@ export const handler = async (event) => {
         const publications = data.Items.map(item => ({
             user: item.User.S,
             initialPrice: parseFloat(item.InitialPrice.N),
-            dueTime: item.DueTime.S,
+            endTime: item.DueTime.S,
             title: item.Title.S,
             description: item.Description.S,
-            created: item.Created.S,
-            image: item.Image.S,
-            publicationId: item.PK.S.replace("PUBID#", "")
+            initialTime: item.Created.S,
+            imageUrl: item.Image.S,
+            id: item.PK.S.replace("PUBID#", ""),
+            country: item.Country?.S
         }));
 
         return {

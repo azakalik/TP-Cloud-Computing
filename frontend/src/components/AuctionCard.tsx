@@ -14,6 +14,7 @@ const BidCard: React.FC<AuctionCardType> = ({
   initialPrice,
   initialTime,
   endTime,
+  user
 }) => {
   const navigate = useNavigate();
 

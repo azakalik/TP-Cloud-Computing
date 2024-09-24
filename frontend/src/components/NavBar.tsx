@@ -17,7 +17,7 @@ import { Link } from 'react-router-dom';
  export function NavBar() {
    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
    return (
-     <Box pb={40}>
+     <Box>
        <header className={classes.header}>
          <Group justify="space-between" h="100%">
            <Image src="/logo.jpeg" alt="eZAuction" h={50}/>

@@ -1,7 +1,7 @@
 import React from "react";
 import { Flex, Title } from "@mantine/core";
 import BidCard from "./AuctionCard";
-import AuctionCardType from "../types/AuctionCardType";
+import AuctionCardType from "../../../shared_types/AuctionCardType";
 
 interface BidsContainerProps {
   pageTitle: string;

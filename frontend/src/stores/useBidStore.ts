@@ -1,7 +1,7 @@
 // src/stores/useBidStore.ts
 import { fetchAuctions, fetchAuctionDetail, fetchUserAuctions } from "../api.ts";
-import AuctionCardType from "../types/AuctionCardType";
-import AuctionDetailType from "../types/AuctionDetailType";
+import AuctionCardType from "../../../shared_types/AuctionCardType.ts";
+import AuctionDetailType from "../../../shared_types/AuctionDetailType.ts";
 import { create } from "zustand";
 
 interface BidStore {

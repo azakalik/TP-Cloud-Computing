@@ -18,7 +18,7 @@ import {
 } from "@mantine/core";
 import { IconClock, IconMoneybag } from "@tabler/icons-react";
 import { fetchAuctionDetail, uploadBid } from "../api";
-import AuctionDetailType from "../types/AuctionDetailType";
+import AuctionDetailType from "../../../shared_types/AuctionDetailType";
 import {
   createHighestBidWebsocket,
   destroyHighestBidWebsocket,

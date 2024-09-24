@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Image, Text, Group, Badge, Button } from '@mantine/core';
 import { IconClock } from '@tabler/icons-react';
 import { useNavigate } from 'react-router-dom';
-import AuctionCardType from '../types/AuctionCardType';
+import AuctionCardType from '../../../shared_types/AuctionCardType';
 import { displayLocalDate } from '../utils';
 
 const BidCard: React.FC<AuctionCardType> = ({

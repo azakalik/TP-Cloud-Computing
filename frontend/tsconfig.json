@@ -19,6 +19,6 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "../shared_types/AuctionCardType.ts", "../shared_types/AuctionDetailType.ts", "../shared_types/NewAuctionType.ts", "../shared_types/NewBidType.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -12,6 +12,7 @@
   "dependencies": {
     "@mantine/core": "^7.12.2",
     "@mantine/dates": "^7.12.2",
+    "@mantine/dropzone": "^7.12.2",
     "@mantine/form": "^7.12.2",
     "@mantine/hooks": "^7.12.2",
     "@mantinex/dev-icons": "^1.0.2",

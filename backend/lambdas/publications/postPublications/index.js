@@ -57,35 +57,6 @@ exports.handler = async (event) => {
             }
         };
 
-        item2 = {
-            TableName: "PUBLICATIONS",
-            Item: {
-                PK: { S: "STATUS#ACTIVE" },
-                SK: { S: `DUE_TIME#${dueTimeISO}, PUBID#${publicationId}` },
-                User: { S: user },
-                InitialPrice: { N: initialPrice.toString() },
-                DueTime: { S: dueTimeISO },
-                Title: { S: title },
-                Description: { S: description },
-                Created: { S: createdTime },
-                Image: { S: imageUrl }
-            }
-        };
-
-        item3 = {
-            TableName: "PUBLICATIONS",
-            Item: {
-                PK: { S: "STATUS#ACTIVE" },
-                SK: { S: `CREATED#${createdTime}, PUBID#${publicationId}` },
-                User: { S: user },
-                InitialPrice: { N: initialPrice.toString() },
-                DueTime: { S: dueTimeISO },
-                Title: { S: title },
-                Description: { S: description },
-                Created: { S: createdTime },
-                Image: { S: imageUrl }
-            }
-        };
 
     } catch (error) {
         console.error(error);
@@ -98,12 +69,10 @@ exports.handler = async (event) => {
     try {
         // Insert the items into DynamoDB
         await dynamoDB.send(new PutItemCommand(item1));
-        await dynamoDB.send(new PutItemCommand(item2));
-        await dynamoDB.send(new PutItemCommand(item3));
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", imageUrl })
+            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: publicationId })
         };
     } catch (error) {
         console.error(error);

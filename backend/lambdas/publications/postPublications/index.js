@@ -12,36 +12,34 @@ exports.handler = async (event) => {
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)
-        const { user, initialPrice, dueTime, title, description, image, filename } = JSON.parse(event.body);
-
+        const { user, initialPrice, dueTime, title, description, image, filename, country = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
+    
         // Generate unique publication ID and timestamps
         publicationId = `PUBID#${uuidv4()}`;
         createdTime = new Date().toISOString();
         dueTimeISO = new Date(dueTime).toISOString();
         
-        
         const base64Image = image.replace(/^data:image\/\w+;base64,/, "");
         const buffer = Buffer.from(base64Image, "base64");
-
-
+    
         // S3 upload parameters with public-read ACL for access
         const bucketName = "ezauction-publication-images";
         const s3Params = {
             Bucket: bucketName,
-            Key: filename,  // The file name in S3
+            Key: filename,
             Body: buffer,
-            ContentEncoding: "base64",  // Important for base64-encoded files
-            ContentType: "image/jpeg",   // Adjust based on your image type
-            ACL: "public-read"  // Make the object publicly accessible
+            ContentEncoding: "base64",
+            ContentType: "image/jpeg",
+            ACL: "public-read"
         };
-        
+    
         // Upload image to S3
         await s3.send(new PutObjectCommand(s3Params));
-
+    
         // Construct the URL of the uploaded image
         imageUrl = `https://${bucketName}.s3.amazonaws.com/${filename}`;
-
-        // Prepare DynamoDB item with image URL
+    
+        // Prepare DynamoDB item with image URL and country
         item1 = {
             TableName: "PUBLICATIONS",
             Item: {
@@ -53,11 +51,10 @@ exports.handler = async (event) => {
                 Title: { S: title },
                 Description: { S: description },
                 Created: { S: createdTime },
-                Image: { S: imageUrl }  // Store image URL in DynamoDB
+                Image: { S: imageUrl },
+                Country: { S: country } // Add country field
             }
         };
-
-
     } catch (error) {
         console.error(error);
         return {
@@ -65,6 +62,7 @@ exports.handler = async (event) => {
             body: JSON.stringify({ message: "Could not process the input data", error })
         };
     }
+
 
     try {
         // Insert the items into DynamoDB

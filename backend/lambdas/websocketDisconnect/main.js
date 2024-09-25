@@ -12,9 +12,11 @@ export const handler = async (event) => {
     // Extract connectionId from the WebSocket request context
     const connectionId = requestContext.connectionId;
 
+    const tableName = process.env.TABLE_NAME;
+
     // Define the delete parameters using the partition key (PK)
     const deleteParams = {
-        TableName: 'USER_SESSIONS',  // Replace with your DynamoDB table name
+        TableName: tableName,  // Replace with your DynamoDB table name
         Key: {
             PK: `CONID#${connectionId}`,  // Use the correct partition key
             SK: `DEFAULT`
@@ -36,7 +38,7 @@ export const handler = async (event) => {
 
         // Proceed to delete the second item based on the publicationId
         const publicationDeleteParams = {
-            TableName: "USER_SESSIONS",
+            TableName: tableName,
             Key: {
                 PK: `PUBID#${publicationId}`,
                 SK: `CONID#${connectionId}`  // Use the correct sort key

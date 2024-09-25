@@ -7,9 +7,11 @@ import { ApiGatewayManagementApiClient, PostToConnectionCommand } from "@aws-sdk
 const ddbClient = new DynamoDBClient({ region: 'us-east-1' });
 const ddb = DynamoDBDocumentClient.from(ddbClient);
 
+const endpoint = process.env.WS_API_GATEWAY_ENDPOINT;
+
 // Initialize API Gateway Management API Client
 const apiGatewayClient = new ApiGatewayManagementApiClient({
-    endpoint: 'https://6kd5lvizbj.execute-api.us-east-1.amazonaws.com/prod' // Replace with your API Gateway WebSocket endpoint
+    endpoint
 });
 
 export const handler = async (event) => {
@@ -22,10 +24,12 @@ export const handler = async (event) => {
             continue;  // Skip this message if data is missing
         }
 
+        const tableName = process.env.TABLE_NAME;
+
         try {
             // Query DynamoDB to get all connection IDs associated with the publicationId
             const queryParams = {
-                TableName: 'USER_SESSIONS',
+                TableName: tableName,
                 KeyConditionExpression: 'PK = :pubId',
                 ExpressionAttributeValues: {
                     ':pubId': `PUBID#${publicationId}`

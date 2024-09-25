@@ -1,14 +1,10 @@
 // Import necessary clients and commands from AWS SDK v3
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { LambdaClient } from '@aws-sdk/client-lambda'; // Import Lambda SDK
 
 // Initialize DynamoDB Client
 const ddbClient = new DynamoDBClient({ region: 'us-east-1' });  // Replace with your region
 const ddb = DynamoDBDocumentClient.from(ddbClient);
-
-// Initialize Lambda Client
-const lambdaClient = new LambdaClient({ region: 'us-east-1' });  // Replace with your region
 
 export const handler = async (event) => {
     const { requestContext, queryStringParameters } = event;
@@ -26,13 +22,15 @@ export const handler = async (event) => {
             body: 'userId and publicationId are required.'
         };
     }
+    
+    const tableName = process.env.TABLE_NAME;
 
     // Prepare the transactional write params
     const params = {
         TransactItems: [
             {
                 Put: {
-                    TableName: "USER_SESSIONS",
+                    TableName: tableName,
                     Item: {
                         PK: `CONID#${connectionId}`,
                         SK: "DEFAULT",
@@ -42,7 +40,7 @@ export const handler = async (event) => {
             },
             {
                 Put: {
-                    TableName: "USER_SESSIONS",
+                    TableName: tableName,
                     Item: {
                         PK: `PUBID#${publicationId}`,
                         SK: `CONID#${connectionId}`,

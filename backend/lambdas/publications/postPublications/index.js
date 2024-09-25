@@ -30,8 +30,8 @@ exports.handler = async (event) => {
     
         // Generate unique publication ID and timestamps
         publicationId = `PUBID#${uuidv4()}`;
-        createdTime = new Date().toISOString();
-        dueTimeISO = new Date(endTime).toISOString();
+        initialTime = new Date().toISOString();
+        endTimeISO = new Date(endTime).toISOString();
         
         const filename = publicationId.replace("PUBID#", "") + "_" + "0" + "." + getExtensionFromBase64(images[0])
         
@@ -64,12 +64,12 @@ exports.handler = async (event) => {
                 SK: { S: publicationId },
                 User: { S: user },
                 InitialPrice: { N: initialPrice.toString() },
-                DueTime: { S: dueTimeISO },
+                EndTime: { S: endTimeISO },
                 Title: { S: title },
                 Description: { S: description },
-                Created: { S: createdTime },
+                InitialTime: { S: initialTime },
                 Image: { S: imageUrl },
-                Country: { S: countryFlag } // Add country field
+                CountryFlag: { S: countryFlag } // Add country field
             }
         };
     } catch (error) {

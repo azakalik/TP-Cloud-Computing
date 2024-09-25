@@ -9,7 +9,7 @@ const ddb = DynamoDBDocumentClient.from(ddbClient);
 
 // Initialize API Gateway Management API Client
 const apiGatewayClient = new ApiGatewayManagementApiClient({
-    endpoint: 'https://p08scbd5oj.execute-api.us-east-1.amazonaws.com/production' // Replace with your API Gateway WebSocket endpoint
+    endpoint: 'https://6kd5lvizbj.execute-api.us-east-1.amazonaws.com/prod' // Replace with your API Gateway WebSocket endpoint
 });
 
 export const handler = async (event) => {
@@ -39,9 +39,11 @@ export const handler = async (event) => {
                 console.log(`No connections found for publicationId ${publicationId}`);
                 continue;  // Skip if no connections are found
             }
-
-            // Message to be sent (e.g., the price)
-            const message = `New price: ${price}`;
+            
+            const message = {
+                highestBid: price,
+                userId: userId
+            };
 
             // Send a message to each connected client
             for (const connection of connections) {
@@ -50,7 +52,7 @@ export const handler = async (event) => {
                 try {
                     const postCommand = new PostToConnectionCommand({
                         ConnectionId: connectionId,
-                        Data: Buffer.from(message)  // Convert message to a buffer
+                        Data: Buffer.from(JSON.stringify(message)) // Data must be in a Buffer
                     });
                     
                     await apiGatewayClient.send(postCommand);

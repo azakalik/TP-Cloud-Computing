@@ -22,7 +22,7 @@ function getExtensionFromBase64(base64String) {
 
 exports.handler = async (event) => {
     
-    let publicationId, createdTime, dueTimeISO, item1, item2, item3, imageUrl;
+    let publicationId, createdTime, dueTimeISO, item1, imageUrl;
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)
@@ -39,7 +39,7 @@ exports.handler = async (event) => {
         const buffer = Buffer.from(base64Image, "base64");
     
         // S3 upload parameters with public-read ACL for access
-        const bucketName = "ezauction-publication-images";
+        const bucketName = process.env.BUCKET_NAME;
         const s3Params = {
             Bucket: bucketName,
             Key: filename,
@@ -56,8 +56,9 @@ exports.handler = async (event) => {
         imageUrl = `https://${bucketName}.s3.amazonaws.com/${filename}`;
     
         // Prepare DynamoDB item with image URL and country
+        const tableName = process.env.TABLE_NAME;
         item1 = {
-            TableName: "PUBLICATIONS",
+            TableName: tableName,
             Item: {
                 PK: { S: publicationId },
                 SK: { S: publicationId },

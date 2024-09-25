@@ -54,7 +54,7 @@ const AuctionDetailPage: React.FC = () => {
       if (typeof bidAmount === "string") {
         return true;
       }
-      if (bidAmount <= minBidAmount || bidAmount <= auctionDetail!.initialPrice) {
+      if (bidAmount <= minBidAmount || (auctionDetail && bidAmount < auctionDetail.initialPrice)) {
         return true;
       }
       return false;

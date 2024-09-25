@@ -68,13 +68,13 @@ export const handler = async (event) => {
         const publications = data.Items.map(item => ({
             user: item.User.S,
             initialPrice: parseFloat(item.InitialPrice.N),
-            endTime: data.Item.EndTime.S,
+            endTime: item.EndTime.S,
             title: item.Title.S,
             description: item.Description.S,
-            initialTime: data.Item.InitialTime.S,
+            initialTime: item.InitialTime.S,
             imageUrl: item.Image.S,
             id: item.PK.S.replace("PUBID#", ""),
-            countryFlag: data.Item.CountryFlag?.S
+            countryFlag: item.CountryFlag?.S
         }));
 
         return {

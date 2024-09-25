@@ -32,7 +32,7 @@ export const handler = async (event) => {
                 title: data.Item.Title.S,
                 description: data.Item.Description.S,
                 initialTime: data.Item.InitialTime.S,
-                image: data.Item.Image.S.Array,
+                imageUrl: data.Item.Image.S,
                 countryFlag: data.Item.CountryFlag?.S
             };
 

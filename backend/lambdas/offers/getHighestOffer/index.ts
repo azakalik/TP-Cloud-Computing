@@ -1,17 +1,9 @@
-import {SecretsManager, ApiGatewayManagementApi} from 'aws-sdk';
+import {ApiGatewayV2, SecretsManager} from 'aws-sdk';
+import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import fs from 'fs/promises';
 import { Client } from 'pg';
 
 const region = 'us-east-1';
-
-type Event = {
-    body: string;
-}
-
-type Body = {
-    connectionId: string;
-    publicationId: string;
-}
 
 type DbCredentials = {
     password: string;
@@ -38,28 +30,9 @@ const getDbCredentials = async (secretName?: string): Promise<DbCredentials> => 
     };
 }
 
-export const handler = async (event: Event) => {
-    let body: Body;
+export const handler = async (event: APIGatewayProxyEventV2): Promise<APIGatewayProxyResultV2> => {
 
-    try {
-        body = JSON.parse(event.body);
-    } catch (error) {
-        console.error('Error parsing event:', error);
-        return {
-            statusCode: 400,
-            body: JSON.stringify({error: 'Invalid request body'})
-        };
-    }
-
-    const {connectionId, publicationId} = body;
-
-    if (!connectionId) {
-        console.error('No connectionId provided in event.');
-        return {
-            statusCode: 400,
-            body: JSON.stringify({error: 'Connection ID is required'})
-        };
-    }
+    const {publicationId} = event.queryStringParameters;
 
     let dbCredentials: DbCredentials;
 
@@ -111,8 +84,11 @@ export const handler = async (event: Event) => {
     let highestOffer: number | undefined;
 
     try {
+        console.log('Connecting to database');
         await client.connect();
+        console.log('Connected to database');
         const result = await client.query<{price: number}>(`SELECT price FROM offers WHERE publication_id = $1 ORDER BY price DESC LIMIT 1`, [publicationId]);
+        console.log('Query result:', result.rows);
         highestOffer = result.rows[0]?.price || undefined;
     } catch (error) {
         console.error('Error fetching highest offer:', error);
@@ -124,7 +100,7 @@ export const handler = async (event: Event) => {
         await client.end();
     }
 
-    const apiGatewayEndpoint = process.env.API_GATEWAY_ENDPOINT;
+    /* const apiGatewayEndpoint = process.env.API_GATEWAY_ENDPOINT;
 
     if (!apiGatewayEndpoint) {
         console.error('API_GATEWAY_ENDPOINT is not provided.');
@@ -137,10 +113,10 @@ export const handler = async (event: Event) => {
     // Initialize ApiGatewayManagementApiClient
     const apiGatewayManagementApi = new ApiGatewayManagementApi({
         endpoint: apiGatewayEndpoint
-    });
+    }); */
 
     try {
-        // Example: Send a WebSocket message to the client
+        /* // Example: Send a WebSocket message to the client
         const message = {
             action: 'message',
             data: {
@@ -154,12 +130,16 @@ export const handler = async (event: Event) => {
             Data: Buffer.from(JSON.stringify(message)) // Data must be in a Buffer
         };
 
+        console.log('Sending message to connection:', connectionId);
+
         // Send the message to the WebSocket client
         await apiGatewayManagementApi.postToConnection(postToConnectionCommand).promise();
 
+        console.log('Message sent successfully'); */
+
         return {
             statusCode: 200,
-            body: `Successfully processed connectionId: ${connectionId}`
+            body: JSON.stringify({price: highestOffer})
         };
     } catch (error) {
         console.error('Error processing connectionId:', error);

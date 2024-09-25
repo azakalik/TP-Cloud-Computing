@@ -28,12 +28,12 @@ export const handler = async (event) => {
             const publication = {
                 user: data.Item.User.S,
                 initialPrice: parseFloat(data.Item.InitialPrice.N),
-                dueTime: data.Item.DueTime.S,
+                endTime: data.Item.EndTime.S,
                 title: data.Item.Title.S,
                 description: data.Item.Description.S,
-                created: data.Item.Created.S,
+                initialTime: data.Item.InitialTime.S,
                 image: data.Item.Image.S.Array,
-                country: data.Item.Country?.S
+                countryFlag: data.Item.CountryFlag?.S
             };
 
             return {
@@ -68,13 +68,13 @@ export const handler = async (event) => {
         const publications = data.Items.map(item => ({
             user: item.User.S,
             initialPrice: parseFloat(item.InitialPrice.N),
-            endTime: item.DueTime.S,
+            endTime: data.Item.EndTime.S,
             title: item.Title.S,
             description: item.Description.S,
-            initialTime: item.Created.S,
+            initialTime: data.Item.InitialTime.S,
             imageUrl: item.Image.S,
             id: item.PK.S.replace("PUBID#", ""),
-            country: item.Country?.S
+            countryFlag: data.Item.CountryFlag?.S
         }));
 
         return {

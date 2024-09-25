@@ -17,7 +17,7 @@ import {
   Loader
 } from "@mantine/core";
 import { IconClock, IconMoneybag } from "@tabler/icons-react";
-import { fetchAuctionDetail, uploadBid } from "../api";
+import { fetchAuctionDetail, fetchAuctionInitialHighestBid, uploadBid } from "../api";
 import AuctionDetailType from "../../../shared_types/AuctionDetailType";
 import {
   createHighestBidWebsocket,
@@ -62,6 +62,20 @@ const AuctionDetailPage: React.FC = () => {
     setDisableBidButton(handleDisableBidButton());
   }, [bidAmount, minBidAmount]);
 
+  // Initialize the highest bid with a value from DB on page load
+  useEffect(() => {
+    if (highestBid !== null) {
+      return;
+    }
+
+  fetchAuctionInitialHighestBid(id!).then((data) => {
+    if (highestBid === null) {
+      setHighestBid(data.price);
+    }});
+  }, [id, highestBid])
+
+
+  // When a new highest bid is received, set the animation to true and reset it after 500ms
   useEffect(() => {
     setNewHighestBidAnimation(true); // Set the animation to true
     const timer = setTimeout(() => setNewHighestBidAnimation(false), 500); // Reset animation after 500ms
@@ -69,11 +83,14 @@ const AuctionDetailPage: React.FC = () => {
   }, [highestBid]);
 
   useEffect(() => {
+    if (auctionDetail) { // If the auction details are already loaded, don't fetch them again
+      return;
+    }
     fetchAuctionDetail(id!).then((data) => {
       setAuctionDetail(data);
       setLoading(false);
     }); // Fetch the bid details when the component mounts
-  }, [id]);
+  }, [id, auctionDetail]);
 
   // Set the initial bid amount when the auction details are loaded
   useEffect(() => {
@@ -111,7 +128,7 @@ const AuctionDetailPage: React.FC = () => {
 
   const handleBid = async () => {
     setUploadingBid(true);
-    await uploadBid(id!, bidAmount as number);
+    await uploadBid('hola@gmail.com', id!, bidAmount as number); // todo handle errors here
     setUploadingBid(false);
     setBidSuccessful(true);
   };
@@ -127,15 +144,16 @@ const AuctionDetailPage: React.FC = () => {
       <Card shadow="sm" padding="lg" radius="md" withBorder>
         <Grid align="center">
           <Grid.Col span={4.5}>
-            <Image src={auctionDetail.imageUrls} alt={auctionDetail.title} />
+            <Image src={auctionDetail.imageUrl} alt={auctionDetail.title} />
           </Grid.Col>
           <Grid.Col span={0.5} />
           <Grid.Col span={7}>
             <Group mt="md" mb="xs">
               <Title>{auctionDetail.title}</Title>
-              <Badge color="blue" variant="light">
-                {auctionDetail.countryFlag}
-              </Badge>
+              {
+                // Show the country flag if available
+                auctionDetail.countryFlag && <Badge color="blue" variant="light">{auctionDetail.countryFlag}</Badge>
+              }
             </Group>
 
             <Text size="md" color="dimmed" style={{ lineHeight: 1.8 }}>

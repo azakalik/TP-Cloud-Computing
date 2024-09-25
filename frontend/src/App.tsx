@@ -8,6 +8,8 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import '@mantine/dates/styles.css';
 import '@mantine/dropzone/styles.css';
 
+import './styles.css';
+
 import { Layout } from "./layout";
 import AuctionDetailPage from "./pages/AuctionDetailPage";
 import MyAuctionsPage from "./pages/MyAuctionsPage";

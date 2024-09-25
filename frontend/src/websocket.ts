@@ -1,9 +1,5 @@
 import { HIGHEST_BID_WS_URL } from "./constants";
-
-type HighestBidWebSocketMessage = {
-  highestBid: number;
-  userId: string;
-};
+import HighestBidWebSocketMessage from "../../shared_types/HighestBidWebSocketMessage";
 
 type SetHighestBid = (bid: number) => void;
 type SetUserId = (userId: string) => void;

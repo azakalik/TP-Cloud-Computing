@@ -10,7 +10,9 @@ type Offer = {
     price: number;
 };
 
-type Event = Offer;
+type Event = {
+    body: string;
+}
 
 type DbCredentials = {
     password: string;
@@ -58,7 +60,17 @@ const getDbCredentials = async (secretName?: string): Promise<DbCredentials> => 
 
 
 export const handler = async (event: Event) => {
-    const offer: Offer = event;
+    let offer: Offer;
+    
+    try {
+        offer = JSON.parse(event.body);
+    } catch (error) {
+        console.error('Error while parsing event body', error);
+        return {
+            statusCode: 400,
+            body: JSON.stringify({error: 'Invalid request body'}),
+        };
+    }
 
     const error = validateOffer(offer);
     if (error) {

@@ -1,7 +1,7 @@
 // Import necessary clients and commands from AWS SDK v3
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'; // Import Lambda SDK
+import { LambdaClient } from '@aws-sdk/client-lambda'; // Import Lambda SDK
 
 // Initialize DynamoDB Client
 const ddbClient = new DynamoDBClient({ region: 'us-east-1' });  // Replace with your region
@@ -57,17 +57,6 @@ export const handler = async (event) => {
     try {
         await ddb.send(new TransactWriteCommand(params));
         console.log('Connection ID stored successfully.');
-
-        // Now call the second Lambda asynchronously (non-blocking)
-        const lambdaParams = {
-            FunctionName: 'maxPriceGetter', // Replace with your second Lambda's name
-            InvocationType: 'Event', // Asynchronous invocation
-            Payload: JSON.stringify({ connectionId }) // Pass the connectionId
-        };
-
-        // Invoke the second Lambda asynchronously and await the invocation to complete
-        const response = await lambdaClient.send(new InvokeCommand(lambdaParams));
-        console.log('Second Lambda invoked asynchronously.', response);
 
         return {
             statusCode: 200,

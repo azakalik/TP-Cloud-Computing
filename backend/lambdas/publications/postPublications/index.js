@@ -22,7 +22,7 @@ function getExtensionFromBase64(base64String) {
 
 exports.handler = async (event) => {
     
-    let publicationId, createdTime, dueTimeISO, item1, imageUrl;
+    let publicationId, initialTime, endTimeISO, item1, imageUrl;
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)
@@ -30,8 +30,8 @@ exports.handler = async (event) => {
     
         // Generate unique publication ID and timestamps
         publicationId = `PUBID#${uuidv4()}`;
-        createdTime = new Date().toISOString();
-        dueTimeISO = new Date(endTime).toISOString();
+        initialTime = new Date().toISOString();
+        endTimeISO = new Date(endTime).toISOString();
         
         const filename = publicationId.replace("PUBID#", "") + "_" + "0" + "." + getExtensionFromBase64(images[0])
         
@@ -64,12 +64,12 @@ exports.handler = async (event) => {
                 SK: { S: publicationId },
                 User: { S: user },
                 InitialPrice: { N: initialPrice.toString() },
-                DueTime: { S: dueTimeISO },
+                EndTime: { S: endTimeISO },
                 Title: { S: title },
                 Description: { S: description },
-                Created: { S: createdTime },
+                InitialTime: { S: initialTime },
                 Image: { S: imageUrl },
-                Country: { S: countryFlag } // Add country field
+                CountryFlag: { S: countryFlag } // Add country field
             }
         };
     } catch (error) {

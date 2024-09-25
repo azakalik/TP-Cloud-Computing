@@ -28,7 +28,7 @@ Ir a la sección VPC y creemos una VPC nueva, clickeando en “Create VPC”
 
 Clickear en “Create VPC”
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image.png)
+![image.png](images/image.png)
 
 ## 1.2. Creación de las tablas de ruteo
 
@@ -102,11 +102,11 @@ Vamos a la sección “Security groups” del recurso VPC y clickeamos en “Cre
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Conexión SSH desde nuestra IP
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%201.png)
+    ![image.png](images/image%201.png)
     
 - **Outbound rules**: Por ahora, como no tenemos creado el SG para RDS permitiremos cualquier conexión por el puerto 5432 (default de postgres) dentro de la VPC. También permitiremos la conexión a Internet.
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%202.png)
+    ![image.png](images/image%202.png)
     
 
 Clickeamos en “Create security group”.
@@ -128,7 +128,7 @@ En la sección “Internet gateways”, clickeamos “Create internet gateway”
 
 Clickeamos “Create internet gateway”. En el mensaje de creación, nos aparecerá el botón “Attach to a VPC” 
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%203.png)
+![image.png](images/image%203.png)
 
 Lo clickeamos
 
@@ -148,7 +148,7 @@ Clickeamos en “Create route table”. Luego, editamos sus rutas, clickeando en
 - Destino 0.0.0.0/0
 - Target Internet Gateway (ezauction-igw)
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%204.png)
+![image.png](images/image%204.png)
 
 Clickeamos en “Save changes”
 
@@ -198,11 +198,11 @@ En el dashboard de VPC, ir a la sección Security groups. Clickear en “Create 
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Por ahora, como no tenemos creado el SG para lambdas permitiremos cualquier conexión por el puerto 5432 (default de postgres)
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%205.png)
+    ![image.png](images/image%205.png)
     
 - **Outbound rules**: Por ahora, como no tenemos creado el SG para RDS permitiremos cualquier conexión por el puerto 5432 (default de postgres)
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%206.png)
+    ![image.png](images/image%206.png)
     
 
 Clickeamos en “Create security group”
@@ -218,28 +218,28 @@ En el dashboard de VPC, ir a la sección Security groups. Clickear en “Create 
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Permitiremos la conexión por el puerto 5432 del SG del RDS Proxy (auctions-sg-rds-proxy) y la conexión por el puerto 5432 para la instancia EC2.
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%207.png)
+    ![image.png](images/image%207.png)
     
 - **Outbound rules**: Ninguna.
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%208.png)
+    ![image.png](images/image%208.png)
     
 
 Clickeamos en “Create security group”.
 
 Dado que configuraremos replicación, deberemos habilitar el puerto 5432 para comunicarse entre ellos, es decir este SG. Por lo tanto, editamos la reglas inbound y outbound.
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%209.png)
+![image.png](images/image%209.png)
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2010.png)
+![image.png](images/image%2010.png)
 
 Actualizamos el SG del RDS Proxy y de la instancia EC2, para que su outbound rule sea solo hacia el SG de las instancias RDS.
 
-![Outbound rules del SG de RDS Proxy](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2011.png)
+![Outbound rules del SG de RDS Proxy](images/image%2011.png)
 
 Outbound rules del SG de RDS Proxy
 
-![Outbound rules del SG de EC2](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2012.png)
+![Outbound rules del SG de EC2](images/image%2012.png)
 
 Outbound rules del SG de EC2
 
@@ -262,7 +262,7 @@ Vamos al servicio RDS y a la sección “Subnet groups”. Clickeamos en “Crea
 - **AZs**: us-east-1a y us-east-1b
 - **Subnets**: 10.0.192.0/24 y 10.0.193.0/24
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2013.png)
+    ![image.png](images/image%2013.png)
     
 
 Clickeamos en “Create”.
@@ -512,7 +512,7 @@ Clickeamos en “Create read replica”.
 
 Una vez creada, veremos en el listado de databases como se linkea la replica a la instancia primaria
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2014.png)
+![image.png](images/image%2014.png)
 
 ## 2.8. Multi-AZ instance
 
@@ -701,11 +701,11 @@ Vamos al recurso VPC, en la sección Security groups, clickeamos en “Create se
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Permitiremos mensajes HTTPS. Como no existe el SG de lambda, por ahora permitiremos desde cualquier IP de la VPC
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/Captura_de_pantalla_2024-09-24_205818.png)
+    ![image.png](images/Captura_de_pantalla_2024-09-24_205818.png)
     
 - **Outbound rules**: Ninguna
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/Captura_de_pantalla_2024-09-24_205835.png)
+    ![image.png](images/Captura_de_pantalla_2024-09-24_205835.png)
     
 
 Clickeamos en “Create security group”.
@@ -714,7 +714,7 @@ Clickeamos en “Create security group”.
 
 También configuraremos la VPC para que permita la resolución de DNS. Vamos al detalle de la VPC ezauction-vpc, en el dropdown de “Actions”, elegimos la opción “Edit VPC settings” y en **DNS settings**, habilitamos ambos checkboxes.
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2015.png)
+![image.png](images/image%2015.png)
 
 Guardamos los cambios, clickeando “Save”.
 
@@ -828,7 +828,7 @@ En el panel de VPC, en la sección “Security groups”, clickeamos en “Creat
 - **Outbound rules**:
     - Comunicarse con el SG del SQS VPC Endpoint por el puerto HTTPS
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2016.png)
+    ![image.png](images/image%2016.png)
     
 
 Editamos el SG de VPC endpoint (ezauction-sg-vpc-endpoint) para que solo permita la comunicación (inbound) desde este SG (ezauction-sg-lambda-vpc-endpoint)
@@ -844,7 +844,7 @@ En el panel de VPC, en la sección “Security groups”, clickeamos en “Creat
 - **Outbound rules**:
     - Comunicarse con el SG del RDS Proxy por el puerto de PostgreSQL
     
-    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2017.png)
+    ![image.png](images/image%2017.png)
     
 
 Editamos el SG de RDS Proxy (ezauction-sg-rds-proxy) para que solo permita la comunicación (inbound) desde este SG (ezauction-sg-lambda-rds)
@@ -899,17 +899,17 @@ Vamos a agregar cuatro variables de entorno con la información del endpoint de 
 | SQS_ENDPOINT | [Uno de los DNS Name creados al VPC endpoint de SQS (ezauction-vpc-endpoint-sqs-offers)]
  |
 
-![Ejemplo de DNS name de VPC Endpoint de un SQS](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/Captura_de_pantalla_2024-09-22_211248.png)
+![Ejemplo de DNS name de VPC Endpoint de un SQS](images/Captura_de_pantalla_2024-09-22_211248.png)
 
 Ejemplo de DNS name de VPC Endpoint de un SQS
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2018.png)
+![image.png](images/image%2018.png)
 
 “Encryption configuration” dejamos el default y clickeamos en “Save”.
 
 También, vamos a aumentar el tiempo de ejecución de la lambda (el cual es 3 segundos por default). Para ello, en “Configuration” > “General Configuration”, editamos el campo timeout.
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2019.png)
+![image.png](images/image%2019.png)
 
 ### 4.3.2. Subida de código
 
@@ -951,7 +951,7 @@ Luego, generar un archivo .zip que incluya
 
 Una vez generado el archivo ZIP, ir al detalle de la función lambda ezauction-lambda-place-offer y, en la sección “Code”, elegir la opción “Upload from” > “.zip file”
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2020.png)
+![image.png](images/image%2020.png)
 
 Subir el archivo .zip con el código y dependencias, y clickear “Save”. Esperar a que la función se actualice.
 
@@ -1035,7 +1035,7 @@ Luego, generar un archivo .zip que incluya
 
 Una vez generado el archivo ZIP, ir al detalle de la función lambda ezauction-lambda-place-offer y, en la sección “Code”, elegir la opción “Upload from” > “.zip file”
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2020.png)
+![image.png](images/image%2020.png)
 
 Subir el archivo .zip con el código y dependencias, y clickear “Save”. Esperar a que la función se actualice.
 
@@ -1124,7 +1124,7 @@ auctions=> SELECT * FROM offers;
 
 Y el mensaje en la cola SQS
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2021.png)
+![image.png](images/image%2021.png)
 
 # 5. Publications
 
@@ -1464,11 +1464,11 @@ Clickeamos “Add”.
 
 Tardará un tiempo en configurarse. Esto se puede ver en la sección “Configuration” > “Triggers”, donde se mostrará el estado del trigger.
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2022.png)
+![image.png](images/image%2022.png)
 
 Luego de un rato, clickear en “Recargar” y debería cambiar al estado “Enabled”
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2023.png)
+![image.png](images/image%2023.png)
 
 # 8. Frontend
 
@@ -1552,7 +1552,7 @@ Para subir el directorio assets, subirlo con “Add folder”. Se deberán subir
 
 En el detalle del bucket, vamos a la sección “Properties”. En el último bloque está la propiedad “Static website hosting”.
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2024.png)
+![image.png](images/image%2024.png)
 
 Clickeamos en “Edit”
 
@@ -1593,4 +1593,4 @@ Luego, vamos a permitir el acceso público al sitio web. Para ello, vamos a la s
 
 Volver a “Static website hosting”, en la sección “Properties” del bucket y clickear el link “Bucket website endpoint”
 
-![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2025.png)
+![image.png](images/image%2025.png)

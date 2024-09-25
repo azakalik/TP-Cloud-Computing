@@ -22,7 +22,7 @@ function getExtensionFromBase64(base64String) {
 
 exports.handler = async (event) => {
     
-    let publicationId, createdTime, dueTimeISO, item1, imageUrl;
+    let publicationId, initialTime, endTimeISO, item1, imageUrl;
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)

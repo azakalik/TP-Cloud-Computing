@@ -28,7 +28,7 @@ Ir a la sección VPC y creemos una VPC nueva, clickeando en “Create VPC”
 
 Clickear en “Create VPC”
 
-![image.png](images/image.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image.png)
 
 ## 1.2. Creación de las tablas de ruteo
 
@@ -102,11 +102,11 @@ Vamos a la sección “Security groups” del recurso VPC y clickeamos en “Cre
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Conexión SSH desde nuestra IP
     
-    ![image.png](images/image%201.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%201.png)
     
 - **Outbound rules**: Por ahora, como no tenemos creado el SG para RDS permitiremos cualquier conexión por el puerto 5432 (default de postgres) dentro de la VPC. También permitiremos la conexión a Internet.
     
-    ![image.png](images/image%202.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%202.png)
     
 
 Clickeamos en “Create security group”.
@@ -128,7 +128,7 @@ En la sección “Internet gateways”, clickeamos “Create internet gateway”
 
 Clickeamos “Create internet gateway”. En el mensaje de creación, nos aparecerá el botón “Attach to a VPC” 
 
-![image.png](images/image%203.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%203.png)
 
 Lo clickeamos
 
@@ -148,7 +148,7 @@ Clickeamos en “Create route table”. Luego, editamos sus rutas, clickeando en
 - Destino 0.0.0.0/0
 - Target Internet Gateway (ezauction-igw)
 
-![image.png](images/image%204.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%204.png)
 
 Clickeamos en “Save changes”
 
@@ -198,11 +198,11 @@ En el dashboard de VPC, ir a la sección Security groups. Clickear en “Create 
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Por ahora, como no tenemos creado el SG para lambdas permitiremos cualquier conexión por el puerto 5432 (default de postgres)
     
-    ![image.png](images/image%205.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%205.png)
     
 - **Outbound rules**: Por ahora, como no tenemos creado el SG para RDS permitiremos cualquier conexión por el puerto 5432 (default de postgres)
     
-    ![image.png](images/image%206.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%206.png)
     
 
 Clickeamos en “Create security group”
@@ -218,28 +218,28 @@ En el dashboard de VPC, ir a la sección Security groups. Clickear en “Create 
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Permitiremos la conexión por el puerto 5432 del SG del RDS Proxy (auctions-sg-rds-proxy) y la conexión por el puerto 5432 para la instancia EC2.
     
-    ![image.png](images/image%207.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%207.png)
     
 - **Outbound rules**: Ninguna.
     
-    ![image.png](images/image%208.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%208.png)
     
 
 Clickeamos en “Create security group”.
 
 Dado que configuraremos replicación, deberemos habilitar el puerto 5432 para comunicarse entre ellos, es decir este SG. Por lo tanto, editamos la reglas inbound y outbound.
 
-![image.png](images/image%209.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%209.png)
 
-![image.png](images/image%2010.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2010.png)
 
 Actualizamos el SG del RDS Proxy y de la instancia EC2, para que su outbound rule sea solo hacia el SG de las instancias RDS.
 
-![Outbound rules del SG de RDS Proxy](images/image%2011.png)
+![Outbound rules del SG de RDS Proxy](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2011.png)
 
 Outbound rules del SG de RDS Proxy
 
-![Outbound rules del SG de EC2](images/image%2012.png)
+![Outbound rules del SG de EC2](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2012.png)
 
 Outbound rules del SG de EC2
 
@@ -262,7 +262,7 @@ Vamos al servicio RDS y a la sección “Subnet groups”. Clickeamos en “Crea
 - **AZs**: us-east-1a y us-east-1b
 - **Subnets**: 10.0.192.0/24 y 10.0.193.0/24
     
-    ![image.png](images/image%2013.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2013.png)
     
 
 Clickeamos en “Create”.
@@ -365,11 +365,11 @@ Una vez creada, nos mostrará un botón que nos dará los detalles de conexión 
 
 - Master username
 - Master password
-- Endpoint ([ezauction-rds-db-primary.c5tmsb7ui9vl.us-east-1.rds.amazonaws.com](http://ezauction-rds-db-primary.c5tmsb7ui9vl.us-east-1.rds.amazonaws.com/))
+- Endpoint
 
 ## 2.6. Creación del RDS Proxy
 
-Dado que la comunicación con la instacia será mediante lambdas, necesitamos contar con un proxy que mantenga puertos abiertos para evitar el retardo inicial en el llamado de las funciones.
+Dado que la comunicación con la instancia será mediante lambdas, necesitamos contar con un proxy que mantenga puertos abiertos para evitar el retardo inicial en el llamado de las funciones.
 
 Crearemos un Proxy, en la sección Proxies, clickeando en “Create proxy”
 
@@ -478,8 +478,6 @@ Clickeamos en “Create proxy”
 
 ## 2.7. Creación de la read replica
 
-### 2.7.1. Read replica
-
 Desde el detalle de la BD, en la sección Actions, elegir la opción “Create read replica”
 
 - **Replica source**: ezauction-rds-db-primary
@@ -514,36 +512,7 @@ Clickeamos en “Create read replica”.
 
 Una vez creada, veremos en el listado de databases como se linkea la replica a la instancia primaria
 
-![image.png](images/image%2014.png)
-
-### 2.7.2. RDS Proxy
-
-Como vimos en 2.6, al crear el RDS proxy nos pidió definir una instancia RDS en particular, por lo que la replica no tiene un RDS proxy asociado. Luego debemos crearle uno.
-
-En la sección “Proxies”, clickeamos en “Create proxy”
-
-- **Engine family**: PostgreSQL
-- **Proxy identifier**: ezauction-rds-proxy-replica
-- **Idle client connection timeout**: 5 minutes
-- **Database**: ezauction-rds-db-replica
-- **Connection pool maximum connections**: 100
-- **Additional target group configuration**
-    - **Connection borrow timeout**: 2 minutes
-    - **Initialization query**: Vacío
-- **Authentication**
-    - **Identity and access management (IAM) role**: LabRole
-    - **Secrets Manager secrets**: Reutilizamos el secreto ezauction-rds-secret
-    - **Client authentication type**: SCRAM SHA 256
-    - **IAM authentication**: Not Allowed
-- **Connectivity**
-    - **Require Transport Layer Security**: Habilitado
-    - **Subnets**: Elegimos las subnets ezauction-subnet-rds-…
-    - **Additional connectivity configuration**
-        - **VPC security group**: Choose existing
-        - **Existing VPC security groups**: ezauction-sg-rds-proxy
-- **Enhanced logging**: Deshabilitado
-
-Clickeamos en “Create proxy”
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2014.png)
 
 ## 2.8. Multi-AZ instance
 
@@ -719,7 +688,7 @@ Clickeamos en “Create queue”
 
 ## 4.1. VPC endpoint
 
-Para que la función lambda placeOffer pueda conectarse al SQS, será necesario crear un VPC endpoint hacia el recurso SQS. También será necesario crear un VPC endpoint para obtener los secrets de la RDS (username y password).
+Para que la funciones lambda VPC-inner puedan conectarse al SQS, será necesario crear un VPC endpoint hacia el recurso SQS. También será necesario crear un VPC endpoint para obtener los secrets de la RDS (username y password).
 
 Pero primero, necesitaremos crear un SG para la ENI que se asignará a cada VPC endpoint. 
 
@@ -732,11 +701,11 @@ Vamos al recurso VPC, en la sección Security groups, clickeamos en “Create se
 - **VPC**: ezauction-vpc
 - **Inbound rules**: Permitiremos mensajes HTTPS. Como no existe el SG de lambda, por ahora permitiremos desde cualquier IP de la VPC
     
-    ![image.png](images/Captura_de_pantalla_2024-09-24_205818.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/Captura_de_pantalla_2024-09-24_205818.png)
     
 - **Outbound rules**: Ninguna
     
-    ![image.png](images/Captura_de_pantalla_2024-09-24_205835.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/Captura_de_pantalla_2024-09-24_205835.png)
     
 
 Clickeamos en “Create security group”.
@@ -745,7 +714,7 @@ Clickeamos en “Create security group”.
 
 También configuraremos la VPC para que permita la resolución de DNS. Vamos al detalle de la VPC ezauction-vpc, en el dropdown de “Actions”, elegimos la opción “Edit VPC settings” y en **DNS settings**, habilitamos ambos checkboxes.
 
-![image.png](images/image%2015.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2015.png)
 
 Guardamos los cambios, clickeando “Save”.
 
@@ -859,7 +828,7 @@ En el panel de VPC, en la sección “Security groups”, clickeamos en “Creat
 - **Outbound rules**:
     - Comunicarse con el SG del SQS VPC Endpoint por el puerto HTTPS
     
-    ![image.png](images/image%2016.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2016.png)
     
 
 Editamos el SG de VPC endpoint (ezauction-sg-vpc-endpoint) para que solo permita la comunicación (inbound) desde este SG (ezauction-sg-lambda-vpc-endpoint)
@@ -875,7 +844,7 @@ En el panel de VPC, en la sección “Security groups”, clickeamos en “Creat
 - **Outbound rules**:
     - Comunicarse con el SG del RDS Proxy por el puerto de PostgreSQL
     
-    ![image.png](images/image%2017.png)
+    ![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2017.png)
     
 
 Editamos el SG de RDS Proxy (ezauction-sg-rds-proxy) para que solo permita la comunicación (inbound) desde este SG (ezauction-sg-lambda-rds)
@@ -924,23 +893,23 @@ Vamos a agregar cuatro variables de entorno con la información del endpoint de 
 
 | Key | Value |
 | --- | --- |
-| RDS_PROXY_HOST | [El endpoint del proxy RDS primario] |
+| RDS_PROXY_HOST | [El endpoint del proxy RDS] |
 | SQS_URL | [La URL de la cola SQS] |
 | SECRET_NAME | ezauction-rds-secret |
 | SQS_ENDPOINT | [Uno de los DNS Name creados al VPC endpoint de SQS (ezauction-vpc-endpoint-sqs-offers)]
  |
 
-![Ejemplo de DNS name de VPC Endpoint de un SQS](images/Captura_de_pantalla_2024-09-22_211248.png)
+![Ejemplo de DNS name de VPC Endpoint de un SQS](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/Captura_de_pantalla_2024-09-22_211248.png)
 
 Ejemplo de DNS name de VPC Endpoint de un SQS
 
-![image.png](images/image%2018.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2018.png)
 
 “Encryption configuration” dejamos el default y clickeamos en “Save”.
 
 También, vamos a aumentar el tiempo de ejecución de la lambda (el cual es 3 segundos por default). Para ello, en “Configuration” > “General Configuration”, editamos el campo timeout.
 
-![image.png](images/image%2019.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2019.png)
 
 ### 4.3.2. Subida de código
 
@@ -982,7 +951,7 @@ Luego, generar un archivo .zip que incluya
 
 Una vez generado el archivo ZIP, ir al detalle de la función lambda ezauction-lambda-place-offer y, en la sección “Code”, elegir la opción “Upload from” > “.zip file”
 
-![image.png](images/image%2020.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2020.png)
 
 Subir el archivo .zip con el código y dependencias, y clickear “Save”. Esperar a que la función se actualice.
 
@@ -1021,7 +990,7 @@ Vamos a agregar dos variables de entorno con la información del endpoint de RDS
 
 | Key | Value |
 | --- | --- |
-| RDS_PROXY_HOST | [El endpoint del proxy RDS primaria] |
+| RDS_PROXY_HOST | [El endpoint del proxy RDS] |
 | DB_SECRET_NAME | ezauction-rds-secret |
 
 También, vamos a aumentar el tiempo de ejecución de la lambda (el cual es 3 segundos por default). Para ello, en “Configuration” > “General Configuration”, editamos el campo timeout.
@@ -1066,7 +1035,7 @@ Luego, generar un archivo .zip que incluya
 
 Una vez generado el archivo ZIP, ir al detalle de la función lambda ezauction-lambda-place-offer y, en la sección “Code”, elegir la opción “Upload from” > “.zip file”
 
-![image.png](images/image%2020.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2020.png)
 
 Subir el archivo .zip con el código y dependencias, y clickear “Save”. Esperar a que la función se actualice.
 
@@ -1082,6 +1051,11 @@ Para ello, vamos al recurso “API Gateway” y hacemos click en “Build” de 
     - Lambda
     - **Region**: us-east-1
     - **Lambda function**: ezauction-lambda-place-offer
+    - **Version**: 2.0
+    - Clickeamos “Add integration”
+    - Lambda
+    - **Region**: us-east-1
+    - **Lambda function**: ezauction-lambda-get-highest-offer
     - **Version**: 2.0
 - **Name**: ezauction-api-http
 - Clickeamos en Next
@@ -1103,12 +1077,14 @@ Clickeamos en “Create”.
 
 Debemos deshabilitar CORS para que el browser pueda utilizar la API. Para ello, debemos ir a la sección “CORS” y clickear en “Configure”
 
-- **Access-Control-Allow-Origin**: *
-- **Access-Control-Allow-Headers**: *
+- **Access-Control-Allow-Origin**: * (Clickear Add)
+- **Access-Control-Allow-Headers**: * (Clickear Add)
 - **Access-Control-Allow-Methods**: *
-- **Access-Control-Expose-Headers**: *
+- **Access-Control-Expose-Headers**: * (Clickear Add)
 - **Access-Control-Max-Age**: 0 seconds
 - **Access-Control-Allow-Credentials**: No
+
+Clickeamos “Save”
 
 ## 4.6. Probar lambda
 
@@ -1148,7 +1124,7 @@ auctions=> SELECT * FROM offers;
 
 Y el mensaje en la cola SQS
 
-![image.png](images/image%2021.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2021.png)
 
 # 5. Publications
 
@@ -1227,7 +1203,7 @@ Vamos a la sección “Configuration” > “Environment variables”. Clickeamo
 
 En el repositorio, ir al directorio *backend/lambdas/publications/postPublications*
 
-1. Ejecutar `npm i`
+1. Ejecutar `npm ci`
 2. Correr el script `create_deploy_zip.sh` para zippear el codigo con el node_modules
 3. Volver a la lambda, en la sección “Code”. Vamos a tocar `Upload from` arriba a la derecha del codigo de la lambda y elegimos la opcion `.zip file`.
 
@@ -1360,12 +1336,11 @@ Vamos al recurso “Lambda” y clickeamos en “Create function”
     - **Enable tags:** Deshabilitado
     - **Enable VPC:** Deshabilitado
 
-Vamos a agregar dos variables de entorno con la información del nombre de la tabla de DynamoDB y el nombre de la función que devuelve la oferta más alta. Para ello, vamos a “Configuration” > “Environment variables”. Clickeamos “Edit” y agregamos los siguientes campos:
+Vamos a agregar una variable de entorno con la información del nombre de la tabla de DynamoDB. Para ello, vamos a “Configuration” > “Environment variables”. Clickeamos “Edit” y agregamos los siguientes campos:
 
 | Key | Value |
 | --- | --- |
 | TABLE_NAME | USER_SESSIONS |
-| FUNCTION_NAME | ezauction-lambda-get-highest-offer |
 
 ### 6.2.2. Subida de código
 
@@ -1426,16 +1401,6 @@ Vamos al recurso “API Gateway” y clickeamos en “Create API”
 - **Stage name**: prod
 
 Clickeamos “Create and deploy”.
-
-Una vez creado, vamos a la sección “Stages” y copiamos el “@connections URL” el cual utilizaremos para completar la variable de entorno API_GATEWAY_ENDPOINT de la lambda ezauction-lambda-get-highest-offer
-
-<aside>
-❗
-
-Borrar el @connections final de la URL. 
-El template del endpoint es `https://your-websocket-api-id.execute-api.your-region.amazonaws.com/prod`
-
-</aside>
 
 ## 6.5. Probar WS
 
@@ -1499,10 +1464,133 @@ Clickeamos “Add”.
 
 Tardará un tiempo en configurarse. Esto se puede ver en la sección “Configuration” > “Triggers”, donde se mostrará el estado del trigger.
 
-![image.png](images/image%2022.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2022.png)
 
 Luego de un rato, clickear en “Recargar” y debería cambiar al estado “Enabled”
 
-![image.png](images/image%2023.png)
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2023.png)
 
 # 8. Frontend
+
+## 8.1. Bucket S3
+
+Creemos el bucket que hosteará el SPA.
+
+Vamos al recurso “S3” y clickeamos en “Create bucket”.
+
+- **Bucket type**: General purpose
+- **Bucket name**: `ezauction-frontend`
+- **ACLs disabled**
+- **Block *all* public access**: Deshabilitado
+- “I acknowledge…”: Habilitado
+- **Bucket Versioning**: Disable
+- **Encryption type**: Server-side encryption with Amazon S3 managed keys (SSE-S3)
+- **Bucket Key**: Enable
+
+Clickeamos en “Create bucket”.
+
+## 8.2. Subida del SPA
+
+En el repositorio, ir al directorio *frontend*.
+
+Primero instalemos las dependencias:
+
+```bash
+yarn install
+```
+
+Debemos editar las constantes del proyecto para que se conecte correctamente a los API GWs. Para ello, vamos al archivo *frontend/src/constants.ts*  y, para el stage `"prod"`, editamos los campos:
+
+- stage: `“prod"`
+- HIGHEST_BID_WS_URL: `[URL del WS API Gateway]?userId=[userId generico]`
+- API_GW_URL: `[URL del HTTP API Gateway]`
+
+Después, buildeamos el proyecto:
+
+```bash
+yarn build
+```
+
+Esto generará el directorio *dist* con el contenido estático del SPA.
+
+Vamos al detalle del bucket creado y clickeamos “Upload”. 
+
+<aside>
+❗
+
+Se debe subir el contenido del directorio, NO el directorio en sí
+
+</aside>
+
+Clickeamos en “Add files” y subimos todos los archivos generados en el directorio dist:
+
+```bash
+- assets
+- android-chrome-192x192.png
+- android-chrome-512x512.png
+- apple-touch-icon.png
+- favicon.ico
+- favicon.jpeg
+- favicon.svg
+- favicon-16x16.png
+- favicon-32x32.png
+- index.html
+- logo.jpeg
+- site.webmanifest
+```
+
+Y clickeamos en “Upload” y después “Close”.
+
+<aside>
+👁️
+
+Para subir el directorio assets, subirlo con “Add folder”. Se deberán subir un archivo JS y otro CSS al directorio assets del bucket
+
+</aside>
+
+## 8.3. Configurar bucket como static web hosting
+
+En el detalle del bucket, vamos a la sección “Properties”. En el último bloque está la propiedad “Static website hosting”.
+
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2024.png)
+
+Clickeamos en “Edit”
+
+- **Static website hosting**: Enable
+- **Hosting type**: Host a static website
+- **Index document**: index.html
+- **Error document**: index.html
+    
+    <aside>
+    📖
+    
+    Esto es para que el router de la app maneje los paths distintos al path root
+    
+    </aside>
+    
+
+Clickeamos “Save changes”
+
+Luego, vamos a permitir el acceso público al sitio web. Para ello, vamos a la sección “Permissions” y editamos el “Bucket policy” con el siguiente contenido:
+
+```json
+{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Effect": "Allow",
+			"Principal": "*",
+			"Action": [
+				"s3:GetObject"
+			],
+			"Resource": [ "[Bucket ARN]/*" ]
+		}
+	]
+}
+```
+
+# 9. A disfrutar 😎
+
+Volver a “Static website hosting”, en la sección “Properties” del bucket y clickear el link “Bucket website endpoint”
+
+![image.png](How-To%20EzAuctions%20c1925a577a25400baa2ce7e943282c7e/image%2025.png)

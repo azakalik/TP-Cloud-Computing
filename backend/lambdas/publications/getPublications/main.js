@@ -4,10 +4,11 @@ const dynamoDB = new DynamoDBClient({ region: "us-east-1" });
 
 export const handler = async (event) => {
     const publicationId = event.queryStringParameters?.publicationId;
+    const tableName = process.env.TABLE_NAME;
 
     if (publicationId) {
         const params = {
-            TableName: "PUBLICATIONS",
+            TableName: tableName,
             Key: {
                 PK: { S: `PUBID#${publicationId}` },
                 SK: { S: `PUBID#${publicationId}` } 
@@ -51,7 +52,7 @@ export const handler = async (event) => {
 
     // If no publicationId, use Scan to retrieve all items where PK starts with PUBID#
     const params = {
-        TableName: "PUBLICATIONS",
+        TableName: tableName,
     };
 
     try {

@@ -54,7 +54,7 @@ const AuctionDetailPage: React.FC = () => {
       if (typeof bidAmount === "string") {
         return true;
       }
-      if (bidAmount <= minBidAmount) {
+      if (bidAmount <= minBidAmount || bidAmount <= auctionDetail!.initialPrice) {
         return true;
       }
       return false;
@@ -281,7 +281,7 @@ const AuctionDetailPage: React.FC = () => {
                 hideControls
                 error={
                   disableBidButton && typeof bidAmount === "number"
-                    ? "Bid amount must be greater than the highest bid"
+                    ? "Bid amount must be greater than the initial price and highest bid"
                     : null
                 }
               />

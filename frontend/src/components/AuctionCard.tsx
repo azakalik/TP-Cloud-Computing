@@ -29,9 +29,11 @@ const BidCard: React.FC<AuctionCardType> = ({
 
       <Group mt="md" mb="xs">
         <Text>{title}</Text>
-        <Badge color="blue" variant="light">
-          {countryFlag}
-        </Badge>
+        {
+          countryFlag && <Badge color="blue" variant="light">
+            {countryFlag}
+          </Badge>
+        }
       </Group>
 
       <Text size="sm" color="dimmed">

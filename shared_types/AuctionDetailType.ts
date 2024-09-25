@@ -1,7 +1,6 @@
 type AuctionDetailType = {
-  id: string;
   user: string;
-  imageUrls: string[];
+  imageUrl: string;
   title: string;
   description: string;
   countryFlag: string;

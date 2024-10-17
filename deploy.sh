@@ -47,12 +47,16 @@ if $DEPLOY_FRONTEND; then
     cd frontend  # Navigate to the frontend directory
     ./deploy_frontend.sh "${NO_BUILD:+--no-build}" # Pass the no-build flag if specified
     cd -  # Navigate back to the root directory
+    echo "Frontend deployment complete."
 fi
 
 # Step 2: Deploy the backend if required (placeholder)
 if $DEPLOY_BACKEND; then
-    echo "Deploying backend... (not implemented)"
-    # Call backend deployment script here (if implemented)
+    echo "Deploying backend..."
+    cd backend  # Navigate to the backend directory
+   ./deploy_backend.sh
+   cd -  # Navigate back to the root directory
+    echo "Backend deployment complete."
 fi
 
 # Step 3: Print completion message

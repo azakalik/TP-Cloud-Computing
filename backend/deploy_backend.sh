@@ -35,7 +35,6 @@ fi
 
 echo "Zipping completed."
 
-echo "running terraform apply"
-
+terraform init
 terraform apply
 

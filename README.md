@@ -12,6 +12,42 @@ Integrantes:
 
 ![image.png](images/Arquitectura.png)
 
+# Deployar con Terraform
+## Configurar el perfil adecuado
+Es importante notar que estamos utilizando el perfil `cloud-lab-profile` en vez de `default`, por lo que habra que empezar configurando las credenciales necesarias en `~/.aws/credentials` de la siguiente manera:
+```
+[default]
+aws_access_key_id=
+aws_secret_access_key=
+[cloud-lab-profile]
+aws_access_key_id=${COMPLETAR}
+aws_secret_access_key=${COMPLETAR}
+aws_session_token=${COMPLETAR}
+```
+## Descargar dependencias necesarias
+Se necesita tener instalado en el sistema:
+- terraform
+- aws-cli
+- yarn
+## Correr el script
+Bastara con ejecutar el siguiente script para deployar tanto el frontend como el backend
+```
+./deploy.sh all
+```
+## Argumentos del script
+### Seleccion del deploy target
+Se debe elegir que es lo que queremos deployar, ingresando una de las siguientes opciones:
+- all
+- frontend
+- backend
+### No hacer build del frontend
+Si deployamos muchas veces seguidas sin cambiar el codigo del frontend, puede ser medio molesto ejecutar cada vez el comando `yarn build`, ya que tarda bastante tiempo. Se puede utilizar el argumento opcional `--no-build` para saltar este paso y utilizar la carpeta `dist` existente con el ultimo build hecho. Esto fallara si dicha carpeta no existe, en el caso de que el frontend nunca haya sido buildeado.
+Los comandos posibles en tal caso quedarian asi:
+```
+./deploy.sh frontend --no-build
+./deploy.sh all --no-build
+```
+
 # How-To: EzAuctions
 
 # 1. VPC

@@ -3,7 +3,7 @@ import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, TransactWriteCommand } from '@aws-sdk/lib-dynamodb';
 
 // Initialize DynamoDB Client
-const ddbClient = new DynamoDBClient({ region: 'us-east-1' });  // Replace with your region
+const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION });  // Replace with your region
 const ddb = DynamoDBDocumentClient.from(ddbClient);
 
 export const handler = async (event) => {

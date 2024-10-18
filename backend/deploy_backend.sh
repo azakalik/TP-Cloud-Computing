@@ -3,6 +3,7 @@
 # Define directories
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
+NOTIFICATIONS_DIR="lambdas/notifications"
 OUTPUT_DIR="functions_zips"
 
 # Create the output directory if it doesn't exist
@@ -48,6 +49,27 @@ if [ -d "$DISCONNECT_DIR" ]; then
 else
   echo "$DISCONNECT_DIR does not exist."
 fi
+
+
+# Create zip files for the notification lambda
+if [ -d "$NOTIFICATIONS_DIR" ]; then
+  echo "Processing $NOTIFICATIONS_DIR..."
+  cd "$NOTIFICATIONS_DIR" || exit
+
+  # Check if node_modules exists, run npm install if it doesn't
+  if [ ! -d "node_modules" ]; then
+    echo "node_modules not found in $NOTIFICATIONS_DIR. Running npm install..."
+    npm install
+  fi
+
+  # Zip the function
+  zip -qr "../../$OUTPUT_DIR/notifications.zip" main.js node_modules package.json package-lock.json
+  cd - || exit
+  echo "Created $OUTPUT_DIR/notifications.zip"
+else
+  echo "$DISCONNECT_DIR does not exist."
+fi
+
 
 echo "Zipping completed."
 

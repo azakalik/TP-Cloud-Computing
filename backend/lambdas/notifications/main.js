@@ -4,7 +4,7 @@ import { DynamoDBDocumentClient, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { ApiGatewayManagementApiClient, PostToConnectionCommand } from "@aws-sdk/client-apigatewaymanagementapi";
 
 // Initialize DynamoDB Client
-const ddbClient = new DynamoDBClient({ region: 'us-east-1' });
+const ddbClient = new DynamoDBClient({ region: process.env.AWS_REGION });
 const ddb = DynamoDBDocumentClient.from(ddbClient);
 
 const endpoint = process.env.WS_API_GATEWAY_ENDPOINT;
@@ -18,7 +18,7 @@ export const handler = async (event) => {
     // Process each SQS message in the event
     for (const record of event.Records) {
         const { publicationId, userId, price } = JSON.parse(record.body);  // Read message from SQS body
-
+        console.log("processing------------------------", publicationId, userId, price);
         if (!publicationId || !price) {
             console.error('Missing publicationId or price');
             continue;  // Skip this message if data is missing

@@ -1,7 +1,6 @@
 {
-  "name": "postpublications",
+  "name": "websocketconnect",
   "version": "1.0.0",
-  "description": "",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -11,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "uuid": "^10.0.0"
-  }
+    "@aws-sdk/client-dynamodb": "^3.674.0",
+    "@aws-sdk/lib-dynamodb": "^3.674.0"
+  },
+  "description": ""
 }

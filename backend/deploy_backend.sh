@@ -13,9 +13,17 @@ fi
 
 # Create zip files for the connect lambda
 if [ -d "$CONNECT_DIR" ]; then
-  echo "Zipping main.js from $CONNECT_DIR..."
+  echo "Processing $CONNECT_DIR..."
   cd "$CONNECT_DIR" || exit
-  zip -r "../../$OUTPUT_DIR/websocketConnect.zip" main.js
+  
+  # Check if node_modules exists, run npm install if it doesn't
+  if [ ! -d "node_modules" ];then
+    echo "node_modules not found in $CONNECT_DIR. Running npm install..."
+    npm install
+  fi
+
+  # Zip the function
+  zip -qr "../../$OUTPUT_DIR/websocketConnect.zip" main.js node_modules package.json package-lock.json
   cd - || exit
   echo "Created $OUTPUT_DIR/websocketConnect.zip"
 else
@@ -24,9 +32,17 @@ fi
 
 # Create zip files for the disconnect lambda
 if [ -d "$DISCONNECT_DIR" ]; then
-  echo "Zipping main.js from $DISCONNECT_DIR..."
+  echo "Processing $DISCONNECT_DIR..."
   cd "$DISCONNECT_DIR" || exit
-  zip -r "../../$OUTPUT_DIR/websocketDisconnect.zip" main.js
+
+  # Check if node_modules exists, run npm install if it doesn't
+  if [ ! -d "node_modules" ]; then
+    echo "node_modules not found in $DISCONNECT_DIR. Running npm install..."
+    npm install
+  fi
+
+  # Zip the function
+  zip -qr "../../$OUTPUT_DIR/websocketDisconnect.zip" main.js node_modules package.json package-lock.json
   cd - || exit
   echo "Created $OUTPUT_DIR/websocketDisconnect.zip"
 else
@@ -35,6 +51,14 @@ fi
 
 echo "Zipping completed."
 
-terraform init
-terraform apply
+# Check if terraform init has been run (i.e., check if the .terraform directory exists)
+if [ ! -d ".terraform" ]; then
+  echo ".terraform directory not found. Running terraform init..."
+  terraform init
+else
+  echo "terraform init has already been run."
+fi
 
+# Run terraform apply
+echo "Running terraform apply..."
+terraform apply

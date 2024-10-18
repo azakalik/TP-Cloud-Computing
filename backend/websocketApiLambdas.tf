@@ -10,7 +10,7 @@ module "connect_lambda" {
   }
   policy_statements = [
     {
-      Action   = ["dynamodb:Query", "dynamodb:UpdateItem", "dynamodb:DeleteItem"],
+      Action   = [ "dynamodb:UpdateItem"],
       Effect   = "Allow",
       Resource = aws_dynamodb_table.user_sessions.arn
     }
@@ -29,7 +29,7 @@ module "disconnect_lambda" {
   }
   policy_statements = [
     {
-      Action   = ["dynamodb:Query", "dynamodb:UpdateItem", "dynamodb:DeleteItem"],
+      Action   = ["dynamodb:DeleteItem"],
       Effect   = "Allow",
       Resource = aws_dynamodb_table.user_sessions.arn
     }

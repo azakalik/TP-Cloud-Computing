@@ -2,10 +2,10 @@ module "vpc" {
   source = "terraform-aws-modules/vpc/aws"
 
   name = "ezauction-vpc"
-  cidr = "10.0.0.0/16"
+  cidr = var.vpc_cidr
 
   azs             = ["us-east-1a", "us-east-1a", "us-east-1b", "us-east-1b"]
-  private_subnets = ["10.0.0.0/18", "10.0.192.0/24", "10.0.64.0/18", "10.0.193.0/24"]
+  private_subnets = [cidrsubnet(var.vpc_cidr, 2, 0), cidrsubnet(var.vpc_cidr, 8, 192), cidrsubnet(var.vpc_cidr, 2, 1), cidrsubnet(var.vpc_cidr, 8, 193)]
   private_subnet_names = ["ezauction-subnet-lambda-a", "ezauction-subnet-rds-a", "ezauction-subnet-lambda-b", "ezauction-subnet-rds-b"]
 
   enable_dns_hostnames = true

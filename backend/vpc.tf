@@ -14,5 +14,6 @@ module "vpc" {
 
 locals {
   rds_subnets = [module.vpc.private_subnets[1], module.vpc.private_subnets[3]]
+  lambda_subnets = [module.vpc.private_subnets[0], module.vpc.private_subnets[2]]
 }
 

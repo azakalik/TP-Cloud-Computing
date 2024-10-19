@@ -1,4 +1,5 @@
 module "vpc_endpoint_sqs" {
+    depends_on = [ aws_sqs_queue.auction_queue, data.aws_iam_role.iam_role_labrole, module.sg_vpc_endpoint, module.vpc ]
     source = "./iacModules/vpcEndpoint"
 
     aws_region = var.aws_region
@@ -18,6 +19,7 @@ module "vpc_endpoint_sqs" {
 }
 
 module "vpc_endpoint_secretsmanager" {
+    depends_on = [ aws_secretsmanager_secret_version.secret_rds_credentials_version, data.aws_iam_role.iam_role_labrole, module.sg_vpc_endpoint, module.vpc ]
     source = "./iacModules/vpcEndpoint"
 
     aws_region = var.aws_region

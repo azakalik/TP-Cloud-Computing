@@ -28,7 +28,7 @@ resource "aws_db_instance" "rds_instance_primary" {
     enabled_cloudwatch_logs_exports = ["postgresql", "upgrade"]
     auto_minor_version_upgrade = true
     maintenance_window = "Sun:09:00-Sun:11:00"
-    deletion_protection = true
+    deletion_protection = false
     multi_az = true
     skip_final_snapshot = true
 }

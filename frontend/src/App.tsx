@@ -15,6 +15,17 @@ import AuctionDetailPage from "./pages/AuctionDetailPage";
 import MyAuctionsPage from "./pages/MyAuctionsPage";
 import NewAuctionPage from "./pages/NewAuctionPage";
 import AboutUsPage from "./pages/AboutUsPage";
+import AuthPage from "./pages/AuthPage";
+
+import { Amplify } from 'aws-amplify';
+import awsconfig from "./configuration/awsconfig";
+
+
+
+Amplify.configure(awsconfig);
+
+
+
 
 export default function App() {
   return (
@@ -29,6 +40,11 @@ export default function App() {
               </Layout>
             }
           />
+          <Route path="/auth" element={
+            <Layout>
+              <AuthPage />
+            </Layout>
+          }/>
           <Route
             path="/auction/:id"
             element={

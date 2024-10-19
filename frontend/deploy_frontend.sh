@@ -41,7 +41,7 @@ terraform apply  # Deploy infrastructure
 # Step 3: Upload the build output (dist) to the S3 bucket
 S3_BUCKET=$(terraform output -raw frontend_bucket_name)  # Fetch the bucket name from Terraform output
 echo "Uploading the dist folder to S3 bucket: $S3_BUCKET"
-aws s3 sync "$DIST_DIR/" "s3://$S3_BUCKET/"  # Sync dist folder with S3 bucket
+aws s3 sync "$DIST_DIR/" "s3://$S3_BUCKET/" --profile cloud-lab-profile # Sync dist folder with S3 bucket
 
 # Step 4: Print success message
 echo "Deployment successful! Your website should be live at http://$S3_BUCKET.s3-website-us-east-1.amazonaws.com"

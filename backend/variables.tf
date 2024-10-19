@@ -1,8 +1,3 @@
-variable "role_arn" {
-  description = "The ARN of the IAM role to be used for Lambda"
-  type        = string
-}
-
 ############## PROVIDER STUFF ##############
 # AWS Credentials file path
 variable "aws_credentials_path" {

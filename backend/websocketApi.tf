@@ -9,14 +9,14 @@ resource "aws_apigatewayv2_integration" "lambda_connect_integration" {
   api_id           = aws_apigatewayv2_api.websocket_api.id
   integration_uri  = module.connect_lambda.lambda_function_arn
   integration_type = "AWS_PROXY"
-  credentials_arn  = var.role_arn
+  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
 }
 
 resource "aws_apigatewayv2_integration" "lambda_disconnect_integration" {
   api_id           = aws_apigatewayv2_api.websocket_api.id
   integration_uri  = module.disconnect_lambda.lambda_function_arn
   integration_type = "AWS_PROXY"
-  credentials_arn  = var.role_arn
+  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
 }
 
 

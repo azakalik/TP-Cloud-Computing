@@ -22,7 +22,7 @@ resource "aws_sqs_queue_policy" "auction_queue_policy" {
         Sid    = "__owner_statement",
         Effect = "Allow",
         Principal = {
-          AWS = var.role_arn
+          AWS = data.aws_iam_role.iam_role_labrole.arn
         },
         Action = [
           "SQS:*"
@@ -34,7 +34,7 @@ resource "aws_sqs_queue_policy" "auction_queue_policy" {
         Effect = "Allow",
         Principal = {
           AWS = [
-            var.role_arn # Use the variable for LabRole ARN
+            data.aws_iam_role.iam_role_labrole.arn
           ]
         },
         Action = [
@@ -47,7 +47,7 @@ resource "aws_sqs_queue_policy" "auction_queue_policy" {
         Effect = "Allow",
         Principal = {
           AWS = [
-            var.role_arn # Use the variable for LabRole ARN
+            data.aws_iam_role.iam_role_labrole.arn
           ]
         },
         Action = [

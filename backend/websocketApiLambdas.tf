@@ -3,7 +3,7 @@ module "connect_lambda" {
   function_name = "WebSocketConnectHandler"
   handler       = "main.handler"
   runtime       = "nodejs20.x"
-  role_arn      = var.role_arn
+  role_arn      = data.aws_iam_role.iam_role_labrole.arn
   filename      = "./functions_zips/websocketConnect.zip"
   environment_variables = {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
@@ -23,7 +23,7 @@ module "disconnect_lambda" {
   handler       = "main.handler"
   runtime       = "nodejs20.x"
   filename      = "./functions_zips/websocketDisconnect.zip"
-  role_arn      = var.role_arn
+  role_arn      = data.aws_iam_role.iam_role_labrole.arn
   environment_variables = {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
   }
@@ -49,7 +49,7 @@ resource "aws_lambda_function" "ezauction_lambda_notify" {
   handler       = "main.handler"
   runtime       = "nodejs20.x"
   filename      = "./functions_zips/notifications.zip"
-  role          = var.role_arn  # Use the provided role ARN
+  role          = data.aws_iam_role.iam_role_labrole.arn
   # Define environment variables
   environment {
     variables = {

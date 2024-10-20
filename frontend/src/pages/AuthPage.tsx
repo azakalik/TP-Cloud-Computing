@@ -1,20 +1,16 @@
-import React from 'react';
 import { Auth } from 'aws-amplify';
+import React from 'react';
 
 const AuthPage: React.FC = () => {
-  const handleSignIn = () => {
-    Auth.federatedSignIn(); // This will redirect to the Hosted UI
-  };
 
-  const handleSignOut = () => {
-    Auth.signOut(); // This will sign out the user
+  const handleSignIn = () => {
+    Auth.federatedSignIn();  // This redirects to the Hosted UI
   };
 
   return (
     <div>
-      <h2>Hosted UI Auth</h2>
+      <h2>Please Sign In</h2>
       <button onClick={handleSignIn}>Sign In with Hosted UI</button>
-      <button onClick={handleSignOut}>Sign Out</button>
     </div>
   );
 };

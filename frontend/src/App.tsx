@@ -4,7 +4,7 @@ import { theme } from "./theme";
 import LandingPage from "./pages/ListAuctionsPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
-// Import necessary styles for the DatePicker and Dropzone components
+// Import necessary styles
 import '@mantine/dates/styles.css';
 import '@mantine/dropzone/styles.css';
 
@@ -19,64 +19,26 @@ import AuthPage from "./pages/AuthPage";
 
 import { Amplify } from 'aws-amplify';
 import awsconfig from "./configuration/awsconfig";
-
-
+import PrivateRoute from "./components/PrivateRoute";
 
 Amplify.configure(awsconfig);
 
-
-
-
 export default function App() {
   return (
-    <MantineProvider theme={theme} >
+    <MantineProvider theme={theme}>
       <Router>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <Layout>
-                <LandingPage />
-              </Layout>
-            }
-          />
-          <Route path="/auth" element={
-            <Layout>
-              <AuthPage />
-            </Layout>
-          }/>
-          <Route
-            path="/auction/:id"
-            element={
-              <Layout>
-                <AuctionDetailPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/my_auctions"
-            element={
-              <Layout>
-                <MyAuctionsPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/new_auction"
-            element={
-              <Layout>
-                <NewAuctionPage />
-              </Layout>
-            }
-          />
-          <Route
-            path="/about_us"
-            element={
-              <Layout>
-                <AboutUsPage />
-              </Layout>
-            }
-          />
+          {/* Public Route for Authentication */}
+          <Route path="/auth" element={<Layout><AuthPage /></Layout>} />
+
+          {/* Private Routes */}
+          <Route element={<PrivateRoute />}>
+            <Route path="/" element={<Layout><LandingPage /></Layout>} />
+            <Route path="/auction/:id" element={<Layout><AuctionDetailPage /></Layout>} />
+            <Route path="/my_auctions" element={<Layout><MyAuctionsPage /></Layout>} />
+            <Route path="/new_auction" element={<Layout><NewAuctionPage /></Layout>} />
+            <Route path="/about_us" element={<Layout><AboutUsPage /></Layout>} />
+          </Route>
         </Routes>
       </Router>
     </MantineProvider>

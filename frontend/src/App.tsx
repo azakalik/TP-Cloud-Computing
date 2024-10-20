@@ -22,6 +22,7 @@ import awsconfig from "./configuration/awsconfig";
 import PrivateRoute from "./components/PrivateRoute";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
+import VerifyPage from "./pages/Verification";
 
 Amplify.configure(awsconfig);
 
@@ -31,11 +32,11 @@ export default function App() {
       <Router>
         <Routes>
           {/* Public Route for Authentication */}
-          <Route path="/signin" element={<Layout><SignInPage /></Layout>} />
-          <Route path="/signup" element={<Layout><SignUpPage /></Layout>} />
+          <Route path="/signin" element={<SignInPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/verification" element={<VerifyPage />} />
 
-
-          {/* Private Routes */}
+          {/* Private Routes */ }
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<Layout><LandingPage /></Layout>} />
             <Route path="/auction/:id" element={<Layout><AuctionDetailPage /></Layout>} />

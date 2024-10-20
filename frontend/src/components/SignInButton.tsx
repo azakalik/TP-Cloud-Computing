@@ -1,17 +1,21 @@
-import { useDisclosure } from '@mantine/hooks';
-import { Modal, Button } from '@mantine/core';
-import { AuthenticationForm } from './AuthenticationForm';
+import { useNavigate } from 'react-router-dom';
+import { Auth } from 'aws-amplify';
+import { Button } from '@mantine/core';
 
-export function SignInButton() {
-  const [opened, { open, close }] = useDisclosure(false);
+export function SignOutButton() {
+  const navigate = useNavigate();
+
+
+  const handleSignOut = async () => {
+    try {
+      await Auth.signOut(); // Sign out the user
+      navigate('/signin'); // Redirect to sign-in page after sign-out
+    } catch (error: any) {
+      console.error('Error signing out:', error);
+    }
+  };
 
   return (
-    <>
-      <Modal opened={opened} onClose={close} centered withCloseButton={false}>
-        <AuthenticationForm />
-      </Modal>
-
-      <Button onClick={open}>Log in / Sign up</Button>
-    </>
+      <Button onClick={handleSignOut}>Sign out</Button>
   );
 }

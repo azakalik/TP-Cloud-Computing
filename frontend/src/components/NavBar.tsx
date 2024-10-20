@@ -11,7 +11,7 @@ import {
  } from '@mantine/core';
  import { useDisclosure } from '@mantine/hooks';
  import classes from '../css-modules/NavBar.module.css';
-import { SignInButton } from './SignInButton';
+import { SignOutButton } from './SignInButton';
 import { Link } from 'react-router-dom';
  
  export function NavBar() {
@@ -30,7 +30,7 @@ import { Link } from 'react-router-dom';
            </Group>
  
            <Group visibleFrom="sm">
-             <SignInButton />
+             <SignOutButton />
            </Group>
  
            <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />

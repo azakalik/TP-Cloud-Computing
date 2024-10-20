@@ -19,7 +19,6 @@ const PrivateRoute: React.FC = () => {
     // You could add a loading spinner here if needed
     return <div>Loading...</div>;
   }
-
   return isAuthenticated ? <Outlet /> : <Navigate to="/signin" />;
 };
 

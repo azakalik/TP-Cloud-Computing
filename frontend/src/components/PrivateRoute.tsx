@@ -20,7 +20,7 @@ const PrivateRoute: React.FC = () => {
     return <div>Loading...</div>;
   }
 
-  return isAuthenticated ? <Outlet /> : <Navigate to="/auth" />;
+  return isAuthenticated ? <Outlet /> : <Navigate to="/signin" />;
 };
 
 export default PrivateRoute;

@@ -15,11 +15,13 @@ import AuctionDetailPage from "./pages/AuctionDetailPage";
 import MyAuctionsPage from "./pages/MyAuctionsPage";
 import NewAuctionPage from "./pages/NewAuctionPage";
 import AboutUsPage from "./pages/AboutUsPage";
-import AuthPage from "./pages/AuthPage";
+import AuthPage from "./pages/SignInPage";
 
 import { Amplify } from 'aws-amplify';
 import awsconfig from "./configuration/awsconfig";
 import PrivateRoute from "./components/PrivateRoute";
+import SignInPage from "./pages/SignInPage";
+import SignUpPage from "./pages/SignUpPage";
 
 Amplify.configure(awsconfig);
 
@@ -29,7 +31,9 @@ export default function App() {
       <Router>
         <Routes>
           {/* Public Route for Authentication */}
-          <Route path="/auth" element={<Layout><AuthPage /></Layout>} />
+          <Route path="/signin" element={<Layout><SignInPage /></Layout>} />
+          <Route path="/signup" element={<Layout><SignUpPage /></Layout>} />
+
 
           {/* Private Routes */}
           <Route element={<PrivateRoute />}>

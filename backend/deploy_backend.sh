@@ -9,6 +9,8 @@ POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
 OUTPUT_DIR="functions_zips"
 
+terraform init
+
 
 # Create the output directory if it doesn't exist
 if [ ! -d "$OUTPUT_DIR" ]; then

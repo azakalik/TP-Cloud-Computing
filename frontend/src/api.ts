@@ -5,21 +5,51 @@ import AuctionDetailType from "../../shared_types/AuctionDetailType";
 import NewAuctionType from "../../shared_types/NewAuctionType";
 import AuctionInitialHighestBid from "../../shared_types/AuctionCurrentHighestBid";
 import NewBidType from "../../shared_types/NewBidType";
+import axios from "axios";
+import {Auth} from "aws-amplify";
 
+const api = axios.create({
+  baseURL: `${API_GW_URL}`
+});
+
+api.interceptors.request.use(
+  async (config) => {
+    try {
+      // Retrieve the current session and JWT token
+      const session = await Auth.currentSession();
+      const token = session.getIdToken().getJwtToken();
+
+      // Attach the JWT token in the Authorization header with Bearer prefix
+      config.headers['Authorization'] = `Bearer ${token}`;
+    } catch (error) {
+      console.error("Failed to attach JWT token:", error);
+      throw error; // Optionally re-throw the error to handle it upstream
+    }
+    return config;
+  },
+  (error) => {
+    // Handle request errors
+    return Promise.reject(error);
+  }
+);
+
+// Function to fetch auctions
 export const fetchAuctions = async (): Promise<AuctionCardType[]> => {
   try {
-    const response = await fetch(`${API_GW_URL}/publications`);
-    if (!response.ok) {
+    const response = await api.get('/publications');
+
+    // Check if response status is 200 (OK)
+    if (response.status === 200) {
+      return response.data; // Return data if successful
+    } else {
       throw new Error(`Error fetching auctions: ${response.statusText}`);
     }
-
-    const data: AuctionCardType[] = await response.json();
-    return data;
   } catch (error) {
     console.error("Failed to fetch auctions:", error);
     return []; // Return an empty array in case of error
   }
 };
+
 
 // todo implement in backend
 export const fetchUserAuctions = async (): Promise<AuctionCardType[]> => {
@@ -32,16 +62,18 @@ export const fetchAuctionInitialHighestBid = async (
   id: string
 ): Promise<AuctionInitialHighestBid> => {
   try {
-    const response = await fetch(`${API_GW_URL}/offers?publicationId=${id}`);
-    if (!response.ok) {
-      throw new Error(`Error fetching auctions: ${response.statusText}`);
-    }
+    const response = await api.get(`/offers`, {
+      params: { publicationId: id },
+    });
 
-    const data: AuctionInitialHighestBid = await response.json();
-    return data;
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error(`Error fetching initial highest bid: ${response.statusText}`);
+    }
   } catch (error) {
     console.error("Failed to fetch current highest bid:", error);
-    throw Error("Not found :("); // Return an empty array in case of error
+    throw new Error("Not found :("); // Throw an error with a message
   }
 };
 
@@ -49,18 +81,18 @@ export const fetchAuctionDetail = async (
   id: string
 ): Promise<AuctionDetailType> => {
   try {
-    const response = await fetch(
-      `${API_GW_URL}/publications?publicationId=${id}`
-    );
-    if (!response.ok) {
-      throw new Error(`Error fetching auctions: ${response.statusText}`);
-    }
+    const response = await api.get(`/publications`, {
+      params: { publicationId: id },
+    });
 
-    const data: AuctionDetailType = await response.json();
-    return data;
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error(`Error fetching auction detail: ${response.statusText}`);
+    }
   } catch (error) {
-    console.error("Failed to fetch auctions:", error);
-    throw Error("Not found :("); // Return an empty array in case of error
+    console.error("Failed to fetch auction details:", error);
+    throw new Error("Not found :(");
   }
 };
 
@@ -70,35 +102,26 @@ export const uploadBid = async (
   publicationId: string,
   price: number
 ): Promise<boolean> => {
-  console.log(
-    "Uploading bid to publication ID:",
-    publicationId,
-    "with price:",
-    price
-  );
   try {
     const payload: NewBidType = {
       userId,
       publicationId,
       price,
     };
-    const response = await fetch(`${API_GW_URL}/offers`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
 
-    if (!response.ok) {
-      throw new Error(`Failed to upload auction: ${response.statusText}`);
+    const response = await api.post('/offers', payload);
+
+    if (response.status === 200 || response.status === 201) {
+      return true; // Success
+    } else {
+      throw new Error(`Failed to upload bid: ${response.statusText}`);
     }
-    return true;
-  } catch {
-    console.error("Failed to upload bid");
-    return false;
+  } catch (error) {
+    console.error("Failed to upload bid:", error);
+    return false; // Return false if there's an error
   }
 };
+
 
 // Return true if the auction was uploaded successfully, false otherwise
 export const uploadNewAuction = async (
@@ -123,40 +146,33 @@ export const uploadNewAuction = async (
   };
 
   try {
-    // Convert the first image to base64 (extend to handle multiple images if needed)
-    const base64Image = await getBase64(images[0]);
+    const base64Image = await getBase64(images[0]); // Convert the first image to base64
 
     if (!base64Image) {
       throw new Error("Failed to convert image to base64");
     }
 
-    // Proceed with the rest of your upload logic
     const payload: NewAuctionType = {
       user,
       title,
       description,
       countryFlag,
       initialPrice,
-      images: [base64Image], // Base64 encoded image
-      initialTime: new Date().toISOString(), // Current date in ISO string format
-      endTime: dueTime.toISOString(), // Convert date to ISO string format
+      images: [base64Image], // Use the base64 encoded image
+      initialTime: new Date().toISOString(), // Current date in ISO format
+      endTime: dueTime.toISOString(), // Due time in ISO format
     };
 
-    const response = await fetch(`${API_GW_URL}/publications`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    });
+    const response = await api.post('/publications', payload);
 
-    if (!response.ok) {
+    if (response.status === 200 || response.status === 201) {
+      return true; // Success
+    } else {
       throw new Error(`Failed to upload auction: ${response.statusText}`);
     }
-
-    return true; // Success
   } catch (error) {
     console.error("Error uploading auction:", error);
     return false; // Failure
   }
 };
+

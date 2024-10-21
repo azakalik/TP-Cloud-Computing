@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Auth } from 'aws-amplify';
 import { useNavigate } from 'react-router-dom';
 import { Flex, Paper, Stack, Title, TextInput, Button, Text } from '@mantine/core';
+import { Link } from 'react-router-dom';
 
 const SignUpPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -23,10 +24,6 @@ const SignUpPage: React.FC = () => {
     } catch (error: any) {
       setError(error.message || JSON.stringify(error));
     }
-  };
-
-  const goToSignIn = () => {
-    navigate('/signin'); // Redirect to the sign-in page
   };
 
   return (
@@ -63,9 +60,9 @@ const SignUpPage: React.FC = () => {
           <Flex justify="center" mt="md">
             <Text>
               Already have an account?{' '}
-              <Button variant="link" onClick={goToSignIn} style={{ padding: 0 }}>
+              <Link to="/signin" style={{ textDecoration: 'none', color: '#1c7ed6' }}>
                 Back to Sign In
-              </Button>
+              </Link>
             </Text>
           </Flex>
         </Stack>

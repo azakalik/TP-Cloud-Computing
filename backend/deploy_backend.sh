@@ -4,8 +4,11 @@
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
 NOTIFICATIONS_DIR="lambdas/notifications"
+GET_PUBLICATIONS_DIR="lambdas/getPublications"
+POST_PUBLICATIONS_DIR="lambdas/postPublications"
 OFFERS_DIR="lambdas/offers"
 OUTPUT_DIR="functions_zips"
+
 
 # Create the output directory if it doesn't exist
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -68,7 +71,41 @@ if [ -d "$NOTIFICATIONS_DIR" ]; then
   cd - || exit
   echo "Created $OUTPUT_DIR/notifications.zip"
 else
-  echo "$DISCONNECT_DIR does not exist."
+  echo "$NOTIFICATIONS_DIR does not exist."
+fi
+
+# Create zip files for the connect lambda
+if [ -d "$GET_PUBLICATIONS_DIR" ]; then
+  echo "Processing $GET_PUBLICATIONS_DIR..."
+  cd "$GET_PUBLICATIONS_DIR" || exit
+
+  # Skip npm install for getPublications lambda as it doesn't have any dependencies
+
+  # Zip the function
+  zip -qr "../../$OUTPUT_DIR/getPublications.zip" main.js node_modules package.json package-lock.json
+  cd - || exit
+  echo "Created $OUTPUT_DIR/getPublications.zip"
+else
+  echo "$GET_PUBLICATIONS_DIR does not exist."
+fi
+
+# Create zip files for the connect lambda
+if [ -d "$POST_PUBLICATIONS_DIR" ]; then
+  echo "Processing $POST_PUBLICATIONS_DIR..."
+  cd "$POST_PUBLICATIONS_DIR" || exit
+  
+  # Check if node_modules exists, run npm install if it doesn't
+  if [ ! -d "node_modules" ];then
+    echo "node_modules not found in $POST_PUBLICATIONS_DIR. Running npm install..."
+    npm install
+  fi
+
+  # Zip the function
+  zip -qr "../../$OUTPUT_DIR/postPublications.zip" main.js node_modules package.json package-lock.json
+  cd - || exit
+  echo "Created $OUTPUT_DIR/postPublications.zip"
+else
+  echo "$POST_PUBLICATIONS_DIR does not exist."
 fi
 
 # Create zip file for offers lambdas

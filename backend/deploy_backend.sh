@@ -4,8 +4,8 @@
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
 NOTIFICATIONS_DIR="lambdas/notifications"
-GET_PUBLICATIONS_DIR="lambdas/getPublications"
-POST_PUBLICATIONS_DIR="lambdas/postPublications"
+GET_PUBLICATIONS_DIR="lambdas/publications/getPublications"
+POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
 OUTPUT_DIR="functions_zips"
 
@@ -82,7 +82,7 @@ if [ -d "$GET_PUBLICATIONS_DIR" ]; then
   # Skip npm install for getPublications lambda as it doesn't have any dependencies
 
   # Zip the function
-  zip -qr "../../$OUTPUT_DIR/getPublications.zip" main.js node_modules package.json package-lock.json
+  zip -qr "../../../$OUTPUT_DIR/getPublications.zip" main.js
   cd - || exit
   echo "Created $OUTPUT_DIR/getPublications.zip"
 else
@@ -101,7 +101,7 @@ if [ -d "$POST_PUBLICATIONS_DIR" ]; then
   fi
 
   # Zip the function
-  zip -qr "../../$OUTPUT_DIR/postPublications.zip" main.js node_modules package.json package-lock.json
+  zip -qr "../../../$OUTPUT_DIR/postPublications.zip" index.js node_modules package.json package-lock.json
   cd - || exit
   echo "Created $OUTPUT_DIR/postPublications.zip"
 else

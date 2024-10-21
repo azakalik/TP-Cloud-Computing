@@ -80,3 +80,19 @@ resource "aws_apigatewayv2_route" "api_http_route_publications_post" {
   route_key = "POST /publications"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_post.id}"
 }
+
+
+resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
+  domain_name = "api.aws.martinippolito.com.ar"
+  domain_name_configuration {
+    certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+}
+
+resource "aws_apigatewayv2_api_mapping" "api_mapping" {
+  api_id      = aws_apigatewayv2_api.api_http.id
+  domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
+  stage       = aws_apigatewayv2_stage.api_http_stage.name
+}

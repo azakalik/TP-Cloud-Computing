@@ -4,6 +4,7 @@
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
 NOTIFICATIONS_DIR="lambdas/notifications"
+OFFERS_DIR="lambdas/offers"
 OUTPUT_DIR="functions_zips"
 
 # Create the output directory if it doesn't exist
@@ -70,6 +71,17 @@ else
   echo "$DISCONNECT_DIR does not exist."
 fi
 
+# Create zip file for offers lambdas
+if [ -d "$OFFERS_DIR" ]; then
+  echo "Processing $OFFERS_DIR..."
+
+  for lambda_dir in "$OFFERS_DIR"/*/; do
+    lambda=$(basename "$lambda_dir")
+    sh "$OFFERS_DIR/compile.sh" "$lambda" "$OUTPUT_DIR"
+  done
+else
+  echo "$OFFERS_DIR does not exist."
+fi
 
 echo "Zipping completed."
 

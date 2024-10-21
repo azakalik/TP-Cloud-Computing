@@ -56,15 +56,15 @@ resource "aws_apigatewayv2_stage" "api_http_stage" {
 resource "aws_apigatewayv2_integration" "api_http_integration_publications_get" {
   api_id             = aws_apigatewayv2_api.api_http.id
   integration_type   = "AWS_PROXY"
-  integration_method = "GET"
   integration_uri    = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.ezauction_lambda_get_publication.arn}/invocations"
+    credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
 }
 
 resource "aws_apigatewayv2_integration" "api_http_integration_publications_post" {
   api_id             = aws_apigatewayv2_api.api_http.id
   integration_type   = "AWS_PROXY"
-  integration_method = "POST"
   integration_uri    = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.ezauction_lambda_create_publication.arn}/invocations"
+  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
 }
 
 # ROUTES
@@ -82,17 +82,20 @@ resource "aws_apigatewayv2_route" "api_http_route_publications_post" {
 }
 
 
-resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
-  domain_name = "api.aws.martinippolito.com.ar"
-  domain_name_configuration {
-    certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
-    endpoint_type   = "REGIONAL"
-    security_policy = "TLS_1_2"
-  }
-}
+# resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
+#   domain_name = "api.aws.martinippolito.com.ar"
+#   domain_name_configuration {
+#     certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
+#     endpoint_type   = "REGIONAL"
+#     security_policy = "TLS_1_2"
+#   }
+# # Add a depends_on to wait for the certificate validation to be completed
+#   depends_on = [aws_acm_certificate_validation.wildcard_validation]
+# }
 
-resource "aws_apigatewayv2_api_mapping" "api_mapping" {
-  api_id      = aws_apigatewayv2_api.api_http.id
-  domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
-  stage       = aws_apigatewayv2_stage.api_http_stage.name
-}
+# resource "aws_apigatewayv2_api_mapping" "api_mapping" {
+#   api_id      = aws_apigatewayv2_api.api_http.id
+#   domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
+#   stage       = aws_apigatewayv2_stage.api_http_stage.name
+# }
+

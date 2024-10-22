@@ -6,7 +6,7 @@ variable "function_name" {
 variable "handler" {
     description = "The handler of the Lambda function."
     type        = string  
-    default     = "main.handler"
+    default     = "index.handler"
 }
 
 variable "runtime" {
@@ -32,15 +32,21 @@ variable "env_vars" {
 
 variable "api_gw_id" {
     description = "The ID of the API Gateway."
-    type        = optional(string)  
+    type        = string 
+    nullable    = true
+    default     = null
 }
 
 variable "api_gw_execution_arn" {
     description = "The ARN of the API Gateway execution role. Required if api_gw_id is set."
-    type        = optional(string)  
+    type        = string 
+    nullable    = true
+    default     = null
 }
 
 variable "route_key" {
     description = "The route key for the Lambda function. Required if api_gw_id is set."
-    type        = optional(string)
+    type        = string
+    nullable    = true
+    default     = null
 }

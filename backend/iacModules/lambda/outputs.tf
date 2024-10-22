@@ -1,7 +1,7 @@
-output "lambda_arn" {
-  value = aws_lambda_function.lambda.arn  
+output "arn" {
+  value = aws_lambda_function.function.arn  
 }
 
-output "lambda_id" {
-    value = aws_lambda_function.lambda.id
+output "id" {
+    value = aws_lambda_function.function.id
 }

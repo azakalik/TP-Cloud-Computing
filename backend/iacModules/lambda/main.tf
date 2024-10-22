@@ -10,7 +10,7 @@ resource "aws_lambda_function" "function" {
 }
 
 resource "aws_apigatewayv2_integration" "integration" {
-    count = var.api_gw_id != null ? 1 : 0
+    count = var.integrates_with_api_gw ? 1 : 0
     api_id = var.api_gw_id
     integration_uri = aws_lambda_function.function.arn
     integration_type = "AWS_PROXY"
@@ -18,14 +18,14 @@ resource "aws_apigatewayv2_integration" "integration" {
 }
 
 resource "aws_apigatewayv2_route" "route" {
-    count = var.api_gw_id != null ? 1 : 0
+    count = var.integrates_with_api_gw ? 1 : 0
     api_id = var.api_gw_id
     route_key = var.route_key
-    target = join("/", ["integrations", aws_apigatewayv2_integration.integration.id])
+    target = join("/", ["integrations", aws_apigatewayv2_integration.integration[0].id])
 }
 
 resource "aws_lambda_permission" "permission" {
-    count = var.api_gw_id != null ? 1 : 0
+    count = var.integrates_with_api_gw ? 1 : 0
     statement_id = "AllowExecutionFromAPIGateway"
     action = "lambda:InvokeFunction"
     function_name = aws_lambda_function.function.function_name

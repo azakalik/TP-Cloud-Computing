@@ -65,6 +65,7 @@ module "lambda_create_publication" {
     TABLE_NAME = aws_dynamodb_table.publications.name
   }
 
+  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
@@ -81,6 +82,7 @@ module "lambda_get_publication" {
     TABLE_NAME = aws_dynamodb_table.publications.name
   }
 
+  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "GET /publications"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn

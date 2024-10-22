@@ -1,14 +1,4 @@
-let stage = 'prod';  // Change this to 'prod' for production
-
-let HIGHEST_BID_WS_URL: string;
-let API_GW_URL: string;
-
-if (stage === 'prod') {
-   HIGHEST_BID_WS_URL = '';  // Set the production URL here
-   API_GW_URL = '';  // Set the production URL here
-} else if (stage === 'dev') {
-   HIGHEST_BID_WS_URL = 'ws://localhost:8000';
-   API_GW_URL = 'http://localhost:3001';
-}
+const HIGHEST_BID_WS_URL: string = import.meta.env.VITE_WS_API_GW_URL;
+const API_GW_URL: string = import.meta.env.VITE_HTTP_API_GW_URL;
 
 export { HIGHEST_BID_WS_URL, API_GW_URL };

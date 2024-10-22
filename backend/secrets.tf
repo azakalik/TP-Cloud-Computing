@@ -1,5 +1,5 @@
 resource "aws_secretsmanager_secret" "secret_rds_credentials" {
-    name = "ezauction-rds-secret"
+    name = var.rds_credentials_secret_name
     description = "Access to RDS primary instance"
 }
 

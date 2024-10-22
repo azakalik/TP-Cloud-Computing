@@ -1,5 +1,3 @@
-
-
 resource "aws_apigatewayv2_api" "api_http" {
   name = "ezauction-api-http"
   protocol_type = "HTTP"
@@ -8,48 +6,8 @@ resource "aws_apigatewayv2_api" "api_http" {
 resource "aws_apigatewayv2_stage" "api_http_stage" {
   api_id = aws_apigatewayv2_api.api_http.id
   name   = "prod"
+  auto_deploy = true
 }
-
-# ##############################
-# # OFFERS
-# ##############################
-
-# # INTEGRATIONS
-
-# resource "aws_apigatewayv2_integration" "api_http_integration_offers_place" {
-#   api_id             = aws_apigatewayv2_api.api_http.id
-#   integration_type   = "AWS_PROXY"
-#   integration_method = "POST"
-#   // TODO: Change this to the correct lambda function
-#   integration_uri    = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.ezauction_lambda_notify.arn}/invocations"
-# }
-
-# resource "aws_apigatewayv2_integration" "api_http_integration_offers_get_highest" {
-#   api_id             = aws_apigatewayv2_api.api_http.id
-#   integration_type   = "AWS_PROXY"
-#   integration_method = "GET"
-#   // TODO: Change this to the correct lambda function
-#   integration_uri    = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.ezauction_lambda_notify.arn}/invocations"
-# }
-
-# # ROUTES
-
-# resource "aws_apigatewayv2_route" "api_http_route_offers_place" {
-#   api_id    = aws_apigatewayv2_api.api_http.id
-#   route_key = "POST /offers"
-#   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_place.id}"
-# }
-
-# resource "aws_apigatewayv2_route" "api_http_route_offers_get_highest" {
-#   api_id    = aws_apigatewayv2_api.api_http.id
-#   route_key = "GET /offers"
-#   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_get_highest.id}"
-# }
-
-
-##############################
-# PUBLICATIONS
-##############################
 
 # INTEGRATIONS
 
@@ -88,21 +46,76 @@ module "lambda_get_publication" {
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
 }
 
+module "lambda_create_offers_table" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
 
-# resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
-#   domain_name = "api.aws.martinippolito.com.ar"
-#   domain_name_configuration {
-#     certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
-#     endpoint_type   = "REGIONAL"
-#     security_policy = "TLS_1_2"
-#   }
-# # Add a depends_on to wait for the certificate validation to be completed
-#   depends_on = [aws_acm_certificate_validation.wildcard_validation]
-# }
+  function_name = "ezauction-lambda-create-offers-table"
+  filename = "./functions_zips/createOffersTable.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    SECRET_NAME = var.rds_credentials_secret_name
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+  }
 
-# resource "aws_apigatewayv2_api_mapping" "api_mapping" {
-#   api_id      = aws_apigatewayv2_api.api_http.id
-#   domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
-#   stage       = aws_apigatewayv2_stage.api_http_stage.name
-# }
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /tables/offers"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+}
+
+module "lambda_create_offer" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sqs_queue.auction_queue, module.vpc_endpoint_sqs ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-create-offer"
+  filename = "./functions_zips/placeOffer.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    SECRET_NAME = var.rds_credentials_secret_name
+    SQS_URL = aws_sqs_queue.auction_queue.url
+    SQS_ENDPOINT = module.vpc_endpoint_sqs.endpoint
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /offers"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+}
+
+module "lambda_get_highest_offer" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-get-highest-offer"
+  filename = "./functions_zips/getHighestOffer.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    DB_SECRET_NAME = var.rds_credentials_secret_name
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "GET /offers"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+}
+
+resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
+  domain_name = "api.aws.martinippolito.com.ar"
+  domain_name_configuration {
+    certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
+    endpoint_type   = "REGIONAL"
+    security_policy = "TLS_1_2"
+  }
+  # Add a depends_on to wait for the certificate validation to be completed
+  depends_on = [aws_acm_certificate_validation.wildcard_validation]
+}
+
+resource "aws_apigatewayv2_api_mapping" "api_mapping" {
+  api_id      = aws_apigatewayv2_api.api_http.id
+  domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
+  stage       = aws_apigatewayv2_stage.api_http_stage.name
+}
 

@@ -1,6 +1,6 @@
-const { S3Client, PutObjectCommand } = require("@aws-sdk/client-s3");
-const { DynamoDBClient, PutItemCommand } = require("@aws-sdk/client-dynamodb");
-const { v4: uuidv4 } = require("uuid");
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { v4 as uuidv4 } from "uuid";
 
 // Initialize clients
 const dynamoDB = new DynamoDBClient({ region: "us-east-1" });
@@ -20,7 +20,7 @@ function getExtensionFromBase64(base64String) {
 }
 
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
     
     let publicationId, initialTime, endTimeISO, item1, imageUrl;
     

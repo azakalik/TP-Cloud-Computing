@@ -105,6 +105,11 @@ resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_table_create" 
   source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
 }
 
+resource "aws_lambda_invocation" "create_offers_table_invocation" {
+  depends_on = [ aws_lambda_function.ezauction_lambda_create_offers_table ]
+  function_name = aws_lambda_function.ezauction_lambda_create_offers_table.function_name
+  input = jsonencode({})
+}
 
 resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
   domain_name = "api.aws.martinippolito.com.ar"

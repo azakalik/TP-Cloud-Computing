@@ -33,7 +33,8 @@ resource "aws_lambda_function" "ezauction_lambda_get_highest_offer" {
   role          = data.aws_iam_role.iam_role_labrole.arn
   environment {
     variables = {
-      TABLE_NAME = aws_dynamodb_table.publications.name 
+      RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+      DB_SECRET_NAME = var.rds_credentials_secret_name
     }
   }
 }
@@ -46,7 +47,24 @@ resource "aws_lambda_function" "ezauction_lambda_create_offer" {
   role          = data.aws_iam_role.iam_role_labrole.arn
   environment {
     variables = {
-      TABLE_NAME = aws_dynamodb_table.publications.name 
+      RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+      SECRET_NAME = var.rds_credentials_secret_name
+      SQS_URL = aws_sqs_queue.auction_queue.url
+      SQS_ENDPOINT = module.vpc_endpoint_sqs.endpoint
+    }
+  }
+}
+
+resource "aws_lambda_function" "ezauction_lambda_create_offers_table" {
+  function_name = "ezauction-lambda-create-offers-table"
+  handler       = "index.handler"
+  runtime       = "nodejs20.x"
+  filename      = "./functions_zips/createOffersTable.zip"
+  role          = data.aws_iam_role.iam_role_labrole.arn
+  environment {
+    variables = {
+      SECRET_NAME = var.rds_credentials_secret_name
+      RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
     }
   }
 }

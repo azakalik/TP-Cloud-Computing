@@ -1,8 +1,8 @@
 resource "aws_s3_bucket" "publication_images" {
-  bucket = "ezauction-publication-images"
+  bucket = var.s3_publication_bucket_name
 
   tags = {
-    Name        = "ezauction-publication-images"
+    Name        = var.s3_publication_bucket_name
     Environment = "production"
   }
 }

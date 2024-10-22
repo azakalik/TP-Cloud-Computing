@@ -1,39 +1,34 @@
-module "connect_lambda" {
-  source        = "./IaCLambdaModule"
+resource "aws_lambda_function" "connect_lambda" {
   function_name = "WebSocketConnectHandler"
   handler       = "main.handler"
   runtime       = "nodejs20.x"
-  role_arn      = data.aws_iam_role.iam_role_labrole.arn
+  role      = data.aws_iam_role.iam_role_labrole.arn
   filename      = "./functions_zips/websocketConnect.zip"
-  environment_variables = {
+
+  environment {
+
+     variables = {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
   }
-  policy_statements = [
-    {
-      Action   = [ "dynamodb:UpdateItem"],
-      Effect   = "Allow",
-      Resource = aws_dynamodb_table.user_sessions.arn
-    }
-  ]
+
+  }
 }
 
-module "disconnect_lambda" {
-  source        = "./IaCLambdaModule"
+resource "aws_lambda_function" "disconnect_lambda" {
   function_name = "WebSocketDisconnectHandler"
   handler       = "main.handler"
   runtime       = "nodejs20.x"
   filename      = "./functions_zips/websocketDisconnect.zip"
-  role_arn      = data.aws_iam_role.iam_role_labrole.arn
-  environment_variables = {
+  role      = data.aws_iam_role.iam_role_labrole.arn
+
+  environment {
+
+    variables = {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
   }
-  policy_statements = [
-    {
-      Action   = ["dynamodb:DeleteItem"],
-      Effect   = "Allow",
-      Resource = aws_dynamodb_table.user_sessions.arn
-    }
-  ]
+    
+  }
+
 }
 
 

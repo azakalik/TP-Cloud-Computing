@@ -18,7 +18,6 @@ export const handler = async (event) => {
     // Process each SQS message in the event
     for (const record of event.Records) {
         const { publicationId, userId, price } = JSON.parse(record.body);  // Read message from SQS body
-        console.log("processing------------------------", publicationId, userId, price);
         if (!publicationId || !price) {
             console.error('Missing publicationId or price');
             continue;  // Skip this message if data is missing

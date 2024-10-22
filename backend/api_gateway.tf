@@ -34,6 +34,12 @@ resource "aws_apigatewayv2_integration" "api_http_integration_offers_highest" {
   integration_uri    = aws_lambda_function.ezauction_lambda_get_highest_offer.arn
   credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
 }
+resource "aws_apigatewayv2_integration" "api_http_integration_offers_table" {
+  api_id             = aws_apigatewayv2_api.api_http.id
+  integration_type   = "AWS_PROXY"
+  integration_uri    = aws_lambda_function.ezauction_lambda_create_offers_table.arn
+  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn  
+}
 
 # ROUTES
 resource "aws_apigatewayv2_route" "api_http_route_publications_get" {
@@ -55,6 +61,11 @@ resource "aws_apigatewayv2_route" "api_http_route_offers_place" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "POST /offers"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_place.id}"
+}
+resource "aws_apigatewayv2_route" "api_http_route_offers_table" {
+  api_id    = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /tables/offers"
+  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_table.id}"
 }
 
 # PERMISSIONS
@@ -86,7 +97,13 @@ resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_create" {
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
 }
-
+resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_table_create" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.ezauction_lambda_create_offers_table.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
+}
 
 
 resource "aws_apigatewayv2_domain_name" "api_custom_domain" {

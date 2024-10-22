@@ -8,6 +8,8 @@ GET_PUBLICATIONS_DIR="lambdas/publications/getPublications"
 POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
 OUTPUT_DIR="functions_zips"
+ENV_FILE="../frontend/.env"
+
 
 terraform init
 
@@ -135,3 +137,22 @@ fi
 # Run terraform apply
 echo "Running terraform apply..."
 terraform apply
+
+
+COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)
+COGNITO_USER_POOL_CLIENT_ID=$(terraform output -raw cognito_user_pool_client_id)
+
+
+# Check if .env file exists, if not, create it
+if [ ! -f "$ENV_FILE" ]; then
+  echo "$ENV_FILE does not exist. Creating .env file..."
+  touch "$ENV_FILE"
+fi
+
+# Write variables to the .env file
+echo "VITE_REACT_AWS_REGION=us-east-1" > "$ENV_FILE"
+
+echo "VITE_REACT_COGNITO_POOLID=$COGNITO_USER_POOL_ID" >> "$ENV_FILE"
+echo "VITE_REACT_COGNITO_CLIENT_ID=$COGNITO_USER_POOL_CLIENT_ID" >> "$ENV_FILE"
+
+echo "Environment variables updated in $ENV_FILE"

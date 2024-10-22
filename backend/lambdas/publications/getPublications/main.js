@@ -1,8 +1,8 @@
-import { DynamoDBClient, GetItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
+const { DynamoDBClient, GetItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
 
 const dynamoDB = new DynamoDBClient({ region: "us-east-1" });
 
-export const handler = async (event) => {
+const handler = async (event) => {
     const publicationId = event.queryStringParameters?.publicationId;
     const tableName = process.env.TABLE_NAME;
 
@@ -90,3 +90,5 @@ export const handler = async (event) => {
         };
     }
 };
+
+module.exports = { handler };

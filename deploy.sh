@@ -50,7 +50,6 @@ if $DEPLOY_BACKEND; then
     echo "Backend deployment complete."
 fi
 
-
 # Step 2: Deploy the frontend if required
 if $DEPLOY_FRONTEND; then
     echo "Deploying frontend..."

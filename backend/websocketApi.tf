@@ -18,6 +18,7 @@ module "lambda_ws_connect" {
   depends_on = [ aws_apigatewayv2_api.websocket_api, data.aws_iam_role.iam_role_labrole, aws_dynamodb_table.user_sessions ]
   source = "./iacModules/lambda"
 
+  handler = "main.handler"
   function_name = "WebSocketConnectHandler"
   role_arn = data.aws_iam_role.iam_role_labrole.arn
   filename = "./functions_zips/websocketConnect.zip"
@@ -35,6 +36,7 @@ module "lambda_ws_disconnect" {
   depends_on = [ aws_apigatewayv2_api.websocket_api, data.aws_iam_role.iam_role_labrole, aws_dynamodb_table.user_sessions ]
   source = "./iacModules/lambda"
 
+  handler = "main.handler"
   function_name = "WebSocketDisconnectHandler"
   role_arn = data.aws_iam_role.iam_role_labrole.arn
   filename = "./functions_zips/websocketDisconnect.zip"
@@ -52,6 +54,7 @@ module "lambda_ws_notify" {
   depends_on = [ data.aws_iam_role.iam_role_labrole, aws_dynamodb_table.user_sessions, aws_apigatewayv2_api.websocket_api ]
   source = "./iacModules/lambda"
 
+  handler = "main.handler"
   function_name = "ezauction-lambda-notify"
   filename = "./functions_zips/notifications.zip"
   role_arn = data.aws_iam_role.iam_role_labrole.arn

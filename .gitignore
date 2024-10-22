@@ -137,3 +137,4 @@ terraform.tfstate.backup
 .terraform.lock.hcl
 *.zip
 .terraform.tfstate.lock.info
+/backend/functions_zips

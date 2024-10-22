@@ -37,3 +37,15 @@ variable "rds_password" {
   description = "The password for the RDS instance."
   type        = string
 }
+
+variable "s3_publication_bucket_name" {
+  description = "The name of the S3 bucket for storing publications."
+  type        = string  
+  default     = "ezauction-publications-images"
+}
+
+variable "rds_credentials_secret_name" {
+  description = "The name of the secret for storing RDS credentials."
+  type        = string
+  default     = "ezauction-rds-secret"
+}

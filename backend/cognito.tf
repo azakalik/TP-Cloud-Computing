@@ -42,14 +42,3 @@ resource "aws_cognito_user_pool_client" "ez_auction_pool_client" {
 
   prevent_user_existence_errors = "ENABLED"
 }
-
-# Output the User Pool ID and App Client ID
-output "cognito_user_pool_id" {
-  description = "The ID of the Cognito User Pool"
-  value       = aws_cognito_user_pool.ez_auction_user_pool.id
-}
-
-output "cognito_user_pool_client_id" {
-  description = "The ID of the Cognito User Pool App Client"
-  value       = aws_cognito_user_pool_client.ez_auction_pool_client.id
-}

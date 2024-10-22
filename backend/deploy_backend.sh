@@ -159,6 +159,9 @@ terraform apply
 COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)
 COGNITO_USER_POOL_CLIENT_ID=$(terraform output -raw cognito_user_pool_client_id)
 
+HTTP_API_GW_URL=$(terraform output -raw http_api_gw_url)
+WS_API_GW_URL=$(terraform output -raw ws_api_gw_url)
+
 
 # Check if .env file exists, if not, create it
 if [ ! -f "$ENV_FILE" ]; then
@@ -171,5 +174,8 @@ echo "VITE_REACT_AWS_REGION=us-east-1" > "$ENV_FILE"
 
 echo "VITE_REACT_COGNITO_POOLID=$COGNITO_USER_POOL_ID" >> "$ENV_FILE"
 echo "VITE_REACT_COGNITO_CLIENT_ID=$COGNITO_USER_POOL_CLIENT_ID" >> "$ENV_FILE"
+
+echo "VITE_HTTP_API_GW_URL=$HTTP_API_GW_URL" >> "$ENV_FILE"
+echo "VITE_WS_API_GW_URL=$WS_API_GW_URL" >> "$ENV_FILE"
 
 echo "Environment variables updated in $ENV_FILE"

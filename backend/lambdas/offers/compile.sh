@@ -1,4 +1,3 @@
-
 lambda_name=$1
 output_dir=$2
 
@@ -13,15 +12,17 @@ if [ -z "$output_dir" ]; then
 fi
 
 # Build the lambda
-cd $lambda_name
+cd lambdas/offers/$lambda_name
 npm ci
 npm run compile
 
+
 # Zip the lambda
-zip -r $output_dir/$lambda_name.zip 'node_modules/*' 'amazon-root-ca.pem' 'package.json' 'package-lock.json' 'dist/*'
+echo I am zipping $lambda_name
+mkdir -p ../../../$output_dir  # Ensure the output directory exists
+rm -rf ../../../$output_dir/$lambda_name.zip
+zip -qr ../../../$output_dir/$lambda_name.zip node_modules amazon-root-ca.pem package.json package-lock.json dist/index.js
+
+cd -
 
 echo "Created $output_dir/$lambda_name.zip"
-
-
-
-

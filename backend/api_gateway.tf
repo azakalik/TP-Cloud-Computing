@@ -53,55 +53,38 @@ resource "aws_apigatewayv2_stage" "api_http_stage" {
 
 # INTEGRATIONS
 
-resource "aws_apigatewayv2_integration" "api_http_integration_publications_get" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-    integration_uri    = aws_lambda_function.ezauction_lambda_get_publication.arn
+module "lambda_create_publication" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
 
-  # integration_uri    = aws_lambda_function.ezauction_lambda_get_publication.arn
-  # integration_uri    = "arn:aws:apigateway:${var.aws_region}:lambda:path/2015-03-31/functions/${aws_lambda_function.ezauction_lambda_get_publication.arn}/invocations"
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
+  function_name = "ezauction-lambda-create-publication"
+  filename = "./functions_zips/postPublications.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    BUCKET_NAME = aws_s3_bucket.publication_images.bucket
+    TABLE_NAME = aws_dynamodb_table.publications.name
+  }
 
-resource "aws_apigatewayv2_integration" "api_http_integration_publications_post" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.ezauction_lambda_create_publication.arn
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
-
-# ROUTES
-
-resource "aws_apigatewayv2_route" "api_http_route_publications_get" {
-  api_id    = aws_apigatewayv2_api.api_http.id
-  route_key = "GET /publications"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_get.id}"
-}
-
-resource "aws_apigatewayv2_route" "api_http_route_publications_post" {
-  api_id    = aws_apigatewayv2_api.api_http.id
+  api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_post.id}"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
 }
 
-# PERMISSIONS
-resource "aws_lambda_permission" "allow_api_gateway_invoke_publications_get" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_get_publication.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
+module "lambda_get_publication" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-get-publication"
+  filename = "./functions_zips/getPublications.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    TABLE_NAME = aws_dynamodb_table.publications.name
+  }
+
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "GET /publications"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
 }
-
-
-resource "aws_lambda_permission" "allow_api_gateway_invoke_publications_create" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_create_publication.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
-}
-
 
 
 # resource "aws_apigatewayv2_domain_name" "api_custom_domain" {

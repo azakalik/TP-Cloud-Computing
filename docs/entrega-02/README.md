@@ -55,6 +55,9 @@ Para desplejar la infraestructura completa, basta con con ejecutar el siguiente 
 ./deploy.sh all
 ```
 
+> [!WARNING]
+> El despligue del backend va a tardar aproximadamente 20 mins. debido a las instancias RDS.
+
 ### Argumentos del script
 **Seleccion del target deploy**
 

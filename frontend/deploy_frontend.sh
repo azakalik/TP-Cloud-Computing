@@ -36,7 +36,7 @@ fi
 echo "Deploying Terraform infrastructure..."
 terraform init      # Initialize Terraform (only needed for the first time or after changes)
 # terraform plan
-terraform apply  # Deploy infrastructure
+terraform apply -auto-approve
 
 # Step 3: Upload the build output (dist) to the S3 bucket
 S3_BUCKET=$(terraform output -raw frontend_bucket_name)  # Fetch the bucket name from Terraform output

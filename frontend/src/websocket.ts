@@ -1,15 +1,16 @@
 import { HIGHEST_BID_WS_URL } from "./constants";
 import HighestBidWebSocketMessage from "../../shared_types/HighestBidWebSocketMessage";
+import { Auth } from "aws-amplify";
 
 type SetHighestBid = (bid: number) => void;
 type SetUserId = (userId: string) => void;
 
-export function createHighestBidWebsocket(
+export async function createHighestBidWebsocket(
   setHighestBid: SetHighestBid,
   setUserId: SetUserId,
   publicationId: string, // Accept publicationId as a parameter
   url: string = HIGHEST_BID_WS_URL
-): WebSocket {
+): Promise<WebSocket> {
   // Append publicationId as a query parameter to the WebSocket URL
   let char;
   if (url.includes("?")) {
@@ -18,9 +19,15 @@ export function createHighestBidWebsocket(
     char = "?";
   }
 
-  const wsUrlWithParams = `${url}${char}publicationId=${encodeURIComponent(
-    publicationId
-  )}`;
+  // Retrieve the current session and JWT token
+  const session = await Auth.currentSession();
+  const token = session.getIdToken().getJwtToken();
+
+  const publicationIdParam = `publicationId=${encodeURIComponent(publicationId)}`
+  const authorizationParam = `Authorization=${encodeURIComponent(token)}`
+  const userIdParam = `userId=22` // TODO: delete
+
+  const wsUrlWithParams = `${url}${char}${publicationIdParam}&${authorizationParam}&${userIdParam}`;
   
 
   const websocket = new WebSocket(wsUrlWithParams);

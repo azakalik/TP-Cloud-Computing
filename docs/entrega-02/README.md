@@ -5,15 +5,15 @@
 
 ## Módulos utilizados
 ### Módulos externos
-- **[vpc](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest)**
+- **[vpc](https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest)**:
   Módulo para la creación de VPC y sus subredes.
-- **[security group](https://registry.terraform.io/modules/terraform-aws-modules/security-group/aws/latest)**
+- **[security group](https://registry.terraform.io/modules/terraform-aws-modules/security-group/aws/latest)**:
   Módulo para la creación de grupos de seguridad.
-- **[s3-bucket](https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest)**
+- **[s3-bucket](https://registry.terraform.io/modules/terraform-aws-modules/s3-bucket/aws/latest)**:
   Módulo para la creación de buckets S3.
 
 ### Módulos propios
-- **[vpcEndpoint](backend/iacModules/vpcEndpoint)**
+- **[vpcEndpoint](backend/iacModules/vpcEndpoint)**:
   Módulo para la creación de VPC endpoints.
 
 ## Funciones y meta-argumentos utilizados
@@ -30,7 +30,7 @@
 - **[Terraform](https://developer.hashicorp.com/terraform/install)**
 - **[Node >= v20](https://nodejs.org/en/download/package-manager)**
 - **[Yarn](https://classic.yarnpkg.com/lang/en/docs/install)**
-- **zip**: `sudo apt install zip`
+- **[zip](https://www.tecmint.com/install-zip-and-unzip-in-linux/)**
 
 ## Perfil
 Es importante notar que, por defecto, el proyecto  utiliza el perfil `cloud-lab-profile`, en vez de `default`. Por lo tanto, se tiene que configurar las credenciales necesarias en `~/.aws/credentials` de la siguiente manera:
@@ -54,6 +54,9 @@ Para desplejar la infraestructura completa, basta con con ejecutar el siguiente 
 ```
 ./deploy.sh all
 ```
+
+> [!WARNING]
+> El despligue del backend va a tardar aproximadamente 20 mins. debido a las instancias RDS.
 
 ### Argumentos del script
 **Seleccion del target deploy**

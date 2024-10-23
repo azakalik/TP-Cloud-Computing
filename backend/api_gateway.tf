@@ -125,7 +125,7 @@ module "lambda_get_highest_offer" {
 }
 
 resource "aws_lambda_invocation" "create_offers_table_invocation" {
-  depends_on = [ module.lambda_create_offers_table ]
+  depends_on = [ module.lambda_create_offers_table, aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica ]
   function_name = module.lambda_create_offers_table.function_name
   input = jsonencode({})
 }

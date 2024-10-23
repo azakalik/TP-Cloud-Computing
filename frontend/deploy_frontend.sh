@@ -3,18 +3,16 @@
 # Exit script on any error
 set -e
 
-# If no arguments are provided, default to building the frontend
-if [ "$#" -eq 0 ]; then
-    BUILD_FRONTEND=true  # Default to building the frontend
-else
-# Parse command-line arguments
-   while [[ "$#" -gt 0 ]]; do
-      case $1 in
-         --no-build) BUILD_FRONTEND=false; shift ;; # Skip building the frontend
-         *) echo "Unknown parameter: $1"; exit 1 ;;
-      esac
-   done
-fi
+
+# Check if --no-build was passed
+# If --no-build is passed, the script will skip the npm install and build steps
+BUILD_FRONTEND=true
+for arg in "$@"; do
+  if [ "$arg" == "--no-build" ]; then
+    BUILD_FRONTEND=false
+    break
+  fi
+done
 
 
 DIST_DIR="dist"  # Path to the build output

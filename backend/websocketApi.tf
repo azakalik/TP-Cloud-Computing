@@ -24,6 +24,8 @@ module "lambda_ws_connect" {
   filename = "./functions_zips/websocketConnect.zip"
   env_vars = {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
+    COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
+    COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
   }
 
   integrates_with_api_gw = true

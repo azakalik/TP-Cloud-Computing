@@ -17,11 +17,20 @@ resource "aws_apigatewayv2_integration" "integration" {
     credentials_arn = var.role_arn
 }
 
-resource "aws_apigatewayv2_route" "route" {
-    count = var.integrates_with_api_gw ? 1 : 0
+resource "aws_apigatewayv2_route" "non_jwt_route" {
+    count = var.integrates_with_api_gw && !var.has_jwt_authorizer ? 1 : 0
     api_id = var.api_gw_id
     route_key = var.route_key
     target = join("/", ["integrations", aws_apigatewayv2_integration.integration[0].id])
+}
+
+resource "aws_apigatewayv2_route" "jwt_route" {
+    count = var.integrates_with_api_gw && var.has_jwt_authorizer ? 1 : 0
+    api_id = var.api_gw_id
+    route_key = var.route_key
+    target = join("/", ["integrations", aws_apigatewayv2_integration.integration[0].id])
+    authorization_type = "JWT"
+    authorizer_id = var.authorizer_id  
 }
 
 resource "aws_lambda_permission" "permission" {

@@ -56,3 +56,16 @@ variable "route_key" {
     nullable    = true
     default     = null
 }
+
+variable "has_jwt_authorizer" {
+    description = "Whether the Lambda function has a JWT authorizer."
+    type        = bool
+    default     = false    
+}
+
+variable "authorizer_id" {
+    description = "The ID of the authorizer. Required if has_jwt_authorizer is true."
+    type        = string
+    nullable    = true
+    default     = null  
+}

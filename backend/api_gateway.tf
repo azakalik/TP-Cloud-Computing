@@ -34,6 +34,9 @@ module "lambda_create_publication" {
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
 module "lambda_get_publication" {
@@ -51,6 +54,9 @@ module "lambda_get_publication" {
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "GET /publications"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
 module "lambda_create_offers_table" {
@@ -69,6 +75,9 @@ module "lambda_create_offers_table" {
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /tables/offers"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
 module "lambda_create_offer" {
@@ -89,6 +98,9 @@ module "lambda_create_offer" {
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /offers"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
 module "lambda_get_highest_offer" {
@@ -107,6 +119,9 @@ module "lambda_get_highest_offer" {
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "GET /offers"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
 resource "aws_lambda_invocation" "create_offers_table_invocation" {

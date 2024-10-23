@@ -40,21 +40,25 @@ resource "aws_apigatewayv2_route" "api_http_route_publications_get" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "GET /publications"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_get.id}"
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 resource "aws_apigatewayv2_route" "api_http_route_publications_post" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_post.id}"
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 resource "aws_apigatewayv2_route" "api_http_route_offers_get" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "GET /offers"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_highest.id}"
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 resource "aws_apigatewayv2_route" "api_http_route_offers_place" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "POST /offers"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_place.id}"
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
 # PERMISSIONS
@@ -88,7 +92,7 @@ resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_create" {
 }
 
 
-
+# DOMAINS
 resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
   domain_name = "api.aws.martinippolito.com.ar"
   domain_name_configuration {
@@ -106,3 +110,15 @@ resource "aws_apigatewayv2_api_mapping" "api_mapping" {
   stage       = aws_apigatewayv2_stage.api_http_stage.name
 }
 
+# COGNITO AUTHORIZER
+resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
+  api_id = aws_apigatewayv2_api.api_http.id
+  authorizer_type = "JWT"
+  identity_sources = ["$request.header.Authorization"]  # Cognito tokens are passed in the Authorization header
+  name = "CognitoAuthorizer"
+  
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.ez_auction_pool_client.id]  # Specify the Cognito app client ID
+    issuer = aws_cognito_user_pool.ez_auction_user_pool.endpoint         # Use the user pool's endpoint
+  }
+}

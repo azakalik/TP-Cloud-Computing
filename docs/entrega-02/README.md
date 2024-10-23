@@ -15,6 +15,8 @@
 ### Módulos propios
 - **[vpcEndpoint](backend/iacModules/vpcEndpoint)**
   Módulo para la creación de VPC endpoints.
+- **[lambda](backend/iacModules/lambda)**
+  Módulo para la creación de un recurso lambda, pudiendo definir su integración, ruta y permisos.
 
 ## Funciones y meta-argumentos utilizados
 - **[formatlist](https://developer.hashicorp.com/terraform/language/functions/formatlist)**
@@ -23,6 +25,7 @@
 - **[join](https://developer.hashicorp.com/terraform/language/functions/join)**
 - **[depends_on](https://developer.hashicorp.com/terraform/language/meta-arguments/depends_on)**
 - **[for_each](https://developer.hashicorp.com/terraform/language/meta-arguments/for_each)**
+- **[count](https://developer.hashicorp.com/terraform/language/meta-arguments/count)**
 
 # Deployar con Terraform
 ## Requisitos

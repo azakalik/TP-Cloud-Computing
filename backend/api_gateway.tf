@@ -9,7 +9,6 @@ resource "aws_apigatewayv2_stage" "api_http_stage" {
   auto_deploy = true
 }
 
-# INTEGRATIONS
 
 module "lambda_create_publication" {
   depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
@@ -100,6 +99,12 @@ module "lambda_get_highest_offer" {
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "GET /offers"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+}
+
+resource "aws_lambda_invocation" "create_offers_table_invocation" {
+  depends_on = [ module.lambda_create_offers_table ]
+  function_name = module.lambda_create_offers_table.function_name
+  input = jsonencode({})
 }
 
 resource "aws_apigatewayv2_domain_name" "api_custom_domain" {

@@ -17,7 +17,7 @@ const VerifyPage: React.FC = () => {
     try {
       const currentEmail = userEmail || email;
       await Auth.confirmSignUp(currentEmail, code);
-      setMessage('Verification successful! Redirecting to home page...');
+      setMessage('Verification successful! Redirecting to sign in page...');
       setTimeout(() => {
         navigate('/');
       }, 2000); // Redirect to home after a successful verification

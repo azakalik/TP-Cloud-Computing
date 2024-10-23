@@ -8,12 +8,12 @@ const SignUpPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
-  const [message, setMessage] = useState('');
+  const [message] = useState('');
   const navigate = useNavigate();
 
   const handleSignUp = async () => {
     try {
-      const { user } = await Auth.signUp({
+      await Auth.signUp({
         username: email,
         password,
         attributes: {

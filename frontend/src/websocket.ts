@@ -25,8 +25,9 @@ export async function createHighestBidWebsocket(
 
   const publicationIdParam = `publicationId=${encodeURIComponent(publicationId)}`
   const authorizationParam = `Authorization=${encodeURIComponent(token)}`
+  const userIdParam = `userId=22` // TODO: delete
 
-  const wsUrlWithParams = `${url}${char}${publicationIdParam}&${authorizationParam}`;
+  const wsUrlWithParams = `${url}${char}${publicationIdParam}&${authorizationParam}&${userIdParam}`;
   
 
   const websocket = new WebSocket(wsUrlWithParams);

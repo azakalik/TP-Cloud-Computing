@@ -50,13 +50,13 @@ aws_profile=default
 ```
 
 ## Desplegar
-Para desplejar la infraestructura completa, basta con con ejecutar el siguiente comando:
+Para desplejar la infraestructura completa, basta con ejecutar el siguiente comando:
 ```
 ./deploy.sh all
 ```
 
 > [!WARNING]
-> El despligue del backend va a tardar aproximadamente 20 mins. debido a las instancias RDS.
+> El despligue del backend va a tardar aproximadamente 45 mins. debido a las instancias RDS.
 
 ### Argumentos del script
 **Seleccion del target deploy**

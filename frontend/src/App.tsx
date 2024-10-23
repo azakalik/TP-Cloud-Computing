@@ -15,7 +15,6 @@ import AuctionDetailPage from "./pages/AuctionDetailPage";
 import MyAuctionsPage from "./pages/MyAuctionsPage";
 import NewAuctionPage from "./pages/NewAuctionPage";
 import AboutUsPage from "./pages/AboutUsPage";
-import AuthPage from "./pages/SignInPage";
 
 import { Amplify } from 'aws-amplify';
 import awsconfig from "./configuration/awsconfig";

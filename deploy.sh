@@ -45,7 +45,7 @@ esac
 if $DEPLOY_BACKEND; then
     echo "Deploying backend..."
     cd backend  # Navigate to the backend directory
-   ./deploy_backend.sh
+   ./deploy_backend.sh "${NO_BUILD:+--no-build}" # Pass the no-build flag if specified
    cd -  # Navigate back to the root directory
     echo "Backend deployment complete."
 fi

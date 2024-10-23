@@ -42,10 +42,14 @@ Se debe elegir que es lo que queremos deployar, ingresando una de las siguientes
 - backend
 ### No hacer build del frontend
 Si deployamos muchas veces seguidas sin cambiar el codigo del frontend, puede ser medio molesto ejecutar cada vez el comando `yarn build`, ya que tarda bastante tiempo. Se puede utilizar el argumento opcional `--no-build` para saltar este paso y utilizar la carpeta `dist` existente con el ultimo build hecho. Esto fallara si dicha carpeta no existe, en el caso de que el frontend nunca haya sido buildeado.
-Los comandos posibles en tal caso quedarian asi:
+El comando quedaria asi:
 ```
 ./deploy.sh frontend --no-build
-./deploy.sh all --no-build
+```
+### No hacer build de las lambdas del backend
+Similarmente al caso anterior, puede ser costoso en tiempo compilar las lambdas cada vez que se quiere pushear, por lo que tambien se puede hacer uso de la flag `--no-build`, ejecutando asi el siguiente comando:
+```
+./deploy.sh backend --no-build
 ```
 
 # How-To: EzAuctions

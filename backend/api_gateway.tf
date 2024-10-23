@@ -1,6 +1,14 @@
 resource "aws_apigatewayv2_api" "api_http" {
   name = "ezauction-api-http"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_headers = ["Authorization", "Content-Type"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_origins = ["*"] # Allow from anywhere
+    expose_headers = ["Authorization"]
+    max_age = 3600 # Cache CORS preflight responses for 1 hour
+  }
 }
 
 resource "aws_apigatewayv2_stage" "api_http_stage" {
@@ -107,20 +115,32 @@ resource "aws_lambda_invocation" "create_offers_table_invocation" {
   input = jsonencode({})
 }
 
-resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
-  domain_name = "api.aws.martinippolito.com.ar"
-  domain_name_configuration {
-    certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
-    endpoint_type   = "REGIONAL"
-    security_policy = "TLS_1_2"
+# resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
+#   domain_name = "api.aws.martinippolito.com.ar"
+#   domain_name_configuration {
+#     certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
+#     endpoint_type   = "REGIONAL"
+#     security_policy = "TLS_1_2"
+#   }
+# # Add a depends_on to wait for the certificate validation to be completed
+#   depends_on = [aws_acm_certificate_validation.wildcard_validation]
+# }
+
+# resource "aws_apigatewayv2_api_mapping" "api_mapping" {
+#   api_id      = aws_apigatewayv2_api.api_http.id
+#   domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
+#   stage       = aws_apigatewayv2_stage.api_http_stage.name
+# }
+
+# COGNITO AUTHORIZER
+resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
+  api_id = aws_apigatewayv2_api.api_http.id
+  authorizer_type = "JWT"
+  identity_sources = ["$request.header.Authorization"]  # Cognito tokens are passed in the Authorization header
+  name = "CognitoAuthorizer"
+  
+  jwt_configuration {
+    audience = [aws_cognito_user_pool_client.ez_auction_pool_client.id]  # Specify the Cognito app client ID
+    issuer = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.ez_auction_user_pool.id}"      # Use the user pool's endpoint
   }
-  # Add a depends_on to wait for the certificate validation to be completed
-  depends_on = [aws_acm_certificate_validation.wildcard_validation]
 }
-
-resource "aws_apigatewayv2_api_mapping" "api_mapping" {
-  api_id      = aws_apigatewayv2_api.api_http.id
-  domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
-  stage       = aws_apigatewayv2_stage.api_http_stage.name
-}
-

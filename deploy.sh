@@ -36,16 +36,13 @@ case $2 in
     --no-build) 
         NO_BUILD=true 
         ;;
-    *) 
-        NO_BUILD=false 
-        ;;
 esac
 
 # Step 1: Deploy the backend if required
 if $DEPLOY_BACKEND; then
     echo "Deploying backend..."
     cd backend  # Navigate to the backend directory
-   ./deploy_backend.sh "${NO_BUILD:+--no-build}" # Pass the no-build flag if specified
+    ./deploy_backend.sh "${NO_BUILD:+--no-build}" # Pass the no-build flag if specified
    cd -  # Navigate back to the root directory
     echo "Backend deployment complete."
 fi

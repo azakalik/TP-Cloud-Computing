@@ -20,6 +20,12 @@ variable "filename" {
     type        = string  
 }
 
+variable "timeout" {
+    description = "The timeout of the Lambda function."
+    type        = number  
+    default     = 30  
+}
+
 variable "role_arn" {
     description = "The ARN of the IAM role."
     type        = string  

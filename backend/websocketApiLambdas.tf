@@ -4,6 +4,7 @@ resource "aws_lambda_function" "connect_lambda" {
   runtime       = "nodejs20.x"
   role      = data.aws_iam_role.iam_role_labrole.arn
   filename      = "./functions_zips/websocketConnect.zip"
+  source_code_hash = filebase64sha256("./functions_zips/websocketConnect.zip")
 
   environment {
      variables = {
@@ -20,6 +21,7 @@ resource "aws_lambda_function" "disconnect_lambda" {
   runtime       = "nodejs20.x"
   filename      = "./functions_zips/websocketDisconnect.zip"
   role      = data.aws_iam_role.iam_role_labrole.arn
+  source_code_hash = filebase64sha256("./functions_zips/websocketDisconnect.zip")
 
   environment {
     variables = {
@@ -44,6 +46,8 @@ resource "aws_lambda_function" "ezauction_lambda_notify" {
   runtime       = "nodejs20.x"
   filename      = "./functions_zips/notifications.zip"
   role          = data.aws_iam_role.iam_role_labrole.arn
+  source_code_hash = filebase64sha256("./functions_zips/notifications.zip")
+
   # Define environment variables
   environment {
     variables = {

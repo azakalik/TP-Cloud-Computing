@@ -100,19 +100,22 @@ const AuctionDetailPage: React.FC = () => {
   }, [highestBid]);
 
   useEffect(() => {
-    if (!id) {
-      return;
-    }
-
-    // Create the WebSocket when the component mounts
-    websocketRef.current = createHighestBidWebsocket(setHighestBid, setHighestBidUserId, id);
-
-    // Cleanup the WebSocket when the component unmounts
-    return () => {
-      if (websocketRef.current) {
-        destroyHighestBidWebsocket(websocketRef.current);
+    const callback = async () => {
+      if (!id) {
+        return;
       }
-    };
+  
+      // Create the WebSocket when the component mounts
+      websocketRef.current = await createHighestBidWebsocket(setHighestBid, setHighestBidUserId, id);
+  
+      // Cleanup the WebSocket when the component unmounts
+      return () => {
+        if (websocketRef.current) {
+          destroyHighestBidWebsocket(websocketRef.current);
+        }
+      };
+    }
+    callback();
   }, [id]); // Add publicationId to the dependency array if it can change
 
   if (!id) {

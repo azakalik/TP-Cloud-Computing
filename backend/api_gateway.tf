@@ -122,7 +122,7 @@ resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_table_create" 
 }
 
 resource "aws_lambda_invocation" "create_offers_table_invocation" {
-  depends_on = [ aws_lambda_function.ezauction_lambda_create_offers_table ]
+  depends_on = [ aws_lambda_function.ezauction_lambda_create_offers_table,  aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica]
   function_name = aws_lambda_function.ezauction_lambda_create_offers_table.function_name
   input = jsonencode({})
 }

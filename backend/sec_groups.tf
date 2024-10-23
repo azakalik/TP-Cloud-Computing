@@ -63,7 +63,7 @@ module "sg_vpc_endpoint" {
 
     ingress_with_source_security_group_id = [
         {
-            rule = "https-443-tcp"
+            rule = "all-tcp"
             source_security_group_id = module.sg_lambda_vpc_endpoint.security_group_id
             description = "Allow connection from VPC lambdas"
         }
@@ -84,8 +84,8 @@ module "sg_lambda_vpc_endpoint" {
 
     egress_with_source_security_group_id = [
         {
-            rule = "https-443-tcp"
-            source_security_group_id = module.sg_lambda_vpc_endpoint.security_group_id
+            rule = "all-tcp"
+            source_security_group_id = module.sg_vpc_endpoint.security_group_id
             description = "Allow connection to VPC endpoints"
         }
     ]

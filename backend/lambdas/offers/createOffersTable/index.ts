@@ -34,6 +34,7 @@ export const handler = async () => {
     let dbCredentials: DbCredentials;
 
     const secretName = process.env.SECRET_NAME;
+    console.log("!!!!!!getting DB credentials from secret: ", secretName);
     try {
         dbCredentials = await getDbCredentials(secretName);
     } catch (error) {
@@ -43,7 +44,7 @@ export const handler = async () => {
             body: JSON.stringify({error: 'Internal server error'}),
         };
     }
-
+    console.log("!!!!!!Got credentials: ", dbCredentials);
     const host = process.env.RDS_PROXY_HOST;
     if (!host) {
         console.error('RDS Proxy host is not provided');
@@ -78,10 +79,11 @@ export const handler = async () => {
             rejectUnauthorized: true,
         },
     });
-
+    console.log("!!!!!!Connecting to psg");
     try {
         // Connect to the database and start a transaction
         await client.connect();
+        console.log("!!!!!!Connected to psg");
         await client.query('BEGIN');
 
         // Check if the table already exists
@@ -110,11 +112,12 @@ export const handler = async () => {
                 publication_id VARCHAR NOT NULL,
                 user_id VARCHAR NOT NULL,
                 price NUMERIC NOT NULL,
-                time TIMESTAMP NOT NULL
+                time TIMESTAMP NOT NULL,
                 CONSTRAINT offers_pub_user_time_unique UNIQUE (publication_id, user_id, time),
                 CONSTRAINT offers_pub_price_unique UNIQUE (publication_id, price)
             );
         `;
+        console.log(createTableQuery)
         await client.query(createTableQuery);
 
         // Commit the transaction

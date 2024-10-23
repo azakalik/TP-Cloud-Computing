@@ -6,11 +6,11 @@ resource "aws_lambda_function" "connect_lambda" {
   filename      = "./functions_zips/websocketConnect.zip"
 
   environment {
-
      variables = {
-    TABLE_NAME = aws_dynamodb_table.user_sessions.name
-  }
-
+      TABLE_NAME = aws_dynamodb_table.user_sessions.name
+      COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
+      COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
+      }
   }
 }
 
@@ -22,7 +22,6 @@ resource "aws_lambda_function" "disconnect_lambda" {
   role      = data.aws_iam_role.iam_role_labrole.arn
 
   environment {
-
     variables = {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
   }

@@ -1,6 +1,14 @@
 resource "aws_apigatewayv2_api" "api_http" {
   name = "ezauction-api-http"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_headers = ["Authorization", "Content-Type"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_origins = ["*"] # Allow from anywhere
+    expose_headers = ["Authorization"]
+    max_age = 3600 # Cache CORS preflight responses for 1 hour
+  }
 }
 
 resource "aws_apigatewayv2_stage" "api_http_stage" {
@@ -47,24 +55,28 @@ resource "aws_apigatewayv2_route" "api_http_route_publications_get" {
   route_key = "GET /publications"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_get.id}"
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "JWT"
 }
 resource "aws_apigatewayv2_route" "api_http_route_publications_post" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_post.id}"
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "JWT"
 }
 resource "aws_apigatewayv2_route" "api_http_route_offers_get" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "GET /offers"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_highest.id}"
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "JWT"
 }
 resource "aws_apigatewayv2_route" "api_http_route_offers_place" {
   api_id    = aws_apigatewayv2_api.api_http.id
   route_key = "POST /offers"
   target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_place.id}"
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+  authorization_type = "JWT"
 }
 resource "aws_apigatewayv2_route" "api_http_route_offers_table" {
   api_id    = aws_apigatewayv2_api.api_http.id
@@ -141,6 +153,6 @@ resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
   
   jwt_configuration {
     audience = [aws_cognito_user_pool_client.ez_auction_pool_client.id]  # Specify the Cognito app client ID
-    issuer = aws_cognito_user_pool.ez_auction_user_pool.endpoint         # Use the user pool's endpoint
+    issuer = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.ez_auction_user_pool.id}"      # Use the user pool's endpoint
   }
 }

@@ -78,6 +78,11 @@ module "lambda_create_offers_table" {
 
   has_jwt_authorizer = true
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
 }
 
 module "lambda_create_offer" {
@@ -101,6 +106,11 @@ module "lambda_create_offer" {
 
   has_jwt_authorizer = true
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
 }
 
 module "lambda_get_highest_offer" {
@@ -122,10 +132,15 @@ module "lambda_get_highest_offer" {
 
   has_jwt_authorizer = true
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
 }
 
 resource "aws_lambda_invocation" "create_offers_table_invocation" {
-  depends_on = [ module.lambda_create_offers_table, aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica ]
+  depends_on = [ module.lambda_create_offers_table, aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica, module.vpc_endpoint_secretsmanager ]
   function_name = module.lambda_create_offers_table.function_name
   input = jsonencode({})
 }

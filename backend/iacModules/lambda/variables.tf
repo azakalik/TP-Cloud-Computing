@@ -75,3 +75,13 @@ variable "authorizer_id" {
     nullable    = true
     default     = null  
 }
+
+variable "vpc_config" {
+    description = "The VPC configuration for the Lambda function. Required if inside_vpc is true."
+    type        = object({
+        security_group_ids = list(string)
+        subnet_ids         = list(string)
+    })
+    nullable    = true
+    default     = null
+}

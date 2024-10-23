@@ -153,7 +153,7 @@ fi
 
 # Run terraform apply
 echo "Running terraform apply..."
-terraform apply
+terraform apply -auto-approve
 
 
 COGNITO_USER_POOL_ID=$(terraform output -raw cognito_user_pool_id)

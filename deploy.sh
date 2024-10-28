@@ -3,6 +3,22 @@
 # Exit script on any error
 set -e
 
+# Function to check if a command is installed
+function check_command() {
+    if ! command -v "$1" &> /dev/null; then
+        echo "Error: $1 is not installed. Please install it to continue."
+        exit 1
+    fi
+}
+
+# Validate prerequisites
+check_command aws
+check_command terraform
+check_command node
+check_command yarn
+check_command zip
+
+
 # Check if any arguments are provided
 if [ "$#" -eq 0 ]; then
     echo "Error: You must specify at least one parameter: frontend, backend, or all."

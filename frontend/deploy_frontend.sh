@@ -3,7 +3,6 @@
 # Exit script on any error
 set -e
 
-
 # Check if --no-build was passed
 # If --no-build is passed, the script will skip the npm install and build steps
 BUILD_FRONTEND=true
@@ -13,7 +12,6 @@ for arg in "$@"; do
     break
   fi
 done
-
 
 DIST_DIR="dist"  # Path to the build output
 

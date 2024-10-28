@@ -4,53 +4,9 @@ resource "aws_apigatewayv2_api" "websocket_api" {
   route_selection_expression = "$request.body.action"
 }
 
-
-resource "aws_apigatewayv2_integration" "lambda_connect_integration" {
-  api_id           = aws_apigatewayv2_api.websocket_api.id
-  integration_uri  = aws_lambda_function.connect_lambda.arn
-  integration_type = "AWS_PROXY"
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
+locals {
+  connections_url = "https://${aws_apigatewayv2_api.websocket_api.id}.execute-api.${var.aws_region}.amazonaws.com/${aws_apigatewayv2_stage.production_stage.name}"
 }
-
-resource "aws_apigatewayv2_integration" "lambda_disconnect_integration" {
-  api_id           = aws_apigatewayv2_api.websocket_api.id
-  integration_uri  = aws_lambda_function.disconnect_lambda.arn
-  integration_type = "AWS_PROXY"
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
-
-
-
-resource "aws_apigatewayv2_route" "connect_route" {
-  api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "$connect"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_connect_integration.id}"
-}
-
-resource "aws_apigatewayv2_route" "disconnect_route" {
-  api_id    = aws_apigatewayv2_api.websocket_api.id
-  route_key = "$disconnect"
-  target    = "integrations/${aws_apigatewayv2_integration.lambda_disconnect_integration.id}"
-}
-
-
-resource "aws_lambda_permission" "allow_api_gateway_invoke_connect" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.connect_lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.websocket_api.execution_arn}/*/*"
-}
-
-resource "aws_lambda_permission" "allow_api_gateway_invoke_disconnect" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.disconnect_lambda.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.websocket_api.execution_arn}/*/*"
-}
-
-
 
 resource "aws_apigatewayv2_stage" "production_stage" {
   api_id = aws_apigatewayv2_api.websocket_api.id
@@ -58,3 +14,59 @@ resource "aws_apigatewayv2_stage" "production_stage" {
   auto_deploy = true
 }
 
+module "lambda_ws_connect" {
+  depends_on = [ aws_apigatewayv2_api.websocket_api, data.aws_iam_role.iam_role_labrole, aws_dynamodb_table.user_sessions ]
+  source = "./iacModules/lambda"
+
+  handler = "main.handler"
+  function_name = "WebSocketConnectHandler"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  filename = "./functions_zips/websocketConnect.zip"
+  env_vars = {
+    TABLE_NAME = aws_dynamodb_table.user_sessions.name
+    COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
+    COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.websocket_api.id
+  route_key = "$connect"
+  api_gw_execution_arn = aws_apigatewayv2_api.websocket_api.execution_arn
+}
+
+module "lambda_ws_disconnect" {
+  depends_on = [ aws_apigatewayv2_api.websocket_api, data.aws_iam_role.iam_role_labrole, aws_dynamodb_table.user_sessions ]
+  source = "./iacModules/lambda"
+
+  handler = "main.handler"
+  function_name = "WebSocketDisconnectHandler"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  filename = "./functions_zips/websocketDisconnect.zip"
+  env_vars = {
+    TABLE_NAME = aws_dynamodb_table.user_sessions.name
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.websocket_api.id
+  route_key = "$disconnect"
+  api_gw_execution_arn = aws_apigatewayv2_api.websocket_api.execution_arn
+}
+
+module "lambda_ws_notify" {
+  depends_on = [ data.aws_iam_role.iam_role_labrole, aws_dynamodb_table.user_sessions, aws_apigatewayv2_api.websocket_api ]
+  source = "./iacModules/lambda"
+
+  handler = "main.handler"
+  function_name = "ezauction-lambda-notify"
+  filename = "./functions_zips/notifications.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    TABLE_NAME = aws_dynamodb_table.user_sessions.name
+    WS_API_GATEWAY_ENDPOINT = local.connections_url
+  }
+}
+
+resource "aws_lambda_event_source_mapping" "sqs_trigger" {
+  event_source_arn = aws_sqs_queue.auction_queue.arn  # SQS queue ARN
+  function_name    = module.lambda_ws_notify.id
+} 

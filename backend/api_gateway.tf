@@ -17,113 +17,131 @@ resource "aws_apigatewayv2_stage" "api_http_stage" {
   auto_deploy = true
 }
 
-# INTEGRATIONS
-resource "aws_apigatewayv2_integration" "api_http_integration_publications_get" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.ezauction_lambda_get_publication.arn
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
-resource "aws_apigatewayv2_integration" "api_http_integration_publications_post" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.ezauction_lambda_create_publication.arn
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
-resource "aws_apigatewayv2_integration" "api_http_integration_offers_place" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.ezauction_lambda_create_offer.arn
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
-resource "aws_apigatewayv2_integration" "api_http_integration_offers_highest" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.ezauction_lambda_get_highest_offer.arn
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn
-}
-resource "aws_apigatewayv2_integration" "api_http_integration_offers_table" {
-  api_id             = aws_apigatewayv2_api.api_http.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.ezauction_lambda_create_offers_table.arn
-  credentials_arn  = data.aws_iam_role.iam_role_labrole.arn  
-}
 
-# ROUTES
-resource "aws_apigatewayv2_route" "api_http_route_publications_get" {
-  api_id    = aws_apigatewayv2_api.api_http.id
-  route_key = "GET /publications"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_get.id}"
-  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
-  authorization_type = "JWT"
-}
-resource "aws_apigatewayv2_route" "api_http_route_publications_post" {
-  api_id    = aws_apigatewayv2_api.api_http.id
+module "lambda_create_publication" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-create-publication"
+  filename = "./functions_zips/postPublications.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    BUCKET_NAME = aws_s3_bucket.publication_images.bucket
+    TABLE_NAME = aws_dynamodb_table.publications.name
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_publications_post.id}"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
-  authorization_type = "JWT"
-}
-resource "aws_apigatewayv2_route" "api_http_route_offers_get" {
-  api_id    = aws_apigatewayv2_api.api_http.id
-  route_key = "GET /offers"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_highest.id}"
-  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
-  authorization_type = "JWT"
-}
-resource "aws_apigatewayv2_route" "api_http_route_offers_place" {
-  api_id    = aws_apigatewayv2_api.api_http.id
-  route_key = "POST /offers"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_place.id}"
-  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
-  authorization_type = "JWT"
-}
-resource "aws_apigatewayv2_route" "api_http_route_offers_table" {
-  api_id    = aws_apigatewayv2_api.api_http.id
-  route_key = "POST /tables/offers"
-  target    = "integrations/${aws_apigatewayv2_integration.api_http_integration_offers_table.id}"
 }
 
-# PERMISSIONS
-resource "aws_lambda_permission" "allow_api_gateway_invoke_publications_get" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_get_publication.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
+module "lambda_get_publication" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-get-publication"
+  filename = "./functions_zips/getPublications.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    TABLE_NAME = aws_dynamodb_table.publications.name
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "GET /publications"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
-resource "aws_lambda_permission" "allow_api_gateway_invoke_publications_create" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_create_publication.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
+
+module "lambda_create_offers_table" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-create-offers-table"
+  filename = "./functions_zips/createOffersTable.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    SECRET_NAME = var.rds_credentials_secret_name
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /tables/offers"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
 }
-resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_get" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_get_highest_offer.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
+
+module "lambda_create_offer" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sqs_queue.auction_queue, module.vpc_endpoint_sqs ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-create-offer"
+  filename = "./functions_zips/placeOffer.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    SECRET_NAME = var.rds_credentials_secret_name
+    SQS_URL = aws_sqs_queue.auction_queue.url
+    SQS_ENDPOINT = module.vpc_endpoint_sqs.endpoint
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /offers"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
 }
-resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_create" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_create_offer.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
-}
-resource "aws_lambda_permission" "allow_api_gateway_invoke_offers_table_create" {
-  statement_id  = "AllowExecutionFromAPIGateway"
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.ezauction_lambda_create_offers_table.function_name
-  principal     = "apigateway.amazonaws.com"
-  source_arn    = "${aws_apigatewayv2_api.api_http.execution_arn}/*/*"
+
+module "lambda_get_highest_offer" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-get-highest-offer"
+  filename = "./functions_zips/getHighestOffer.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    DB_SECRET_NAME = var.rds_credentials_secret_name
+  }
+
+  integrates_with_api_gw = true
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "GET /offers"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
 }
 
 resource "aws_lambda_invocation" "create_offers_table_invocation" {
-  depends_on = [ aws_lambda_function.ezauction_lambda_create_offers_table,  aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica]
-  function_name = aws_lambda_function.ezauction_lambda_create_offers_table.function_name
+  depends_on = [ module.lambda_create_offers_table, aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica, module.vpc_endpoint_secretsmanager ]
+  function_name = module.lambda_create_offers_table.function_name
   input = jsonencode({})
 }
 

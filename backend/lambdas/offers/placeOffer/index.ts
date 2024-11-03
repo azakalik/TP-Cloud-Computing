@@ -1,18 +1,27 @@
 import {Client} from 'pg';
 import {SQS, SecretsManager} from 'aws-sdk';
 import fs from 'fs/promises';
+import { jwtDecode, JwtPayload } from 'jwt-decode';
 
-const region = 'us-east-1';
+const region = process.env.AWS_REGION;
+
+type Request = {
+    body: string;
+    headers: {
+        Authorization: string;
+    };
+}
+
+type RequestBody = {
+    publicationId: string;
+    price: number;
+}
 
 type Offer = {
     publicationId: string;
     userId: string;
     price: number;
 };
-
-type Event = {
-    body: string;
-}
 
 type DbCredentials = {
     password: string;
@@ -21,20 +30,32 @@ type DbCredentials = {
     dbname: string;
 };
 
-const validateOffer = (offer: Offer): string | null => {
-    if (!offer) {
+const getJwtPayload = async (request: Request): Promise<JwtPayload> => {
+    const token = request?.headers?.['authorization'];
+    if (!token) {
+        throw new Error('Authorization token is missing');
+    }
+    const regex = /Bearer (.+)/;
+    const match = token.match(regex);
+    if (!match) {
+        throw new Error('Invalid authorization token');
+    }
+    const jwt = match[1];
+    const payload = await jwtDecode(jwt);
+    return payload;  
+}
+
+const validateBody = (body: RequestBody): string | null => {
+    if (!body) {
         return 'Offer is required';
     }
-    if (!offer.publicationId) {
+    if (!body.publicationId) {
         return 'Publication ID is required';
     }
-    if (!offer.userId) {
-        return 'User ID is required';
-    }
-    if (!offer.price) {
+    if (!body.price) {
         return 'Price is required';
     }
-    if (offer.price <= 0) {
+    if (body.price <= 0) {
         return 'Price must be greater than 0';
     }
     return null;
@@ -59,11 +80,34 @@ const getDbCredentials = async (secretName?: string): Promise<DbCredentials> => 
 }
 
 
-export const handler = async (event: Event) => {
-    let offer: Offer;
+export const handler = async (request: Request) => {
+    let payload: JwtPayload;
+
+    try {
+        payload = await getJwtPayload(request);
+    } catch (error) {
+        console.error('Error while getting JWT payload', error);
+        return {
+            statusCode: 401,
+            body: JSON.stringify({error: 'Unauthorized'}),
+        };
+    }
+
+    // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-the-id-token.html
+    const userId = payload.sub;
+
+    if (!userId) {
+        console.error('User ID is missing in the JWT payload');
+        return {
+            statusCode: 401,
+            body: JSON.stringify({error: 'Unauthorized'}),
+        };
+    }
+
+    let requestBody: RequestBody;
     
     try {
-        offer = JSON.parse(event.body);
+        requestBody = JSON.parse(request.body);
     } catch (error) {
         console.error('Error while parsing event body', error);
         return {
@@ -72,7 +116,13 @@ export const handler = async (event: Event) => {
         };
     }
 
-    const error = validateOffer(offer);
+    const offer: Offer = {
+        publicationId: requestBody.publicationId,
+        userId,
+        price: requestBody.price,
+    };
+
+    const error = validateBody(requestBody);
     if (error) {
         return {
             statusCode: 400,
@@ -133,7 +183,7 @@ export const handler = async (event: Event) => {
         await client.connect();
         await client.query('BEGIN');
 
-        const {publicationId, userId, price} = offer;
+        const {publicationId, price} = offer;
 
         // Get the current highest offer for the publication
         const res = await client.query<{price: number}>(
@@ -169,7 +219,7 @@ export const handler = async (event: Event) => {
         }
         const sqsParams = {
             QueueUrl: sqsUrl,
-            MessageBody: JSON.stringify({publicationId, userId, price}),
+            MessageBody: JSON.stringify(offer),
         };
         
         const endpoint = process.env.SQS_ENDPOINT;

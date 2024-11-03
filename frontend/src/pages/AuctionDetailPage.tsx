@@ -131,7 +131,7 @@ const AuctionDetailPage: React.FC = () => {
 
   const handleBid = async () => {
     setUploadingBid(true);
-    await uploadBid('hola@gmail.com', id!, bidAmount as number); // todo handle errors here
+    await uploadBid(id!, bidAmount as number); // todo handle errors here
     setUploadingBid(false);
     setBidSuccessful(true);
   };

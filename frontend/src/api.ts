@@ -98,13 +98,11 @@ export const fetchAuctionDetail = async (
 
 // Return true if the bid was uploaded successfully, false otherwise
 export const uploadBid = async (
-  userId: string,
   publicationId: string,
   price: number
 ): Promise<boolean> => {
   try {
     const payload: NewBidType = {
-      userId,
       publicationId,
       price,
     };

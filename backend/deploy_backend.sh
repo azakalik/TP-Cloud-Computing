@@ -38,11 +38,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "Processing $CONNECT_DIR..."
     cd "$CONNECT_DIR" || exit
     
-    # Check if node_modules exists, run npm install if it doesn't
-    if [ ! -d "node_modules" ];then
-      echo "node_modules not found in $CONNECT_DIR. Running npm install..."
-      npm install
-    fi
+    npm install
 
     # Zip the function
     zip -qr "../../$OUTPUT_DIR/websocketConnect.zip" main.js node_modules package.json package-lock.json
@@ -57,11 +53,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "Processing $DISCONNECT_DIR..."
     cd "$DISCONNECT_DIR" || exit
 
-    # Check if node_modules exists, run npm install if it doesn't
-    if [ ! -d "node_modules" ]; then
-      echo "node_modules not found in $DISCONNECT_DIR. Running npm install..."
-      npm install
-    fi
+    npm install
 
     # Zip the function
     zip -qr "../../$OUTPUT_DIR/websocketDisconnect.zip" main.js node_modules package.json package-lock.json
@@ -77,11 +69,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "Processing $NOTIFICATIONS_DIR..."
     cd "$NOTIFICATIONS_DIR" || exit
 
-    # Check if node_modules exists, run npm install if it doesn't
-    if [ ! -d "node_modules" ]; then
-      echo "node_modules not found in $NOTIFICATIONS_DIR. Running npm install..."
-      npm install
-    fi
+    npm install
 
     # Zip the function
     zip -qr "../../$OUTPUT_DIR/notifications.zip" main.js node_modules package.json package-lock.json
@@ -111,11 +99,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "Processing $POST_PUBLICATIONS_DIR..."
     cd "$POST_PUBLICATIONS_DIR" || exit
     
-    # Check if node_modules exists, run npm install if it doesn't
-    if [ ! -d "node_modules" ];then
-      echo "node_modules not found in $POST_PUBLICATIONS_DIR. Running npm install..."
-      npm install
-    fi
+    npm install
 
     # Zip the function
     zip -qr "../../../$OUTPUT_DIR/postPublications.zip" index.js node_modules package.json package-lock.json

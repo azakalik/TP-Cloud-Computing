@@ -28,7 +28,6 @@ module "lambda_ws_connect" {
     COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
   }
 
-  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.websocket_api.id
   route_key = "$connect"
   api_gw_execution_arn = aws_apigatewayv2_api.websocket_api.execution_arn
@@ -46,7 +45,6 @@ module "lambda_ws_disconnect" {
     TABLE_NAME = aws_dynamodb_table.user_sessions.name
   }
 
-  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.websocket_api.id
   route_key = "$disconnect"
   api_gw_execution_arn = aws_apigatewayv2_api.websocket_api.execution_arn

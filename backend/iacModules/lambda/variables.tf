@@ -36,28 +36,22 @@ variable "env_vars" {
     type        = map(string) 
 }
 
-variable "integrates_with_api_gw" {
-    description = "Whether the Lambda function integrates with an API Gateway."
-    type        = bool
-    default     = false  
-}
-
 variable "api_gw_id" {
-    description = "The ID of the API Gateway. Required if integrates_with_api_gw is true."
+    description = "The ID of the API Gateway."
     type        = string 
     nullable    = true
     default     = null
 }
 
 variable "api_gw_execution_arn" {
-    description = "The ARN of the API Gateway execution role. Required if integrates_with_api_gw is true."
+    description = "The ARN of the API Gateway execution role. Required if api_gw_id is not null."
     type        = string 
     nullable    = true
     default     = null
 }
 
 variable "route_key" {
-    description = "The route key for the Lambda function. Required if integrates_with_api_gw is true."
+    description = "The route key for the Lambda function. Required if api_gw_id is not null."
     type        = string
     nullable    = true
     default     = null
@@ -77,7 +71,7 @@ variable "authorizer_id" {
 }
 
 variable "vpc_config" {
-    description = "The VPC configuration for the Lambda function. Required if inside_vpc is true."
+    description = "The VPC configuration for the Lambda function."
     type        = object({
         security_group_ids = list(string)
         subnet_ids         = list(string)

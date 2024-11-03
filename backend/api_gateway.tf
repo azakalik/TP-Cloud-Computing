@@ -30,7 +30,6 @@ module "lambda_create_publication" {
     TABLE_NAME = aws_dynamodb_table.publications.name
   }
 
-  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /publications"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
@@ -45,12 +44,12 @@ module "lambda_get_publication" {
 
   function_name = "ezauction-lambda-get-publication"
   filename = "./functions_zips/getPublications.zip"
+  handler = "main.handler"
   role_arn = data.aws_iam_role.iam_role_labrole.arn
   env_vars = {
     TABLE_NAME = aws_dynamodb_table.publications.name
   }
 
-  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "GET /publications"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
@@ -59,34 +58,8 @@ module "lambda_get_publication" {
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
 }
 
-module "lambda_create_offers_table" {
-  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
-  source = "./iacModules/lambda"
-
-  function_name = "ezauction-lambda-create-offers-table"
-  filename = "./functions_zips/createOffersTable.zip"
-  role_arn = data.aws_iam_role.iam_role_labrole.arn
-  env_vars = {
-    SECRET_NAME = var.rds_credentials_secret_name
-    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
-  }
-
-  integrates_with_api_gw = true
-  api_gw_id = aws_apigatewayv2_api.api_http.id
-  route_key = "POST /tables/offers"
-  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
-
-  has_jwt_authorizer = true
-  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
-
-  vpc_config = {
-    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
-    subnet_ids = local.lambda_subnets
-  }
-}
-
 module "lambda_create_offer" {
-  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sqs_queue.auction_queue, module.vpc_endpoint_sqs ]
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sqs_queue.auction_queue, module.vpc_endpoint_sqs, aws_cognito_user_pool.ez_auction_user_pool, aws_cognito_user_pool_client.ez_auction_pool_client ]
   source = "./iacModules/lambda"
 
   function_name = "ezauction-lambda-create-offer"
@@ -97,9 +70,10 @@ module "lambda_create_offer" {
     SECRET_NAME = var.rds_credentials_secret_name
     SQS_URL = aws_sqs_queue.auction_queue.url
     SQS_ENDPOINT = module.vpc_endpoint_sqs.endpoint
+    COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
+    COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
   }
 
-  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "POST /offers"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
@@ -125,7 +99,6 @@ module "lambda_get_highest_offer" {
     DB_SECRET_NAME = var.rds_credentials_secret_name
   }
 
-  integrates_with_api_gw = true
   api_gw_id = aws_apigatewayv2_api.api_http.id
   route_key = "GET /offers"
   api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
@@ -137,12 +110,6 @@ module "lambda_get_highest_offer" {
     security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
     subnet_ids = local.lambda_subnets
   }
-}
-
-resource "aws_lambda_invocation" "create_offers_table_invocation" {
-  depends_on = [ module.lambda_create_offers_table, aws_db_instance.rds_instance_primary, aws_db_instance.rds_instance_replica, module.vpc_endpoint_secretsmanager ]
-  function_name = module.lambda_create_offers_table.function_name
-  input = jsonencode({})
 }
 
 # resource "aws_apigatewayv2_domain_name" "api_custom_domain" {

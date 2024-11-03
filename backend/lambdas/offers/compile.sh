@@ -18,7 +18,6 @@ npm run compile
 
 
 # Zip the lambda
-echo I am zipping $lambda_name # Print a message indicating which Lambda function is being zipped
 mkdir -p ../../../$output_dir  # Create the output directory if it doesn't exist
 rm -rf temp_zip_directory || true # Remove the previous output directory. Ignore errors if doesn't exist
 mkdir temp_zip_directory # Create a temporary directory for zipping files

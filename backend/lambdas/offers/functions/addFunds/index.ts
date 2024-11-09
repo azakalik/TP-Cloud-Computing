@@ -85,7 +85,7 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             newTotal = user.total + amount;
             newAvailable = user.available + amount;
             await client.query(`
-                UPDATE ${tableName} SET total = $1, available = $2 WHERE user_id = $3;
+                UPDATE ${tableName} SET total = total + $1, available = available + $2 WHERE user_id = $3
             `, [newTotal, newAvailable, userId]);
         } else {
             newTotal = amount;

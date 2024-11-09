@@ -1,10 +1,9 @@
 import { BalanceTable } from '@shared/balanceTable';
 import { getJwtPayload } from '@shared/getJwtPayload';
+import { getUserBalance } from '@shared/getUserBalance';
 import { offersHandler } from '@shared/mainHandler';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { JwtPayload } from 'jwt-decode';
-
-const tableName = "balance";
 
 export const handler = async (event: APIGatewayProxyEventV2) => 
     await offersHandler(async (client) => {
@@ -30,14 +29,7 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             };
         }
 
-        const userResult = await client.query<BalanceTable>(
-            `SELECT *
-            FROM ${tableName}
-            WHERE user_id = $1;`,
-            [userId]
-        );
-
-        const user = userResult.rows.length > 0 ? userResult.rows[0] : undefined;
+        const user = await getUserBalance(client, userId);
 
         return {
             statusCode: 200,

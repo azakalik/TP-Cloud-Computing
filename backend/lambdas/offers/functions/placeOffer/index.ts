@@ -4,9 +4,12 @@ import { JwtPayload } from 'jwt-decode';
 import { offersHandler } from '@shared/mainHandler';
 import { getJwtPayload } from '@shared/getJwtPayload';
 import { validateBody } from '@shared/validateBody';
+import { getUserBalance } from '@shared/getUserBalance';
+import { BalanceTable } from '@shared/balanceTable';
 
 const region = process.env.AWS_REGION;
-const tableName = "offers";
+const offersTableName = "offers";
+const balanceTableName = "balance";
 
 type RequestBody = {
     publicationId: string;
@@ -79,26 +82,52 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         const {publicationId, price} = offer;
 
+        // Check user has enough funds
+        const balance = await getUserBalance(client, userId);
+        if (!balance || balance.available < price) {
+            return {
+                statusCode: 400,
+                body: {error: 'Insufficient funds'},
+            };
+        }
+
         // Get the current highest offer for the publication
-         const res = await client.query<{price: number}>(
-            `SELECT price FROM ${tableName} WHERE publication_id = $1 ORDER BY price DESC LIMIT 1`,
+         const res = await client.query<{price: number, user_id: string}>(
+            `SELECT price, user_id FROM ${offersTableName} WHERE publication_id = $1 ORDER BY price DESC LIMIT 1`,
             [publicationId]
         );
 
         // Check if the new offer is higher than the highest offer
-        const highestOffer = res.rows[0]?.price || 0;
+        const highestOffer = res.rows.length > 0 ? res.rows[0] : null;
+        const currentPrice = highestOffer ? highestOffer.price : 0;
 
-        if (price <= highestOffer) {
-            await client.query('ROLLBACK');
+        if (price <= currentPrice) {
             return {
                 statusCode: 400,
                 body: {error: 'Price must be higher than the highest offer'},
             };
         }
 
+        // Refund the previous highest offer
+        if (highestOffer) {
+            const previousUserId = highestOffer.user_id;
+            await client.query(
+                `UPDATE ${balanceTableName} SET available = available + $1 WHERE user_id = $2`,
+                [currentPrice, previousUserId]
+            );
+        }
+
+        // Deduct the new offer from the user balance
+        const newBalanceResult = await client.query<BalanceTable>(
+            `UPDATE ${balanceTableName} SET available = available - $1 WHERE user_id = $2`,
+            [price, userId]
+        );
+
+        const newBalance = newBalanceResult.rows[0];
+
         // Insert the new offer
         await client.query(
-            `INSERT INTO ${tableName} (offer_id, publication_id, user_id, time, price)
+            `INSERT INTO ${offersTableName} (offer_id, publication_id, user_id, time, price)
              VALUES (gen_random_uuid(), $1, $2, NOW(), $3)`,
             [publicationId, userId, price]
         );
@@ -122,6 +151,6 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         return {
             statusCode: 200,
-            body: {message: 'Offer placed successfully'},
+            body: {message: 'Offer placed successfully', total: newBalance.total, available: newBalance.available}
         };
     });

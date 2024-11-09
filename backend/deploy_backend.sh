@@ -137,6 +137,8 @@ fi
 
 # Run terraform apply
 echo "Running terraform apply..."
+terraform apply -target=aws_apigatewayv2_api.api_http
+terraform apply -target=aws_apigatewayv2_api.websocket_api
 terraform apply -auto-approve
 
 

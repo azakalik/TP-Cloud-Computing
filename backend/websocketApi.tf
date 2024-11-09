@@ -64,7 +64,18 @@ module "lambda_ws_notify" {
   }
 }
 
-resource "aws_lambda_event_source_mapping" "sqs_trigger" {
-  event_source_arn = aws_sqs_queue.auction_queue.arn  # SQS queue ARN
-  function_name    = module.lambda_ws_notify.id
-} 
+# Create a Lambda subscription to the SNS topic
+resource "aws_sns_topic_subscription" "sns_lambda_subscription" {
+  topic_arn = aws_sns_topic.auction_topic.arn
+  protocol  = "lambda"
+  endpoint  = module.lambda_ws_notify.arn  # Lambda ARN
+}
+
+# Allow SNS to invoke the Lambda function
+resource "aws_lambda_permission" "allow_sns_invoke" {
+  statement_id  = "AllowExecutionFromSNS"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda_ws_notify.function_name
+  principal     = "sns.amazonaws.com"
+  source_arn    = aws_sns_topic.auction_topic.arn
+}

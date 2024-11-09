@@ -59,7 +59,7 @@ module "lambda_get_publication" {
 }
 
 module "lambda_create_offer" {
-  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sqs_queue.auction_queue, module.vpc_endpoint_sqs, aws_cognito_user_pool.ez_auction_user_pool, aws_cognito_user_pool_client.ez_auction_pool_client ]
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sns_topic.auction_topic, module.vpc_endpoint_sns, aws_cognito_user_pool.ez_auction_user_pool, aws_cognito_user_pool_client.ez_auction_pool_client ]
   source = "./iacModules/lambda"
 
   function_name = "ezauction-lambda-create-offer"
@@ -68,8 +68,8 @@ module "lambda_create_offer" {
   env_vars = {
     RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
     SECRET_NAME = var.rds_credentials_secret_name
-    SQS_URL = aws_sqs_queue.auction_queue.url
-    SQS_ENDPOINT = module.vpc_endpoint_sqs.endpoint
+    SNS_ARN = aws_sns_topic.auction_topic.arn
+    SNS_ENDPOINT = "https://${module.vpc_endpoint_sns.endpoint}"
     COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
     COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
   }

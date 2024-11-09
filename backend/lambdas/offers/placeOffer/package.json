@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-sns": "^3.687.0",
     "aws-sdk": "^2.1691.0",
     "jwt-decode": "^4.0.0",
     "pg": "^8.13.0"

@@ -1,18 +1,18 @@
-module "vpc_endpoint_sqs" {
-    depends_on = [ aws_sqs_queue.auction_queue, data.aws_iam_role.iam_role_labrole, module.sg_vpc_endpoint, module.vpc ]
+module "vpc_endpoint_sns" {
+    depends_on = [ aws_sns_topic.auction_topic, data.aws_iam_role.iam_role_labrole, module.sg_vpc_endpoint, module.vpc ]
     source = "./iacModules/vpcEndpoint"
 
     aws_region = var.aws_region
-    name = "ezauction-vpc-endpoint-sqs-offers"
+    name = "ezauction-vpc-endpoint-sns"
     vpc_id = module.vpc.vpc_id
-    service_name = "sqs"
+    service_name = "sns" # Change to SNS VPC endpoint service
     subnet_ids = local.lambda_subnets
     security_group_ids = [module.sg_vpc_endpoint.security_group_id]
     policy_statements = [
         {
             Effect = "Allow"
-            Action = ["sqs:SendMessage"]
-            Resource = aws_sqs_queue.auction_queue.arn
+            Action = ["sns:Publish"] # Use SNS-specific action
+            Resource = aws_sns_topic.auction_topic.arn
             PrincipalArn = data.aws_iam_role.iam_role_labrole.arn
         }
     ]

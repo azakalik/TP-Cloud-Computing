@@ -18,6 +18,26 @@ resource "aws_apigatewayv2_stage" "api_http_stage" {
 }
 
 
+
+module "lambda_suscribe_sns" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-suscribe-sns-mail"
+  filename = "./functions_zips/suscribeSns.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = { }
+  handler = "main.handler"
+
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /publications/suscribeSnS"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+}
+
+
 module "lambda_create_publication" {
   depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
   source = "./iacModules/lambda"
@@ -112,22 +132,7 @@ module "lambda_get_highest_offer" {
   }
 }
 
-# resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
-#   domain_name = "api.aws.martinippolito.com.ar"
-#   domain_name_configuration {
-#     certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
-#     endpoint_type   = "REGIONAL"
-#     security_policy = "TLS_1_2"
-#   }
-# # Add a depends_on to wait for the certificate validation to be completed
-#   depends_on = [aws_acm_certificate_validation.wildcard_validation]
-# }
 
-# resource "aws_apigatewayv2_api_mapping" "api_mapping" {
-#   api_id      = aws_apigatewayv2_api.api_http.id
-#   domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
-#   stage       = aws_apigatewayv2_stage.api_http_stage.name
-# }
 
 # COGNITO AUTHORIZER
 resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {

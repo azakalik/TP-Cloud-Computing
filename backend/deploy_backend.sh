@@ -12,6 +12,7 @@ done
 
 
 # Define directories
+SUSCRIBE_SNS_DIR="lambdas/suscribeSnS"
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
 NOTIFICATIONS_DIR="lambdas/notifications"
@@ -31,8 +32,29 @@ if [ ! -d "$OUTPUT_DIR" ]; then
   mkdir "$OUTPUT_DIR"
 fi
 
+
+
+
 # If --no-build is not passed, run npm install and build for the lambdas
 if [ "$NO_BUILD" = false ]; then
+
+  if [ -d "$SUSCRIBE_SNS_DIR" ]; then
+    echo "Processing $SUSCRIBE_SNS_DIR..."
+    cd "$SUSCRIBE_SNS_DIR" || exit
+    
+    npm install
+
+    # Zip the function
+    zip -qr "../../$OUTPUT_DIR/suscribeSns.zip" main.js node_modules package.json package-lock.json
+    cd - || exit
+    echo "Created $OUTPUT_DIR/websocketConnect.zip"
+  else
+    echo "$SUSCRIBE_SNS_DIR does not exist."
+  fi
+
+
+
+
   # Create zip files for the connect lambda
   if [ -d "$CONNECT_DIR" ]; then
     echo "Processing $CONNECT_DIR..."

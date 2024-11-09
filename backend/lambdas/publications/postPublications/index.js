@@ -1,10 +1,13 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { v4 as uuidv4 } from "uuid";
+import { SNSClient, CreateTopicCommand, TagResourceCommand } from "@aws-sdk/client-sns";
 
 // Initialize clients
-const dynamoDB = new DynamoDBClient({ region: "us-east-1" });
-const s3 = new S3Client({ region: "us-east-1" });
+const dynamoDB = new DynamoDBClient({ region: process.env.AWS_REGION });
+const s3 = new S3Client({ region: process.env.AWS_REGION });
+// Initialize SNS client
+const snsClient = new SNSClient({ region: process.env.AWS_REGION }); // Replace with your AWS region
 
 
 function getExtensionFromBase64(base64String) {
@@ -20,6 +23,29 @@ function getExtensionFromBase64(base64String) {
 }
 
 
+async function createSNSTopic(publicationId) {
+    try {
+        // Create the SNS topic
+        const createTopicCommand = new CreateTopicCommand({ Name: publicationId });
+        const result = await snsClient.send(createTopicCommand);
+        const topicArn = result.TopicArn;
+        console.log(`SNS Topic created with ARN: ${topicArn}`);
+
+        // Tag the topic with the publicationId
+        const tagCommand = new TagResourceCommand({
+            ResourceArn: topicArn,
+            Tags: [{ Key: "publicationId", Value: publicationId }]
+        });
+        await snsClient.send(tagCommand);
+        console.log(`SNS Topic tagged with publicationId: ${publicationId}`);
+
+    } catch (error) {
+        console.error("Error creating and tagging SNS Topic:", error);
+    }
+}
+
+
+
 export const handler = async (event) => {
     
     let publicationId, initialTime, endTimeISO, item1, imageUrl;
@@ -29,7 +55,9 @@ export const handler = async (event) => {
         const { user, initialPrice, endTime, title, description, images, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
     
         // Generate unique publication ID and timestamps
-        publicationId = `PUBID#${uuidv4()}`;
+        const rawPublicationId = uuidv4()
+        await createSNSTopic(rawPublicationId)
+        publicationId = `PUBID#${rawPublicationId}`;
         initialTime = new Date().toISOString();
         endTimeISO = new Date(endTime).toISOString();
         
@@ -69,7 +97,7 @@ export const handler = async (event) => {
                 Description: { S: description },
                 InitialTime: { S: initialTime },
                 Image: { S: imageUrl },
-                CountryFlag: { S: countryFlag } // Add country field
+                CountryFlag: { S: countryFlag }// Add country field
             }
         };
     } catch (error) {

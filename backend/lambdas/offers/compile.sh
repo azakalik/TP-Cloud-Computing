@@ -32,7 +32,7 @@ for lambda_dir in $lambdas; do
   cp -r $lambda_dir/. $tmp_tsc_dir
 
   cd $tmp_tsc_dir
-  npx tsc
+  npx tsc && npx tsc-alias
 
   find . -name "*.map" -type f -delete
 

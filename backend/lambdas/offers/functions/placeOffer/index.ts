@@ -3,8 +3,10 @@ import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { JwtPayload } from 'jwt-decode';
 import { offersHandler } from '@shared/mainHandler';
 import { getJwtPayload } from '@shared/getJwtPayload';
+import { validateBody } from '@shared/validateBody';
 
 const region = process.env.AWS_REGION;
+const tableName = "offers";
 
 type RequestBody = {
     publicationId: string;
@@ -17,7 +19,7 @@ type Offer = {
     price: number;
 };
 
-const validateBody = (body: RequestBody): string | null => {
+const asserter = (body: RequestBody): string | null => {
     if (!body) {
         return 'Offer is required';
     }
@@ -58,17 +60,16 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             };
         }
 
-        let requestBody: RequestBody;
+        const validation = validateBody(event.body, asserter);
 
-        try {
-            requestBody = JSON.parse(event.body);
-        } catch (error) {
-            console.error('Error while parsing event body', error);
+        if (validation.error !== null) {
             return {
                 statusCode: 400,
-                body: {error: 'Invalid request body'},
+                body: {error: validation.error}
             };
         }
+
+        const requestBody = validation.params;
 
         const offer: Offer = {
             publicationId: requestBody.publicationId,
@@ -76,19 +77,11 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             price: requestBody.price,
         };
 
-        const error = validateBody(requestBody);
-        if (error) {
-            return {
-                statusCode: 400,
-                body: {error},
-            };
-        }
-
         const {publicationId, price} = offer;
 
-         // Get the current highest offer for the publication
+        // Get the current highest offer for the publication
          const res = await client.query<{price: number}>(
-            'SELECT price FROM offers WHERE publication_id = $1 ORDER BY price DESC LIMIT 1',
+            `SELECT price FROM ${tableName} WHERE publication_id = $1 ORDER BY price DESC LIMIT 1`,
             [publicationId]
         );
 
@@ -105,7 +98,7 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         // Insert the new offer
         await client.query(
-            `INSERT INTO offers (offer_id, publication_id, user_id, time, price)
+            `INSERT INTO ${tableName} (offer_id, publication_id, user_id, time, price)
              VALUES (gen_random_uuid(), $1, $2, NOW(), $3)`,
             [publicationId, userId, price]
         );

@@ -42,7 +42,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/websocketConnect.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/websocketConnect.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/websocketConnect.zip"
   else
@@ -57,7 +57,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/websocketDisconnect.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/websocketDisconnect.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/websocketDisconnect.zip"
   else
@@ -73,7 +73,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/notifications.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/notifications.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/notifications.zip"
   else
@@ -88,7 +88,7 @@ if [ "$NO_BUILD" = false ]; then
     # Skip npm install for getPublications lambda as it doesn't have any dependencies
 
     # Zip the function
-    zip -qr "../../../$OUTPUT_DIR/getPublications.zip" main.js
+    zip -qr "$OUTPUT_DIR/getPublications.zip" main.js
     cd - || exit
     echo "Created $OUTPUT_DIR/getPublications.zip"
   else
@@ -103,7 +103,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../../$OUTPUT_DIR/postPublications.zip" index.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/postPublications.zip" index.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/postPublications.zip"
   else
@@ -139,6 +139,7 @@ fi
 
 # Run terraform apply
 echo "Running terraform apply..."
+terraform apply -target=aws_apigatewayv2_api.api_http -target=aws_apigatewayv2_api.websocket_api -auto-approve
 terraform apply -auto-approve
 
 

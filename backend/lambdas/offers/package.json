@@ -1,0 +1,20 @@
+{
+  "name": "offers",
+  "version": "1.0.0",
+  "description": "Offers' lambdas",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1692.0",
+    "jwt-decode": "^4.0.0",
+    "pg": "^8.13.1"
+  }
+}

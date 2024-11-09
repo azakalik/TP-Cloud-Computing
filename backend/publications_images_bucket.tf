@@ -1,5 +1,6 @@
 resource "aws_s3_bucket" "publication_images" {
   bucket = var.s3_publication_bucket_name
+  force_destroy = true
 
   tags = {
     Name        = var.s3_publication_bucket_name

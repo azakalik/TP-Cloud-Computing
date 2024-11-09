@@ -13,6 +13,7 @@ module "frontend_s3_bucket" {
   ignore_public_acls = false
   block_public_policy = false
   restrict_public_buckets = false
+  force_destroy = true
 
   attach_policy = true
   policy = jsonencode({

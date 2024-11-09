@@ -1,4 +1,4 @@
-import { offersHandler } from "../shared/mainHandler";
+import { offersHandler } from "@shared/mainHandler";
 import fs from 'fs/promises';
 
 const tableName = 'offers';
@@ -26,7 +26,7 @@ export const handler = offersHandler(async (client) => {
     const tableExists = res.rows[0].exists;
 
     if (tableExists) {
-        console.info(`Table ${tableName} already exists`);
+        console.info("Offers tables already exists");
         return {
             statusCode: 200,
             body: {message: 'Table already exists'},

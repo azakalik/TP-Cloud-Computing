@@ -12,13 +12,14 @@ done
 
 
 # Define directories
+CWD="$(pwd)"
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
 NOTIFICATIONS_DIR="lambdas/notifications"
 GET_PUBLICATIONS_DIR="lambdas/publications/getPublications"
 POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
-OUTPUT_DIR="functions_zips"
+OUTPUT_DIR="$CWD/functions_zips"
 ENV_FILE="../frontend/.env"
 
 
@@ -113,10 +114,11 @@ if [ "$NO_BUILD" = false ]; then
   if [ -d "$OFFERS_DIR" ]; then
     echo "Processing $OFFERS_DIR..."
 
-    for lambda_dir in "$OFFERS_DIR"/*/; do
-      lambda=$(basename "$lambda_dir")
-      sh "$OFFERS_DIR/compile.sh" "$lambda" "$OUTPUT_DIR"
-    done
+    cd "$OFFERS_DIR" || exit
+
+    sh "./compile.sh" "$OUTPUT_DIR"
+
+    cd "$CWD"
   else
     echo "$OFFERS_DIR does not exist."
   fi

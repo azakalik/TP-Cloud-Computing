@@ -1,15 +1,17 @@
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { offersHandler } from '@shared/mainHandler';
+import { getHighestOffer } from '@shared/getHighestOffer';
 
 export const handler = (event: APIGatewayProxyEventV2) => 
     offersHandler(async (client) => {
         const {publicationId} = event.queryStringParameters;
 
-        const result = await client.query<{price: number}>(`SELECT price FROM offers WHERE publication_id = $1 ORDER BY price DESC LIMIT 1`, [publicationId]);
-        const highestOffer = result.rows[0]?.price || undefined;
+        const highestOffer = await getHighestOffer(client, publicationId);
+
+        const price = highestOffer ? highestOffer.price : 0;
 
         return {
             statusCode: 200,
-            body: {price: highestOffer},
+            body: {price},
         };
     });

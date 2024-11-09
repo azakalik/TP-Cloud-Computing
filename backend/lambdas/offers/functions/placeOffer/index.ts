@@ -6,10 +6,12 @@ import { getJwtPayload } from '@shared/getJwtPayload';
 import { validateBody } from '@shared/validateBody';
 import { getUserBalance } from '@shared/getUserBalance';
 import { BalanceTable } from '@shared/balanceTable';
+import { getHighestOffer } from '@shared/getHighestOffer';
 
 const region = process.env.AWS_REGION;
 const offersTableName = "offers";
 const balanceTableName = "balance";
+const closedAuctionsTableName = "closed_auctions";
 
 type RequestBody = {
     publicationId: string;
@@ -91,14 +93,27 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             };
         }
 
-        // Get the current highest offer for the publication
-         const res = await client.query<{price: number, user_id: string}>(
-            `SELECT price, user_id FROM ${offersTableName} WHERE publication_id = $1 ORDER BY price DESC LIMIT 1`,
+        // Check the auction is still open
+        const auction = await client.query<{exists: boolean}>(
+            `SELECT EXISTS (
+                SELECT 1
+                FROM ${closedAuctionsTableName}
+                WHERE publication_id = $1
+            )`,
             [publicationId]
         );
 
+        if (auction.rows[0].exists) {
+            return {
+                statusCode: 400,
+                body: {error: 'Auction is closed'},
+            };
+        }
+
+        // Get the current highest offer for the publication
+        const highestOffer = await getHighestOffer(client, publicationId);
+
         // Check if the new offer is higher than the highest offer
-        const highestOffer = res.rows.length > 0 ? res.rows[0] : null;
         const currentPrice = highestOffer ? highestOffer.price : 0;
 
         if (price <= currentPrice) {

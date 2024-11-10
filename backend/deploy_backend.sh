@@ -10,7 +10,6 @@ for arg in "$@"; do
   fi
 done
 
-
 # Define directories
 CHECK_SNS_SUB="lambdas/checkSnSSuscription"
 SUSCRIBE_SNS_DIR="lambdas/suscribeSnS"
@@ -20,13 +19,12 @@ NOTIFICATIONS_DIR="lambdas/notifications"
 GET_PUBLICATIONS_DIR="lambdas/publications/getPublications"
 POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
+NOTIFY_WINNER_DIR="lambdas/notifyWinner"  # Added directory for notifyWinner
 OUTPUT_DIR="functions_zips"
 ENV_FILE="../frontend/.env"
 
 
-
 terraform init
-
 
 # Create the output directory if it doesn't exist
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -101,7 +99,6 @@ if [ "$NO_BUILD" = false ]; then
     echo "$DISCONNECT_DIR does not exist."
   fi
 
-
   # Create zip files for the notification lambda
   if [ -d "$NOTIFICATIONS_DIR" ]; then
     echo "Processing $NOTIFICATIONS_DIR..."
@@ -117,7 +114,23 @@ if [ "$NO_BUILD" = false ]; then
     echo "$NOTIFICATIONS_DIR does not exist."
   fi
 
-  # Create zip files for the connect lambda
+  # Create zip files for the notifyWinner lambda (newly added)
+  if [ -d "$NOTIFY_WINNER_DIR" ]; then
+    echo "Processing $NOTIFY_WINNER_DIR..."
+    cd "$NOTIFY_WINNER_DIR" || exit
+
+    # No need to do install for notifyWinner lambda as it doesn't have any dependencies
+    npm install
+
+    # Zip the function
+    zip -qr "../../$OUTPUT_DIR/notifyWinner.zip" index.js package.json package-lock.json node_modules
+    cd - || exit
+    echo "Created $OUTPUT_DIR/notifyWinner.zip"
+  else
+    echo "$NOTIFY_WINNER_DIR does not exist."
+  fi
+
+  # Create zip files for the getPublications lambda
   if [ -d "$GET_PUBLICATIONS_DIR" ]; then
     echo "Processing $GET_PUBLICATIONS_DIR..."
     cd "$GET_PUBLICATIONS_DIR" || exit
@@ -132,7 +145,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "$GET_PUBLICATIONS_DIR does not exist."
   fi
 
-  # Create zip files for the connect lambda
+  # Create zip files for the postPublications lambda
   if [ -d "$POST_PUBLICATIONS_DIR" ]; then
     echo "Processing $POST_PUBLICATIONS_DIR..."
     cd "$POST_PUBLICATIONS_DIR" || exit

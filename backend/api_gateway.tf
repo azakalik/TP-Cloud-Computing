@@ -71,6 +71,7 @@ module "lambda_create_publication" {
   env_vars = {
     BUCKET_NAME = aws_s3_bucket.publication_images.bucket
     TABLE_NAME = aws_dynamodb_table.publications.name
+    SEND_EMAIL_LAMBDA_ARN = aws_lambda_function.send_msg_disc.arn
   }
 
   api_gw_id = aws_apigatewayv2_api.api_http.id

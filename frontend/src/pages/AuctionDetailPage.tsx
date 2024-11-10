@@ -43,7 +43,6 @@ const AuctionDetailPage: React.FC = () => {
   const [bidError, setBidError] = useState<string>("");
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number | null>(null);
-  //@ts-ignore
   const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);
   const [newHighestBidAnimation, setNewHighestBidAnimation] = useState<boolean>(false);
   const [isSubscribed, setisSubscribed] = useState<boolean | null>(null);
@@ -74,6 +73,7 @@ const AuctionDetailPage: React.FC = () => {
     fetchAuctionInitialHighestBid(id!).then((data) => {
       if (highestBid === null) {
         setHighestBid(data.price);
+        setHighestBidUserId(data.userId);
       }
     });
   }, [id, highestBid]);

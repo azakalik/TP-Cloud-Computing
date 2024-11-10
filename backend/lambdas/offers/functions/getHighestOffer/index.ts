@@ -9,9 +9,10 @@ export const handler = (event: APIGatewayProxyEventV2) =>
         const highestOffer = await getHighestOffer(client, publicationId);
 
         const price = highestOffer ? highestOffer.price : 0;
+        const userId = highestOffer ? highestOffer.user_id : null;
 
         return {
             statusCode: 200,
-            body: {price},
+            body: {price, userId},
         };
     });

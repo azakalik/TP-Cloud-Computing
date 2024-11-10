@@ -18,6 +18,28 @@ resource "aws_apigatewayv2_stage" "api_http_stage" {
 }
 
 
+
+module "lambda_suscribe_sns" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-suscribe-sns-mail"
+  filename = "./functions_zips/suscribeSns.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = { 
+    ACCOUNT_ID = data.aws_caller_identity.current.account_id
+  }
+  handler = "main.handler"
+
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "POST /publications/suscribeSnS"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+}
+
+
 module "lambda_create_publication" {
   depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
   source = "./iacModules/lambda"
@@ -59,7 +81,7 @@ module "lambda_get_publication" {
 }
 
 module "lambda_create_offer" {
-  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sqs_queue.auction_queue, module.vpc_endpoint_sqs, aws_cognito_user_pool.ez_auction_user_pool, aws_cognito_user_pool_client.ez_auction_pool_client ]
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, aws_sns_topic.auction_topic, module.vpc_endpoint_sns, aws_cognito_user_pool.ez_auction_user_pool, aws_cognito_user_pool_client.ez_auction_pool_client ]
   source = "./iacModules/lambda"
 
   function_name = "ezauction-lambda-create-offer"
@@ -68,8 +90,8 @@ module "lambda_create_offer" {
   env_vars = {
     RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
     SECRET_NAME = var.rds_credentials_secret_name
-    SQS_URL = aws_sqs_queue.auction_queue.url
-    SQS_ENDPOINT = module.vpc_endpoint_sqs.endpoint
+    SNS_ARN = aws_sns_topic.auction_topic.arn
+    SNS_ENDPOINT = "https://${module.vpc_endpoint_sns.endpoint}"
     COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
     COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
   }
@@ -112,22 +134,7 @@ module "lambda_get_highest_offer" {
   }
 }
 
-# resource "aws_apigatewayv2_domain_name" "api_custom_domain" {
-#   domain_name = "api.aws.martinippolito.com.ar"
-#   domain_name_configuration {
-#     certificate_arn = aws_acm_certificate.wildcard.arn  # Assuming you already have the ACM certificate
-#     endpoint_type   = "REGIONAL"
-#     security_policy = "TLS_1_2"
-#   }
-# # Add a depends_on to wait for the certificate validation to be completed
-#   depends_on = [aws_acm_certificate_validation.wildcard_validation]
-# }
 
-# resource "aws_apigatewayv2_api_mapping" "api_mapping" {
-#   api_id      = aws_apigatewayv2_api.api_http.id
-#   domain_name = aws_apigatewayv2_domain_name.api_custom_domain.domain_name
-#   stage       = aws_apigatewayv2_stage.api_http_stage.name
-# }
 
 # COGNITO AUTHORIZER
 resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {

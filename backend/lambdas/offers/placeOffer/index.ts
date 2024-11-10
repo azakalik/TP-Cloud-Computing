@@ -1,7 +1,9 @@
-import {Client} from 'pg';
-import {SQS, SecretsManager} from 'aws-sdk';
+import { Client } from 'pg';
+import { SecretsManager } from 'aws-sdk';
 import fs from 'fs/promises';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
+import { SNSClient, PublishCommand } from '@aws-sdk/client-sns'; // Import the modular SNS client
+
 
 const region = process.env.AWS_REGION;
 
@@ -42,7 +44,7 @@ const getJwtPayload = async (request: Request): Promise<JwtPayload> => {
     }
     const jwt = match[1];
     const payload = await jwtDecode(jwt);
-    return payload;  
+    return payload;
 }
 
 const validateBody = (body: RequestBody): string | null => {
@@ -65,8 +67,8 @@ const getDbCredentials = async (secretName?: string): Promise<DbCredentials> => 
     if (!secretName) {
         throw new Error('Secret name is not provided');
     }
-    const secretsManager = new SecretsManager({region});
-    const data = await secretsManager.getSecretValue({SecretId: secretName}).promise();
+    const secretsManager = new SecretsManager({ region });
+    const data = await secretsManager.getSecretValue({ SecretId: secretName }).promise();
     if (!data.SecretString) {
         throw new Error('Secret string is empty or undefined');
     }
@@ -89,7 +91,7 @@ export const handler = async (request: Request) => {
         console.error('Error while getting JWT payload', error);
         return {
             statusCode: 401,
-            body: JSON.stringify({error: 'Unauthorized'}),
+            body: JSON.stringify({ error: 'Unauthorized' }),
         };
     }
 
@@ -100,19 +102,19 @@ export const handler = async (request: Request) => {
         console.error('User ID is missing in the JWT payload');
         return {
             statusCode: 401,
-            body: JSON.stringify({error: 'Unauthorized'}),
+            body: JSON.stringify({ error: 'Unauthorized' }),
         };
     }
 
     let requestBody: RequestBody;
-    
+
     try {
         requestBody = JSON.parse(request.body);
     } catch (error) {
         console.error('Error while parsing event body', error);
         return {
             statusCode: 400,
-            body: JSON.stringify({error: 'Invalid request body'}),
+            body: JSON.stringify({ error: 'Invalid request body' }),
         };
     }
 
@@ -126,20 +128,20 @@ export const handler = async (request: Request) => {
     if (error) {
         return {
             statusCode: 400,
-            body: JSON.stringify({error}),
+            body: JSON.stringify({ error }),
         };
     }
 
     let dbCredentials: DbCredentials;
 
     try {
-        const secretName = process.env.SECRET_NAME; 
+        const secretName = process.env.SECRET_NAME;
         dbCredentials = await getDbCredentials(secretName);
     } catch (error) {
         console.error('Error while getting secret', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({error: 'Internal server error'}),
+            body: JSON.stringify({ error: 'Internal server error' }),
         };
     }
 
@@ -148,7 +150,7 @@ export const handler = async (request: Request) => {
         console.error('RDS Proxy host is not provided');
         return {
             statusCode: 500,
-            body: JSON.stringify({error: 'Internal server error'}),
+            body: JSON.stringify({ error: 'Internal server error' }),
         };
     }
 
@@ -162,7 +164,7 @@ export const handler = async (request: Request) => {
         console.error('Error while reading CA file', error);
         return {
             statusCode: 500,
-            body: JSON.stringify({error: 'Internal server error'}),
+            body: JSON.stringify({ error: 'Internal server error' }),
         };
     }
 
@@ -183,10 +185,10 @@ export const handler = async (request: Request) => {
         await client.connect();
         await client.query('BEGIN');
 
-        const {publicationId, price} = offer;
+        const { publicationId, price } = offer;
 
         // Get the current highest offer for the publication
-        const res = await client.query<{price: number}>(
+        const res = await client.query<{ price: number }>(
             'SELECT price FROM offers WHERE publication_id = $1 ORDER BY price DESC LIMIT 1',
             [publicationId]
         );
@@ -198,7 +200,7 @@ export const handler = async (request: Request) => {
             await client.query('ROLLBACK');
             return {
                 statusCode: 400,
-                body: JSON.stringify({error: 'Price must be higher than the highest offer'}),
+                body: JSON.stringify({ error: 'Price must be higher than the highest offer' }),
             };
         }
 
@@ -212,33 +214,45 @@ export const handler = async (request: Request) => {
         // Commit the transaction
         await client.query('COMMIT');
 
-        // Send a message to the offers queue
-        const sqsUrl = process.env.SQS_URL;
-        if (!sqsUrl) {
-            throw new Error('SQS URL is not provided');
+        // Publish a message to the SNS topic
+        const snsArn = process.env.SNS_ARN;
+        if (!snsArn) {
+            throw new Error('SNS ARN is not provided');
         }
-        const sqsParams = {
-            QueueUrl: sqsUrl,
-            MessageBody: JSON.stringify(offer),
+
+        const snsEndpoint = process.env.SNS_ENDPOINT;
+        if (!snsEndpoint) {
+            throw new Error('SNS endpoint is not provided');
+        }
+
+        const snsClient = new SNSClient({
+            region,
+            endpoint: snsEndpoint  // Specify the SNS VPC endpoint URL for private access
+        });
+
+        const snsParams = {
+            TopicArn: snsArn,
+            Message: JSON.stringify(offer),
         };
-        
-        const endpoint = process.env.SQS_ENDPOINT;
-        if (!endpoint) {
-            throw new Error('SQS endpoint is not provided');
+
+        try {
+            const response = await snsClient.send(new PublishCommand(snsParams));
+            console.log(`Message published to SNS topic with MessageId: ${response.MessageId}`);
+        } catch (error) {
+            console.error("Error publishing to SNS topic:", error);
         }
-        const sqs = new SQS({region, endpoint});
-        await sqs.sendMessage(sqsParams).promise();
+
 
         return {
             statusCode: 200,
-            body: JSON.stringify({message: 'Offer placed successfully'}),
+            body: JSON.stringify({ message: 'Offer placed successfully' }),
         };
     } catch (error) {
         console.error('Error while placing offer', error);
         await client.query('ROLLBACK');
         return {
             statusCode: 500,
-            body: JSON.stringify({error: 'Internal server error'}),
+            body: JSON.stringify({ error: 'Internal server error' }),
         };
     } finally {
         await client.end();

@@ -1,4 +1,5 @@
 import {SQS} from 'aws-sdk';
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import { JwtPayload } from 'jwt-decode';
 import { offersHandler } from '@shared/mainHandler';
@@ -147,22 +148,28 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             [publicationId, userId, price]
         );
 
-        // Send a message to the offers queue
-        const sqsUrl = process.env.SQS_URL;
-        if (!sqsUrl) {
-            throw new Error('SQS URL is not provided');
+        // Publish a message to the SNS topic
+        const snsArn = process.env.SNS_ARN;
+        if (!snsArn) {
+            throw new Error('SNS ARN is not provided');
         }
-        const sqsParams = {
-            QueueUrl: sqsUrl,
-            MessageBody: JSON.stringify(offer),
+
+        const snsEndpoint = process.env.SNS_ENDPOINT;
+        if (!snsEndpoint) {
+            throw new Error('SNS endpoint is not provided');
+        }
+
+        const snsClient = new SNSClient({
+            region,
+            endpoint: snsEndpoint  // Specify the SNS VPC endpoint URL for private access
+        });
+
+        const snsParams = {
+            TopicArn: snsArn,
+            Message: JSON.stringify(offer),
         };
         
-        const endpoint = process.env.SQS_ENDPOINT;
-        if (!endpoint) {
-            throw new Error('SQS endpoint is not provided');
-        }
-        const sqs = new SQS({region, endpoint});
-        await sqs.sendMessage(sqsParams).promise();
+        const response = await snsClient.send(new PublishCommand(snsParams));
 
         return {
             statusCode: 200,

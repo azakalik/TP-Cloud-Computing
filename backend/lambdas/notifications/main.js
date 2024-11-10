@@ -15,9 +15,11 @@ const apiGatewayClient = new ApiGatewayManagementApiClient({
 });
 
 export const handler = async (event) => {
-    // Process each SQS message in the event
+    // Process each SNS message in the event
     for (const record of event.Records) {
-        const { publicationId, userId, price } = JSON.parse(record.body);  // Read message from SQS body
+        // Read message from SNS body
+        const { publicationId, userId, price } = JSON.parse(record.Sns.Message);  
+
         if (!publicationId || !price) {
             console.error('Missing publicationId or price');
             continue;  // Skip this message if data is missing

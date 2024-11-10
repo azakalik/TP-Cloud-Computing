@@ -18,3 +18,16 @@ output "ws_api_gw_url" {
   description = "The URL of the WebSocket API Gateway"
   value       = join("/", [aws_apigatewayv2_api.websocket_api.api_endpoint, aws_apigatewayv2_stage.production_stage.name])
 }
+
+
+output "account_id" {
+  value = data.aws_caller_identity.current.account_id
+}
+
+output "arn" {
+  value = data.aws_caller_identity.current.arn
+}
+
+output "user_id" {
+  value = data.aws_caller_identity.current.user_id
+}

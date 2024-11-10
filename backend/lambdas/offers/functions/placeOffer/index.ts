@@ -169,7 +169,7 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             Message: JSON.stringify(offer),
         };
         
-        const response = await snsClient.send(new PublishCommand(snsParams));
+        await snsClient.send(new PublishCommand(snsParams));
 
         return {
             statusCode: 200,

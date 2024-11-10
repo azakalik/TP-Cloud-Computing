@@ -51,6 +51,43 @@ export const fetchAuctions = async (): Promise<AuctionCardType[]> => {
 };
 
 
+export const postSubscriptionToSnS = async (publicationId: string) : Promise<boolean> => {
+
+  try {
+    const response = await api.post(`/publications/suscribeSnS?publicationId=${publicationId}`);
+    // Check if response status is 200 (OK)
+    if (response.status === 200) {
+      return true
+    } else {
+      throw new Error(`Error fetching auctions: ${response.statusText}`);
+    }
+  } catch (error) {
+    return false; // Return an empty array in case of error
+  }
+
+
+}
+
+
+export const fetchIsSubscribedToSnS = async (publicationId: string) : Promise<boolean> => {
+
+  try {
+    const response = await api.get(`/publications/suscribeSnS?publicationId=${publicationId}`);
+    // Check if response status is 200 (OK)
+    if (response.status === 200) {
+      console.log(response.data);
+      return response.data.isSubscribed; // Return data if successful
+    } else {
+      throw new Error(`Error fetching auctions: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Failed to fetch auctions:", error);
+    return false; // Return an empty array in case of error
+  }
+
+}
+
+
 // todo implement in backend
 export const fetchUserAuctions = async (): Promise<AuctionCardType[]> => {
   return new Promise(() => {

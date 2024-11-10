@@ -40,6 +40,7 @@ const AuctionDetailPage: React.FC = () => {
   const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number | null>(null);
+  //@ts-ignore
   const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);
   const [newHighestBidAnimation, setNewHighestBidAnimation] = useState<boolean>(false);
   const [isSubscribed, setisSubscribed] = useState<boolean | null>(null);
@@ -259,7 +260,7 @@ const AuctionDetailPage: React.FC = () => {
 
             {/* Subscription Bell Icon */}
             {isSubscribed !== null &&
-              <Group position="center" spacing="xs" mb="md">
+              <Group>
                 <ActionIcon
                   onClick={isSubscribed ? undefined : handleSubscribe} // Disable onClick when subscribed
                   size="xl"

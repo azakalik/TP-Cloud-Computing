@@ -11,6 +11,7 @@ for arg in "$@"; do
 done
 
 # Define directories
+CWD="$(pwd)"
 CHECK_SNS_SUB="lambdas/checkSnSSuscription"
 SUSCRIBE_SNS_DIR="lambdas/suscribeSnS"
 CONNECT_DIR="lambdas/websocketConnect"
@@ -19,8 +20,7 @@ NOTIFICATIONS_DIR="lambdas/notifications"
 GET_PUBLICATIONS_DIR="lambdas/publications/getPublications"
 POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
-NOTIFY_WINNER_DIR="lambdas/notifyWinner"  # Added directory for notifyWinner
-OUTPUT_DIR="functions_zips"
+OUTPUT_DIR="$CWD/functions_zips"
 ENV_FILE="../frontend/.env"
 
 
@@ -45,7 +45,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/suscribeSns.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/suscribeSns.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/websocketConnect.zip"
   else
@@ -60,7 +60,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/checkSnsSub.zip" index.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/checkSnsSub.zip" index.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/checkSnsSub.zip"
   else
@@ -77,7 +77,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/websocketConnect.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/websocketConnect.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/websocketConnect.zip"
   else
@@ -92,7 +92,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/websocketDisconnect.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/websocketDisconnect.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/websocketDisconnect.zip"
   else
@@ -107,27 +107,11 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../$OUTPUT_DIR/notifications.zip" main.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/notifications.zip" main.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/notifications.zip"
   else
     echo "$NOTIFICATIONS_DIR does not exist."
-  fi
-
-  # Create zip files for the notifyWinner lambda (newly added)
-  if [ -d "$NOTIFY_WINNER_DIR" ]; then
-    echo "Processing $NOTIFY_WINNER_DIR..."
-    cd "$NOTIFY_WINNER_DIR" || exit
-
-    # No need to do install for notifyWinner lambda as it doesn't have any dependencies
-    npm install
-
-    # Zip the function
-    zip -qr "../../$OUTPUT_DIR/notifyWinner.zip" index.js package.json package-lock.json node_modules
-    cd - || exit
-    echo "Created $OUTPUT_DIR/notifyWinner.zip"
-  else
-    echo "$NOTIFY_WINNER_DIR does not exist."
   fi
 
   # Create zip files for the getPublications lambda
@@ -138,7 +122,7 @@ if [ "$NO_BUILD" = false ]; then
     # Skip npm install for getPublications lambda as it doesn't have any dependencies
 
     # Zip the function
-    zip -qr "../../../$OUTPUT_DIR/getPublications.zip" main.js
+    zip -qr "$OUTPUT_DIR/getPublications.zip" main.js
     cd - || exit
     echo "Created $OUTPUT_DIR/getPublications.zip"
   else
@@ -153,7 +137,7 @@ if [ "$NO_BUILD" = false ]; then
     npm install
 
     # Zip the function
-    zip -qr "../../../$OUTPUT_DIR/postPublications.zip" index.js node_modules package.json package-lock.json
+    zip -qr "$OUTPUT_DIR/postPublications.zip" index.js node_modules package.json package-lock.json
     cd - || exit
     echo "Created $OUTPUT_DIR/postPublications.zip"
   else
@@ -164,10 +148,11 @@ if [ "$NO_BUILD" = false ]; then
   if [ -d "$OFFERS_DIR" ]; then
     echo "Processing $OFFERS_DIR..."
 
-    for lambda_dir in "$OFFERS_DIR"/*/; do
-      lambda=$(basename "$lambda_dir")
-      sh "$OFFERS_DIR/compile.sh" "$lambda" "$OUTPUT_DIR"
-    done
+    cd "$OFFERS_DIR" || exit
+
+    sh "./compile.sh" "$OUTPUT_DIR"
+
+    cd "$CWD"
   else
     echo "$OFFERS_DIR does not exist."
   fi
@@ -188,8 +173,7 @@ fi
 
 # Run terraform apply
 echo "Running terraform apply..."
-terraform apply -target=aws_apigatewayv2_api.api_http
-terraform apply -target=aws_apigatewayv2_api.websocket_api
+terraform apply -target=aws_apigatewayv2_api.api_http -target=aws_apigatewayv2_api.websocket_api -auto-approve
 terraform apply -auto-approve
 
 

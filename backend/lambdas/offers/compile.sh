@@ -1,34 +1,55 @@
-lambda_name=$1
-output_dir=$2
-
-if [ -z "$lambda_name" ]; then
-  echo "Lambda name is required"
-  exit 1
-fi
+output_dir=$1
 
 if [ -z "$output_dir" ]; then
   echo "Output directory is required"
   exit 1
 fi
 
-# Build the lambda
-cd lambdas/offers/$lambda_name
 npm ci
-npm run compile
 
+lambdas=./functions/*/
 
-# Zip the lambda
-mkdir -p ../../../$output_dir  # Create the output directory if it doesn't exist
-rm -rf temp_zip_directory || true # Remove the previous output directory. Ignore errors if doesn't exist
-mkdir temp_zip_directory # Create a temporary directory for zipping files
-cp -r node_modules amazon-root-ca.pem package.json package-lock.json dist temp_zip_directory # Copy required files and directories into the temporary directory
-cd temp_zip_directory # Change the current directory to the temporary directory
-mv dist/index.js index.js # Move index.js from the dist directory to the root of temp_zip_directory
-rm -rf ../../../../$output_dir/$lambda_name.zip # Remove any existing zip file in the output directory to avoid conflicts
-zip -qr ../../../../$output_dir/$lambda_name.zip * # Zip all contents of the temporary directory into a single zip file in the output directory
-cd ..
-rm -rf temp_zip_directory # Remove the temporary directory and its contents after zipping
+pwd="$(pwd)"
+tmp_tsc_dir=$PWD/tmp/tsc
+tmp_zip_dir=$PWD/tmp/zip
 
-cd ../../../
+for lambda_dir in $lambdas; do
+  lambda_name=$(basename "$lambda_dir") 
 
-echo "Created $output_dir/$lambda_name.zip"
+  rm -rf "$tmp_zip_dir" || true
+  mkdir -p "$tmp_zip_dir"
+  cp -r node_modules amazon-root-ca.pem package.json package-lock.json $tmp_zip_dir
+  cp -r $lambda_dir/. $tmp_zip_dir
+  cd $tmp_zip_dir
+  find . -name "*.ts" -type f -delete
+
+  cd $pwd
+
+  rm -rf "$tmp_tsc_dir" || true
+  mkdir -p "$tmp_tsc_dir"
+  cp -r shared tsconfig.json $tmp_tsc_dir
+
+  cp -r $lambda_dir/. $tmp_tsc_dir
+
+  cd $tmp_tsc_dir
+  npx tsc && npx tsc-alias
+
+  find . -name "*.map" -type f -delete
+
+  cp -r dist/. $tmp_zip_dir
+
+  cd $tmp_zip_dir
+
+  zip_file=$output_dir/$lambda_name.zip
+
+  rm -rf $zip_file
+
+  zip -qr $zip_file *
+
+  cd $pwd
+
+  echo "Created $zip_file"
+done
+
+rm -rf $tmp_tsc_dir
+rm -rf $tmp_zip_dir

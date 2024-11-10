@@ -12,7 +12,7 @@ module "vpc_endpoint_sns" {
         {
             Effect = "Allow"
             Action = ["sns:Publish"] # Use SNS-specific action
-            Resource = aws_sns_topic.auction_topic.arn
+            Resource = "*"
             PrincipalArn = data.aws_iam_role.iam_role_labrole.arn
         }
     ]

@@ -34,6 +34,27 @@ api.interceptors.request.use(
   }
 );
 
+export type ErrorResponse = {
+  error: string;
+}; 
+
+type Response<T> = T | ErrorResponse;
+
+const isErrorResponse = <T>(response: Response<T>): response is ErrorResponse => {
+  return typeof response === 'object' && response && 'error' in response;
+}
+
+const sendOrFail = async <T>(request: () => Promise<T>, defaultErrorMessage: string): Promise<T | ErrorResponse> => {
+  try {
+    return await request();
+  } catch (error) {
+    if (error instanceof Error) {
+      return { error: error.message };
+    }
+    return { error: defaultErrorMessage };
+  }
+};    
+
 // Function to fetch auctions
 export const fetchAuctions = async (): Promise<AuctionCardType[]> => {
   try {
@@ -226,4 +247,16 @@ export const fetchUserBalance = async (): Promise<UserBalance> => {
     return { total: 0, available: 0 };
   }
 }
+
+export const addFunds = async (amount: number): Promise<Response<UserBalance>> =>
+  sendOrFail(async () => {
+    const response = await api.put<Response<UserBalance>>('/funds', { amount });
+    const data = response.data;
+    if (response.status === 200 || response.status === 201) {
+      return data;
+    } else {
+      const message = isErrorResponse(data) ? data.error : response.statusText;
+      throw new Error(`Failed to add funds: ${message}`);
+    }
+  }, "Failed to add funds");
 

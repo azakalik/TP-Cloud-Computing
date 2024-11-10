@@ -21,6 +21,7 @@ type NavBarLink = {
 
 const navBarLinks: NavBarLink[] = [
   { to: '/', text: 'Home' },
+  { to: "/add_funds", text: "Add funds" },
   { to: '/new_auction', text: 'Add an auction' },
   { to: '/about_us', text: 'About us' },
 ];
@@ -37,7 +38,7 @@ export function NavBar() {
            <Group h="100%" gap={0} visibleFrom="sm">
               {
                 navBarLinks.map((link) => (
-                  <Link to={link.to} className={classes.link}>{link.text}</Link>
+                  <Link key={link.to} to={link.to} className={classes.link}>{link.text}</Link>
                 ))
               }
            </Group>
@@ -66,7 +67,7 @@ export function NavBar() {
 
            {
              navBarLinks.map((link) => (
-               <Link to={link.to} className={classes.link}>{link.text}</Link>
+               <Link key={link.to} to={link.to} className={classes.link}>{link.text}</Link>
              ))
            }
  

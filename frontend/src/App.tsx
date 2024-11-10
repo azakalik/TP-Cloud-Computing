@@ -24,6 +24,7 @@ import SignUpPage from "./pages/SignUpPage";
 import VerifyPage from "./pages/Verification";
 import useUserBalanceStore from "./stores/useBalanceStore";
 import { useEffect } from "react";
+import AddFundsPage from "./pages/AddFundsPage";
 
 Amplify.configure(awsconfig);
 
@@ -49,6 +50,7 @@ export default function App() {
             <Route path="/auction/:id" element={<Layout><AuctionDetailPage /></Layout>} />
             <Route path="/my_auctions" element={<Layout><MyAuctionsPage /></Layout>} />
             <Route path="/new_auction" element={<Layout><NewAuctionPage /></Layout>} />
+            <Route path="/add_funds" element={<Layout><AddFundsPage /></Layout>} />
             <Route path="/about_us" element={<Layout><AboutUsPage /></Layout>} />
           </Route>
         </Routes>

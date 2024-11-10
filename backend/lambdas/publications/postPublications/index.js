@@ -1,13 +1,37 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, PutItemCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
+import AWS from 'aws-sdk';
 import { v4 as uuidv4 } from "uuid";
 import { SNSClient, CreateTopicCommand, TagResourceCommand } from "@aws-sdk/client-sns";
+import { jwtDecode } from 'jwt-decode';
+
 
 // Initialize clients
 const dynamoDB = new DynamoDBClient({ region: process.env.AWS_REGION });
 const s3 = new S3Client({ region: process.env.AWS_REGION });
 // Initialize SNS client
 const snsClient = new SNSClient({ region: process.env.AWS_REGION }); // Replace with your AWS region
+
+// Initialize EventBridge and define the rule name and target Lambda ARN
+const eventbridge = new AWS.EventBridge();
+const baseRuleName = 'notify-auction-end'; 
+const targetLambdaArn = process.env.SEND_EMAIL_LAMBDA_ARN;
+const tableName = process.env.TABLE_NAME;
+
+const getJwtPayload = async (request) => {
+    const token = request?.headers?.['authorization'];
+    if (!token) {
+        throw new Error('Authorization token is missing');
+    }
+    const regex = /Bearer (.+)/;
+    const match = token.match(regex);
+    if (!match) {
+        throw new Error('Invalid authorization token');
+    }
+    const jwt = match[1];
+    const payload = await jwtDecode(jwt);
+    return payload;
+}
 
 
 function getExtensionFromBase64(base64String) {
@@ -48,14 +72,14 @@ async function createSNSTopic(publicationId) {
 
 export const handler = async (event) => {
     
-    let publicationId, initialTime, endTimeISO, item1, imageUrl;
+    let rawPublicationId, publicationId, initialTime, endTimeISO, item1, imageUrl;
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)
         const { user, initialPrice, endTime, title, description, images, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
     
         // Generate unique publication ID and timestamps
-        const rawPublicationId = uuidv4()
+        rawPublicationId = uuidv4()
         await createSNSTopic(rawPublicationId)
         publicationId = `PUBID#${rawPublicationId}`;
         initialTime = new Date().toISOString();
@@ -84,7 +108,7 @@ export const handler = async (event) => {
         imageUrl = `https://${bucketName}.s3.amazonaws.com/${filename}`;
     
         // Prepare DynamoDB item with image URL and country
-        const tableName = process.env.TABLE_NAME;
+
         item1 = {
             TableName: tableName,
             Item: {
@@ -113,15 +137,60 @@ export const handler = async (event) => {
         // Insert the items into DynamoDB
         await dynamoDB.send(new PutItemCommand(item1));
 
+    } catch (error) {
+        console.error(error);
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ message: "Error inserting data into DynamoDB", error })
+        };
+    }
+
+    try {
+        // Schedule an EventBridge event when the publication ends
+        const ruleName = `${baseRuleName}-${rawPublicationId}`;
+        //const scheduleExpression = `cron(${new Date(endTimeISO).getUTCMinutes()} ${new Date(endTimeISO).getUTCHours()} ${new Date(endTimeISO).getUTCDate()} ${new Date(endTimeISO).getUTCMonth() + 1} ? ${new Date(endTimeISO).getUTCFullYear()})`;
+        // create a cron job to run in 5 minutes of the lambda execution
+        const scheduleExpression = `cron(${new Date().getUTCMinutes() + 2} ${new Date().getUTCHours()} ${new Date().getUTCDate()} ${new Date().getUTCMonth() + 1} ? ${new Date().getUTCFullYear()})`;
+        
+        // Create or update the EventBridge rule
+        await eventbridge.putRule({
+            Name: ruleName,
+            ScheduleExpression: scheduleExpression,
+            State: 'ENABLED'
+        }).promise();
+
+        await eventbridge.enableRule({ Name: ruleName }).promise();
+
+        // Add the target Lambda function with the message as input
+        await eventbridge.putTargets({
+            Rule: ruleName,
+            Targets: [
+            {
+                Id: '1',
+                //Arn: targetLambdaArn,
+                Arn: targetLambdaArn,
+                Input: JSON.stringify({ publicationId: publicationId, email: (await getJwtPayload(event)).email })
+            }
+            ]
+        }).promise();
+
         return {
             statusCode: 200,
             body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: publicationId })
         };
     } catch (error) {
         console.error(error);
+        // remove the item from DynamoDB if the scheduling fails
+        await dynamoDB.send(new DeleteItemCommand({
+            TableName: tableName,
+            Key: {
+                PK: { S: publicationId },
+                SK: { S: publicationId }
+            }
+        }));
         return {
             statusCode: 500,
-            body: JSON.stringify({ message: "Error inserting data into DynamoDB", error })
+            body: JSON.stringify({ message: "Error scheduling the closing event", error })
         };
     }
 };

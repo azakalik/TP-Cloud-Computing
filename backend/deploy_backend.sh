@@ -10,9 +10,9 @@ for arg in "$@"; do
   fi
 done
 
-
 # Define directories
 CWD="$(pwd)"
+CHECK_SNS_SUB="lambdas/checkSnSSuscription"
 SUSCRIBE_SNS_DIR="lambdas/suscribeSnS"
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
@@ -25,7 +25,6 @@ ENV_FILE="../frontend/.env"
 
 
 terraform init
-
 
 # Create the output directory if it doesn't exist
 if [ ! -d "$OUTPUT_DIR" ]; then
@@ -53,6 +52,20 @@ if [ "$NO_BUILD" = false ]; then
     echo "$SUSCRIBE_SNS_DIR does not exist."
   fi
 
+
+  if [ -d "$CHECK_SNS_SUB" ]; then
+    echo "Processing $CHECK_SNS_SUB..."
+    cd "$CHECK_SNS_SUB" || exit
+    
+    npm install
+
+    # Zip the function
+    zip -qr "$OUTPUT_DIR/checkSnsSub.zip" index.js node_modules package.json package-lock.json
+    cd - || exit
+    echo "Created $OUTPUT_DIR/checkSnsSub.zip"
+  else
+      echo "$CHECK_SNS_SUB does not exist."
+  fi
 
 
 
@@ -86,7 +99,6 @@ if [ "$NO_BUILD" = false ]; then
     echo "$DISCONNECT_DIR does not exist."
   fi
 
-
   # Create zip files for the notification lambda
   if [ -d "$NOTIFICATIONS_DIR" ]; then
     echo "Processing $NOTIFICATIONS_DIR..."
@@ -102,7 +114,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "$NOTIFICATIONS_DIR does not exist."
   fi
 
-  # Create zip files for the connect lambda
+  # Create zip files for the getPublications lambda
   if [ -d "$GET_PUBLICATIONS_DIR" ]; then
     echo "Processing $GET_PUBLICATIONS_DIR..."
     cd "$GET_PUBLICATIONS_DIR" || exit
@@ -117,7 +129,7 @@ if [ "$NO_BUILD" = false ]; then
     echo "$GET_PUBLICATIONS_DIR does not exist."
   fi
 
-  # Create zip files for the connect lambda
+  # Create zip files for the postPublications lambda
   if [ -d "$POST_PUBLICATIONS_DIR" ]; then
     echo "Processing $POST_PUBLICATIONS_DIR..."
     cd "$POST_PUBLICATIONS_DIR" || exit

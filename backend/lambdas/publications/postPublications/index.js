@@ -169,14 +169,14 @@ export const handler = async (event) => {
                 Id: '1',
                 //Arn: targetLambdaArn,
                 Arn: targetLambdaArn,
-                Input: JSON.stringify({ publicationId: publicationId, email: (await getJwtPayload(event)).email })
+                Input: JSON.stringify({ publicationId: rawPublicationId, email: (await getJwtPayload(event)).email })
             }
             ]
         }).promise();
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: publicationId })
+            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: rawPublicationId })
         };
     } catch (error) {
         console.error(error);

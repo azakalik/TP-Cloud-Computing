@@ -71,7 +71,7 @@ module "lambda_create_publication" {
   env_vars = {
     BUCKET_NAME = aws_s3_bucket.publication_images.bucket
     TABLE_NAME = aws_dynamodb_table.publications.name
-    SEND_EMAIL_LAMBDA_ARN = aws_lambda_function.send_msg_disc.arn
+    SEND_EMAIL_LAMBDA_ARN = module.lambda_notify_winner.arn
   }
 
   api_gw_id = aws_apigatewayv2_api.api_http.id
@@ -227,6 +227,15 @@ module "lambda_notify_winner" {
   }
 }
 
+resource "aws_lambda_permission" "allow_eventbridge_invoke" {
+  statement_id  = "EventBridgeInvokePermission"
+  action        = "lambda:InvokeFunction"
+  function_name = module.lambda_notify_winner.arn
+  principal     = "events.amazonaws.com"
+  # Allow all EventBridge rules in the region and account to invoke the Lambda
+  source_arn    = "arn:aws:events:${var.aws_region}:${data.aws_caller_identity.current.account_id}:rule/*"
+}
+
 # COGNITO AUTHORIZER
 resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
   api_id = aws_apigatewayv2_api.api_http.id
@@ -236,6 +245,6 @@ resource "aws_apigatewayv2_authorizer" "cognito_authorizer" {
   
   jwt_configuration {
     audience = [aws_cognito_user_pool_client.ez_auction_pool_client.id]  # Specify the Cognito app client ID
-    issuer = "https://cognito-idp.us-east-1.amazonaws.com/${aws_cognito_user_pool.ez_auction_user_pool.id}"      # Use the user pool's endpoint
+    issuer = "https://cognito-idp.${var.aws_region}.amazonaws.com/${aws_cognito_user_pool.ez_auction_user_pool.id}"      # Use the user pool's endpoint
   }
 }

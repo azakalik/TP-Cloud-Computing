@@ -1,6 +1,5 @@
 import {
    Group,
-   Button,
    Divider,
    Box,
    Burger,
@@ -13,8 +12,21 @@ import {
  import classes from '../css-modules/NavBar.module.css';
 import { SignOutButton } from './SignInButton';
 import { Link } from 'react-router-dom';
+import { BalanceContainer } from './BalanceContainer';
+
+type NavBarLink = {
+  to: string;
+  text: string;
+};
+
+const navBarLinks: NavBarLink[] = [
+  { to: '/', text: 'Home' },
+  { to: '/new_auction', text: 'Add an auction' },
+  { to: '/about_us', text: 'About us' },
+];
+
  
- export function NavBar() {
+export function NavBar() {
    const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
    return (
      <Box>
@@ -23,11 +35,14 @@ import { Link } from 'react-router-dom';
            <Image src="/logo.jpeg" alt="eZAuction" h={50}/>
  
            <Group h="100%" gap={0} visibleFrom="sm">
-              <Link to='/' className={classes.link}>Home</Link>
-              {/* <Link to='/my_auctions' className={classes.link}>My auctions</Link> */}
-              <Link to='/new_auction' className={classes.link}>Add an auction</Link>
-              <Link to='/about_us' className={classes.link}>About us</Link>
+              {
+                navBarLinks.map((link) => (
+                  <Link to={link.to} className={classes.link}>{link.text}</Link>
+                ))
+              }
            </Group>
+
+           <BalanceContainer />              
  
            <Group visibleFrom="sm">
              <SignOutButton />
@@ -42,28 +57,23 @@ import { Link } from 'react-router-dom';
          onClose={closeDrawer}
          size="100%"
          padding="md"
-         title="Navigation"
+         title="EZAuction"
          hiddenFrom="sm"
          zIndex={1000000}
        >
          <ScrollArea h={`calc(100vh - ${rem(80)})`} mx="-md">
            <Divider my="sm" />
- 
-           <a href="#" className={classes.link}>
-             Home
-           </a>
-           <a href="#" className={classes.link}>
-             Learn
-           </a>
-           <a href="#" className={classes.link}>
-             Academy
-           </a>
+
+           {
+             navBarLinks.map((link) => (
+               <Link to={link.to} className={classes.link}>{link.text}</Link>
+             ))
+           }
  
            <Divider my="sm" />
  
            <Group justify="center" grow pb="xl" px="md">
-             <Button variant="default">Log in</Button>
-             <Button>Sign up</Button>
+            <SignOutButton />
            </Group>
          </ScrollArea>
        </Drawer>

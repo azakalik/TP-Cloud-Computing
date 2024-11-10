@@ -7,6 +7,7 @@ import AuctionInitialHighestBid from "../../shared_types/AuctionCurrentHighestBi
 import NewBidType from "../../shared_types/NewBidType";
 import axios from "axios";
 import {Auth} from "aws-amplify";
+import { UserBalance } from "./stores/useBalanceStore";
 
 const api = axios.create({
   baseURL: `${API_GW_URL}`
@@ -210,4 +211,19 @@ export const uploadNewAuction = async (
     return false; // Failure
   }
 };
+
+export const fetchUserBalance = async (): Promise<UserBalance> => {
+  try {
+    const response = await api.get('/funds');
+
+    if (response.status === 200) {
+      return response.data;
+    } else {
+      throw new Error(`Failed to fetch balance: ${response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Failed to fetch balance:", error);
+    return { total: 0, available: 0 };
+  }
+}
 

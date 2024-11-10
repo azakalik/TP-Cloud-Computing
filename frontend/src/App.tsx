@@ -22,10 +22,18 @@ import PrivateRoute from "./components/PrivateRoute";
 import SignInPage from "./pages/SignInPage";
 import SignUpPage from "./pages/SignUpPage";
 import VerifyPage from "./pages/Verification";
+import useUserBalanceStore from "./stores/useBalanceStore";
+import { useEffect } from "react";
 
 Amplify.configure(awsconfig);
 
 export default function App() {
+  const {fetchBalance} = useUserBalanceStore();
+
+  useEffect(() => {
+    fetchBalance();
+  }, [fetchBalance]);
+
   return (
     <MantineProvider theme={theme}>
       <Router>

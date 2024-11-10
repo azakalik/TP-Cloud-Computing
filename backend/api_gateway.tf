@@ -186,7 +186,7 @@ module "lambda_get_funds" {
 
 module "lambda_notify_winner" {
   # TODO: Add the SNS dependency
-  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy, module.vpc_endpoint_sns ]
   source = "./iacModules/lambda"
 
   function_name = "ezauction-lambda-notify-winner"
@@ -195,7 +195,8 @@ module "lambda_notify_winner" {
   env_vars = {
     RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
     SECRET_NAME = var.rds_credentials_secret_name
-    # TODO: SNS env vars
+    SNS_ENDPOINT = "https://${module.vpc_endpoint_sns.endpoint}"
+    ACCOUNT_ID = data.aws_caller_identity.current.account_id
   }
 
   vpc_config = {

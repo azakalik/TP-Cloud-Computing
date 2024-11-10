@@ -1,8 +1,11 @@
+import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
 import { getHighestOffer } from '@shared/getHighestOffer';
 import { offersHandler } from '@shared/mainHandler';
 import { validateBody } from '@shared/validateBody';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 
+const region = process.env.AWS_REGION;
+const accountId = process.env.ACCOUNT_ID;
 const balanceTableName = "balance";
 const closedAuctionsTableName = "closed_auctions";
 
@@ -56,7 +59,24 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             [publicationId, user_id, price, time]
         );
 
-        // TODO: Notify the winner via SNS
+        // Notify the winner through sns
+        const topicArn = `arn:aws:sns:${region}:${accountId}:${publicationId}`;
+        const snsEndpoint = process.env.SNS_ENDPOINT;
+        if (!snsEndpoint) {
+            throw new Error('SNS endpoint is not provided');
+        }
+
+        const snsClient = new SNSClient({
+            region,
+            endpoint: snsEndpoint
+        });
+
+        const snsParams = {
+            TopicArn: topicArn,
+            Message: `The winner of the auction is user ${user_id} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`,
+        };
+
+        await snsClient.send(new PublishCommand(snsParams));
 
         return {
             statusCode: 200,

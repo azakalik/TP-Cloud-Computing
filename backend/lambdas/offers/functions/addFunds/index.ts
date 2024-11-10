@@ -1,9 +1,9 @@
 import { BalanceTable } from '@shared/balanceTable';
 import { CognitoJwtPayload, getJwtPayload } from '@shared/getJwtPayload';
+import { getUserBalance } from '@shared/getUserBalance';
 import { offersHandler } from '@shared/mainHandler';
 import { validateBody } from '@shared/validateBody';
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import { JwtPayload } from 'jwt-decode';
 
 const tableName = "balance";
 
@@ -15,8 +15,11 @@ const asserter = (body: RequestBody): string | null => {
     if (!body) {
         return 'Offer is required';
     }
-    if (!body.amount) {
+    if (!body.amount && body.amount !== 0) {
         return "Amount is required";
+    }
+    if (typeof body.amount !== 'number') {
+        return "Amount must be a number";
     }
     if (body.amount <= 0) {
         return "Amount must be positive";
@@ -68,24 +71,17 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         const amount = validation.params.amount;
 
-        const userResult = await client.query<BalanceTable>(
-            `SELECT *
-            FROM ${tableName}
-            WHERE user_id = $1;`,
-            [userId]
-        );
-
-        const userExists = userResult.rows.length > 0;
+        const userBalance = await getUserBalance(client, userId);
 
         let newTotal: number;
         let newAvailable: number;
 
-        if (userExists) {
-            const user = userResult.rows[0];
-            newTotal = user.total + amount;
-            newAvailable = user.available + amount;
+        if (userBalance) {
+            const { total, available } = userBalance;
+            newTotal = total + amount;
+            newAvailable = available + amount;
             await client.query(`
-                UPDATE ${tableName} SET total = total + $1, available = available + $2 WHERE user_id = $3
+                UPDATE ${tableName} SET total = $1, available = $2 WHERE user_id = $3
             `, [newTotal, newAvailable, userId]);
         } else {
             newTotal = amount;

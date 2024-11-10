@@ -134,7 +134,7 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         // Deduct the new offer from the user balance
         const newBalanceResult = await client.query<BalanceTable>(
-            `UPDATE ${balanceTableName} SET available = available - $1 WHERE user_id = $2`,
+            `UPDATE ${balanceTableName} SET available = available - $1 WHERE user_id = $2 RETURNING *`,
             [price, userId]
         );
 

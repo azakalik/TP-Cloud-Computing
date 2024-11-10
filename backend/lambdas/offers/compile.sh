@@ -50,3 +50,6 @@ for lambda_dir in $lambdas; do
 
   echo "Created $zip_file"
 done
+
+rm -rf $tmp_tsc_dir
+rm -rf $tmp_zip_dir

@@ -4,7 +4,7 @@ resource "aws_apigatewayv2_api" "api_http" {
 
   cors_configuration {
     allow_headers = ["Authorization", "Content-Type"]
-    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_methods = ["GET", "POST", "OPTIONS", "PUT"]
     allow_origins = ["*"] # Allow from anywhere
     expose_headers = ["Authorization"]
     max_age = 3600 # Cache CORS preflight responses for 1 hour

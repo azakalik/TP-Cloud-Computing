@@ -26,7 +26,9 @@ module "lambda_suscribe_sns" {
   function_name = "ezauction-lambda-suscribe-sns-mail"
   filename = "./functions_zips/suscribeSns.zip"
   role_arn = data.aws_iam_role.iam_role_labrole.arn
-  env_vars = { }
+  env_vars = { 
+    ACCOUNT_ID = data.aws_caller_identity.current.account_id
+  }
   handler = "main.handler"
 
   api_gw_id = aws_apigatewayv2_api.api_http.id

@@ -1,5 +1,4 @@
 import { SNSClient, SubscribeCommand } from '@aws-sdk/client-sns';
-import { STSClient, GetCallerIdentityCommand } from '@aws-sdk/client-sts';
 import { jwtDecode } from 'jwt-decode';
 
 const getJwtPayload = async (request) => {
@@ -19,7 +18,6 @@ const getJwtPayload = async (request) => {
 
 
 const snsClient = new SNSClient({ region: process.env.AWS_REGION });
-const stsClient = new STSClient({ region: process.env.AWS_REGION });
 
 export const handler = async (request) => {
 
@@ -54,12 +52,11 @@ export const handler = async (request) => {
         }
 
 
-        // Retrieve the AWS Account ID using STS
-        const identity = await stsClient.send(new GetCallerIdentityCommand({}));
-        const accountId = identity.Account;
+     
         
         // Construct the Topic ARN
         const region = process.env.AWS_REGION;
+        const accountId = process.env.ACCOUNT_ID;
         const topicArn = `arn:aws:sns:${region}:${accountId}:${publicationId}`;
         console.log(`Constructed Topic ARN: ${topicArn}`);
 
@@ -71,9 +68,10 @@ export const handler = async (request) => {
         };
         const subscribeResponse = await snsClient.send(new SubscribeCommand(subscribeParams));
 
+        console.log(subscribeResponse);
         // Check if the subscription is pending confirmation
         const subscriptionArn = subscribeResponse.SubscriptionArn;
-        if (subscriptionArn === 'PendingConfirmation') {
+        if (subscriptionArn === 'pending confirmation') {
             console.log(`A confirmation email has been sent to ${email}. Subscription is pending until confirmed.`);
             return {
                 statusCode: 200,

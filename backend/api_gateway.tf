@@ -96,7 +96,7 @@ module "lambda_get_highest_offer" {
   role_arn = data.aws_iam_role.iam_role_labrole.arn
   env_vars = {
     RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
-    DB_SECRET_NAME = var.rds_credentials_secret_name
+    SECRET_NAME = var.rds_credentials_secret_name
   }
 
   api_gw_id = aws_apigatewayv2_api.api_http.id
@@ -105,6 +105,76 @@ module "lambda_get_highest_offer" {
 
   has_jwt_authorizer = true
   authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
+}
+
+module "lambda_add_funds" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-add-funds"
+  filename = "./functions_zips/addFunds.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    SECRET_NAME = var.rds_credentials_secret_name
+  }
+
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "PUT /funds"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }
+}
+
+module "lambda_get_funds" {
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-get-funds"
+  filename = "./functions_zips/getFunds.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    SECRET_NAME = var.rds_credentials_secret_name
+  }
+
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "GET /funds"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+
+  vpc_config = {
+    security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]
+    subnet_ids = local.lambda_subnets
+  }  
+}
+
+module "lambda_notify_winner" {
+  # TODO: Add the SNS dependency
+  depends_on = [ aws_apigatewayv2_api.api_http, data.aws_iam_role.iam_role_labrole, aws_db_proxy.rds_proxy ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-notify-winner"
+  filename = "./functions_zips/notifyWinner.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = {
+    RDS_PROXY_HOST = aws_db_proxy.rds_proxy.endpoint
+    SECRET_NAME = var.rds_credentials_secret_name
+    # TODO: SNS env vars
+  }
 
   vpc_config = {
     security_group_ids = [module.sg_lambda_rds.security_group_id, module.sg_lambda_vpc_endpoint.security_group_id]

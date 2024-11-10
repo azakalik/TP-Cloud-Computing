@@ -29,7 +29,7 @@ const asserter = (body: RequestBody): string | null => {
 
 export const handler = async (event: APIGatewayProxyEventV2) => 
     await offersHandler(async (client) => {
-        const validation = validateBody(event.body, asserter);
+        const validation = validateBody(event, asserter);
 
         if (validation.error !== null) {
             return {

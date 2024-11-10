@@ -12,6 +12,7 @@ done
 
 
 # Define directories
+CHECK_SNS_SUB="lambdas/checkSnSSuscription"
 SUSCRIBE_SNS_DIR="lambdas/suscribeSnS"
 CONNECT_DIR="lambdas/websocketConnect"
 DISCONNECT_DIR="lambdas/websocketDisconnect"
@@ -21,6 +22,7 @@ POST_PUBLICATIONS_DIR="lambdas/publications/postPublications"
 OFFERS_DIR="lambdas/offers"
 OUTPUT_DIR="functions_zips"
 ENV_FILE="../frontend/.env"
+
 
 
 terraform init
@@ -52,6 +54,20 @@ if [ "$NO_BUILD" = false ]; then
     echo "$SUSCRIBE_SNS_DIR does not exist."
   fi
 
+
+  if [ -d "$CHECK_SNS_SUB" ]; then
+    echo "Processing $CHECK_SNS_SUB..."
+    cd "$CHECK_SNS_SUB" || exit
+    
+    npm install
+
+    # Zip the function
+    zip -qr "../../$OUTPUT_DIR/checkSnsSub.zip" index.js node_modules package.json package-lock.json
+    cd - || exit
+    echo "Created $OUTPUT_DIR/checkSnsSub.zip"
+  else
+      echo "$CHECK_SNS_SUB does not exist."
+  fi
 
 
 

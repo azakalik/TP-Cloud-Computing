@@ -14,10 +14,11 @@ import {
   Divider,
   Modal,
   NumberInput,
-  Loader
+  Loader,
+  ActionIcon,
 } from "@mantine/core";
-import { IconClock, IconMoneybag } from "@tabler/icons-react";
-import { fetchAuctionDetail, fetchAuctionInitialHighestBid, uploadBid } from "../api";
+import { IconClock, IconMoneybag, IconBell } from "@tabler/icons-react";
+import { fetchAuctionDetail, fetchAuctionInitialHighestBid, fetchIsSubscribedToSnS, postSubscriptionToSnS, uploadBid } from "../api";
 import AuctionDetailType from "../../../shared_types/AuctionDetailType";
 import {
   createHighestBidWebsocket,
@@ -39,16 +40,12 @@ const AuctionDetailPage: React.FC = () => {
   const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // @ts-ignore
-  const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);  // todo use this to show the highest bidder
-  const [newHighestBidAnimation, setNewHighestBidAnimation] =
-    useState<boolean>(false);
-
-  // useRef for the WebSocket connection
+  const [highestBidUserId, setHighestBidUserId] = useState<string | null>(null);
+  const [newHighestBidAnimation, setNewHighestBidAnimation] = useState<boolean>(false);
+  const [isSubscribed, setisSubscribed] = useState<boolean | null>(null);
+  const [emailMessage, setEmailMessage] = useState("");
   const websocketRef = useRef<WebSocket | null>(null);
 
-  // Keep the min bid amount in sync with the highest bid
   useEffect(() => {
     const handleDisableBidButton = () => {
       if (typeof bidAmount === "string") {
@@ -62,37 +59,34 @@ const AuctionDetailPage: React.FC = () => {
     setDisableBidButton(handleDisableBidButton());
   }, [bidAmount, minBidAmount]);
 
-  // Initialize the highest bid with a value from DB on page load
   useEffect(() => {
     if (highestBid !== null) {
       return;
     }
 
-  fetchAuctionInitialHighestBid(id!).then((data) => {
-    if (highestBid === null) {
-      setHighestBid(data.price);
-    }});
-  }, [id, highestBid])
+    fetchAuctionInitialHighestBid(id!).then((data) => {
+      if (highestBid === null) {
+        setHighestBid(data.price);
+      }
+    });
+  }, [id, highestBid]);
 
-
-  // When a new highest bid is received, set the animation to true and reset it after 500ms
   useEffect(() => {
-    setNewHighestBidAnimation(true); // Set the animation to true
-    const timer = setTimeout(() => setNewHighestBidAnimation(false), 500); // Reset animation after 500ms
+    setNewHighestBidAnimation(true);
+    const timer = setTimeout(() => setNewHighestBidAnimation(false), 500);
     return () => clearTimeout(timer);
   }, [highestBid]);
 
   useEffect(() => {
-    if (auctionDetail) { // If the auction details are already loaded, don't fetch them again
+    if (auctionDetail) {
       return;
     }
     fetchAuctionDetail(id!).then((data) => {
       setAuctionDetail(data);
       setLoading(false);
-    }); // Fetch the bid details when the component mounts
+    });
   }, [id, auctionDetail]);
 
-  // Set the initial bid amount when the auction details are loaded
   useEffect(() => {
     if (highestBid !== null) {
       setMinBidAmount(highestBid);
@@ -104,19 +98,36 @@ const AuctionDetailPage: React.FC = () => {
       if (!id) {
         return;
       }
-  
-      // Create the WebSocket when the component mounts
+
       websocketRef.current = await createHighestBidWebsocket(setHighestBid, setHighestBidUserId, id);
-  
-      // Cleanup the WebSocket when the component unmounts
+
       return () => {
         if (websocketRef.current) {
           destroyHighestBidWebsocket(websocketRef.current);
         }
       };
-    }
+    };
     callback();
-  }, [id]); // Add publicationId to the dependency array if it can change
+  }, [id]);
+
+
+
+  useEffect(() => {
+    const checkIfisSubscribedToSnS = async () => {
+
+      try {
+        const isSubscribed = await fetchIsSubscribedToSnS(id!);
+        setisSubscribed(isSubscribed);
+
+      } catch (err) {
+        console.log("Could not subscribe", err);
+      }
+    
+    }
+
+    checkIfisSubscribedToSnS();
+  }, []);
+
 
   if (!id) {
     return <Text>Bid not found!</Text>;
@@ -142,6 +153,22 @@ const AuctionDetailPage: React.FC = () => {
     setBidSuccessful(false);
   };
 
+  const handleSubscribe = async () => {
+    // This is where you can add your subscription callback logic
+    try {
+      const isSubscribed = await postSubscriptionToSnS(id!);
+      if (isSubscribed){
+        setisSubscribed(isSubscribed);
+        setEmailMessage("Check your email to confirm the subscription please");
+      }
+    } catch (err) {
+      console.log(err);
+      setisSubscribed(false);
+    }
+    
+    console.log("User subscribed to notifications.");
+  };
+
   return (
     <Container mb="30">
       <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -153,10 +180,11 @@ const AuctionDetailPage: React.FC = () => {
           <Grid.Col span={7}>
             <Group mt="md" mb="xs">
               <Title>{auctionDetail.title}</Title>
-              {
-                // Show the country flag if available
-                auctionDetail.countryFlag && <Badge color="blue" variant="light">{auctionDetail.countryFlag}</Badge>
-              }
+              {auctionDetail.countryFlag && (
+                <Badge color="blue" variant="light">
+                  {auctionDetail.countryFlag}
+                </Badge>
+              )}
             </Group>
 
             <Text size="md" color="dimmed" style={{ lineHeight: 1.8 }}>
@@ -194,10 +222,10 @@ const AuctionDetailPage: React.FC = () => {
                   >
                     {
                       highestBid ?
-                      `$${highestBid}` :
-                      <Loader size='md' type="dots" color="#F39C12"/>
+                        `$${highestBid}` :
+                        <Loader size='md' type="dots" color="#F39C12" />
                     }
-                    
+
                   </Text>
                 </Stack>
               </Grid.Col>
@@ -229,6 +257,28 @@ const AuctionDetailPage: React.FC = () => {
 
             <Divider my="lg" />
 
+            {/* Subscription Bell Icon */}
+            {isSubscribed !== null &&
+              <Group position="center" spacing="xs" mb="md">
+                <ActionIcon
+                  onClick={isSubscribed ? undefined : handleSubscribe} // Disable onClick when subscribed
+                  size="xl"
+                  radius="xl"
+                  style={{
+                    cursor: isSubscribed ? "not-allowed" : "pointer", // Change cursor to indicate clickable state
+                  }}
+                  disabled={isSubscribed} // Disable button when subscribed
+                  
+                >
+                  <IconBell size={24} />
+                </ActionIcon>
+                <Text>{isSubscribed ? "Subscribed" : "Subscribe to notifications"}</Text>
+                <Text style={{color: "green"}}>{emailMessage}</Text>
+              </Group>
+            }
+
+
+
             {/* Call to Action */}
             <Button
               size="xl"
@@ -250,7 +300,7 @@ const AuctionDetailPage: React.FC = () => {
         {/* Modal for bidding */}
         <Modal
           opened={bidModalOpened}
-          onClose={() => {}} // don't allow closing by clicking outside
+          onClose={() => { }} // don't allow closing by clicking outside
           withCloseButton={false}
         >
           {bidSuccessful ? (
@@ -276,8 +326,7 @@ const AuctionDetailPage: React.FC = () => {
                 min={minBidAmount}
                 prefix="$"
                 allowNegative={false}
-                decimalScale={2} // Allow only 2 decimal places
-                defaultValue={2.2}
+                decimalScale={2}
                 decimalSeparator="."
                 thousandSeparator=","
                 leftSection={<IconMoneybag />}

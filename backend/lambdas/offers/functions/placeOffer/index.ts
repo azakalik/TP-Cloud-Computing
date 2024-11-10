@@ -85,15 +85,6 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         const {publicationId, price} = offer;
 
-        // Check user has enough funds
-        const balance = await getUserBalance(client, userId);
-        if (!balance || balance.available < price) {
-            return {
-                statusCode: 400,
-                body: {error: 'Insufficient funds'},
-            };
-        }
-
         // Check the auction is still open
         const auction = await client.query<{exists: boolean}>(
             `SELECT EXISTS (
@@ -124,8 +115,20 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             };
         }
 
-        // Refund the previous highest offer
-        if (highestOffer) {
+        const previousUserId = highestOffer ? highestOffer.user_id : null;
+
+        // Check user has enough funds
+        const balance = await getUserBalance(client, userId);
+        const difference = previousUserId === userId ? (price - currentPrice) : price;
+        if (!balance || balance.available < difference) {
+            return {
+                statusCode: 400,
+                body: {error: 'Insufficient funds'},
+            };
+        }
+
+        // Refund the previous highest offer, if the user is different
+        if (highestOffer && previousUserId !== userId) {
             const previousUserId = highestOffer.user_id;
             await client.query(
                 `UPDATE ${balanceTableName} SET available = available + $1 WHERE user_id = $2`,
@@ -133,10 +136,10 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             );
         }
 
-        // Deduct the new offer from the user balance
+        // Deduct the new offer from the user balance (if the previous highest offer was from the same user, only deduct the difference)
         const newBalanceResult = await client.query<BalanceTable>(
             `UPDATE ${balanceTableName} SET available = available - $1 WHERE user_id = $2 RETURNING *`,
-            [price, userId]
+            [difference, userId]
         );
 
         const newBalance = newBalanceResult.rows[0];

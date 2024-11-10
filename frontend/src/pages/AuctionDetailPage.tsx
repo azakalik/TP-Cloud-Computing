@@ -25,6 +25,8 @@ import {
   destroyHighestBidWebsocket,
 } from "../websocket";
 import { displayLocalDate } from "../utils";
+import useUserBalanceStore from "../stores/useBalanceStore";
+import useUserStore from "../stores/useUserStore";
 
 const AuctionDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>(); // Grab the bid id from the URL
@@ -37,7 +39,8 @@ const AuctionDetailPage: React.FC = () => {
   const [minBidAmount, setMinBidAmount] = useState<number>(0);
   const [bidAmount, setBidAmount] = useState<number | string>("");
   const [uploadingBid, setUploadingBid] = useState<boolean>(false);
-  const [bidSuccessful, setBidSuccessful] = useState<boolean>(false);
+  const [bidSent, setBidSent] = useState<boolean>(false);
+  const [bidError, setBidError] = useState<string>("");
   const [disableBidButton, setDisableBidButton] = useState<boolean>(false);
   const [highestBid, setHighestBid] = useState<number | null>(null);
   //@ts-ignore
@@ -46,6 +49,9 @@ const AuctionDetailPage: React.FC = () => {
   const [isSubscribed, setisSubscribed] = useState<boolean | null>(null);
   const [emailMessage, setEmailMessage] = useState("");
   const websocketRef = useRef<WebSocket | null>(null);
+
+  const {setBalance, fetchBalance} = useUserBalanceStore();
+  const {user} = useUserStore();
 
   useEffect(() => {
     const handleDisableBidButton = () => {
@@ -100,7 +106,15 @@ const AuctionDetailPage: React.FC = () => {
         return;
       }
 
-      websocketRef.current = await createHighestBidWebsocket(setHighestBid, setHighestBidUserId, id);
+      websocketRef.current = await createHighestBidWebsocket(id, (
+        message
+      ) => {
+        setHighestBid(message.highestBid);
+        setHighestBidUserId(message.userId);
+        if (user && message.userId !== user.id) {
+          fetchBalance();
+        }
+      });
 
       return () => {
         if (websocketRef.current) {
@@ -143,15 +157,23 @@ const AuctionDetailPage: React.FC = () => {
 
   const handleBid = async () => {
     setUploadingBid(true);
-    await uploadBid(id!, bidAmount as number); // todo handle errors here
+    const response = await uploadBid(id!, bidAmount as number);
     setUploadingBid(false);
-    setBidSuccessful(true);
+
+    if ("error" in response) {
+      setBidError(response.error);
+    } else {
+      setBidError("");
+      setBalance(response);
+    }
+    setBidSent(true);
   };
 
   const handleCloseModal = () => {
     setBidModalOpened(false);
     setBidAmount("");
-    setBidSuccessful(false);
+    setBidError("");
+    setBidSent(false);
   };
 
   const handleSubscribe = async () => {
@@ -222,9 +244,18 @@ const AuctionDetailPage: React.FC = () => {
                     }}
                   >
                     {
-                      highestBid ?
-                        `$${highestBid}` :
+                      highestBid ? (
+                          <Stack align="center">
+                            <Text size="lg">${highestBid}</Text>
+                            {highestBidUserId && user && highestBidUserId === user.id && (
+                              <Badge color="red" variant="filled" size="sm">
+                                Your bid
+                              </Badge>
+                            )}
+                          </Stack>
+                      ) : (
                         <Loader size='md' type="dots" color="#F39C12" />
+                      )
                     }
 
                   </Text>
@@ -304,18 +335,19 @@ const AuctionDetailPage: React.FC = () => {
           onClose={() => { }} // don't allow closing by clicking outside
           withCloseButton={false}
         >
-          {bidSuccessful ? (
+          {bidSent ? (
             <>
-              <Title order={2}>Bid successful!</Title>
+              <Title order={2}>{bidError ? "Bid failed!" : "Bid successful!"}</Title>
               <Divider my="20" />
               <Text size="lg">
-                Your bid of ${bidAmount} has been successfully placed.
+                {bidError ? bidError : `Your bid of $${bidAmount} has been successfully placed.`}
               </Text>
               <Group mt="md">
                 <Button onClick={handleCloseModal}>Close</Button>
               </Group>
             </>
-          ) : (
+          ) :
+          (
             <>
               <Title order={2}>Enter your bid</Title>
               <Divider my="20" />

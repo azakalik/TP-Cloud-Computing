@@ -2,14 +2,10 @@ import { HIGHEST_BID_WS_URL } from "./constants";
 import HighestBidWebSocketMessage from "../../shared_types/HighestBidWebSocketMessage";
 import { Auth } from "aws-amplify";
 
-type SetHighestBid = (bid: number) => void;
-type SetUserId = (userId: string) => void;
-
 export async function createHighestBidWebsocket(
-  setHighestBid: SetHighestBid,
-  setUserId: SetUserId,
   publicationId: string, // Accept publicationId as a parameter
-  url: string = HIGHEST_BID_WS_URL
+  onBid: (message: HighestBidWebSocketMessage) => void,
+  url: string = HIGHEST_BID_WS_URL,
 ): Promise<WebSocket> {
   // Append publicationId as a query parameter to the WebSocket URL
   let char;
@@ -41,8 +37,7 @@ export async function createHighestBidWebsocket(
       console.log("WebSocket message received:", event.data);
       const parsedData: HighestBidWebSocketMessage = JSON.parse(event.data);
       if (parsedData.highestBid !== undefined) {
-        setUserId(parsedData.userId);
-        setHighestBid(parsedData.highestBid);
+        onBid(parsedData);
       }
     } catch (error) {
       console.error("Error parsing WebSocket message:", error);

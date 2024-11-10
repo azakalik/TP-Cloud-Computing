@@ -159,25 +159,25 @@ export const fetchAuctionDetail = async (
 export const uploadBid = async (
   publicationId: string,
   price: number
-): Promise<boolean> => {
-  try {
+): Promise<Response<UserBalance>> => 
+  sendOrFail(async () => {
     const payload: NewBidType = {
       publicationId,
       price,
     };
 
-    const response = await api.post('/offers', payload);
+    const response = await api.post<Response<UserBalance>>('/offers', payload, {
+      validateStatus: () => true,
+    });
+    const data = response.data;
 
     if (response.status === 200 || response.status === 201) {
-      return true; // Success
+      return data;
     } else {
-      throw new Error(`Failed to upload bid: ${response.statusText}`);
+      const message = isErrorResponse(data) ? data.error : response.statusText;
+      throw new Error(message);
     }
-  } catch (error) {
-    console.error("Failed to upload bid:", error);
-    return false; // Return false if there's an error
-  }
-};
+  }, "An error occurred while uploading the bid");
 
 
 // Return true if the auction was uploaded successfully, false otherwise

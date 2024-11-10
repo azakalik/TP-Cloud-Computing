@@ -149,8 +149,10 @@ export const handler = async (event) => {
         // Schedule an EventBridge event when the publication ends
         const ruleName = `${baseRuleName}-${rawPublicationId}`;
         //const scheduleExpression = `cron(${new Date(endTimeISO).getUTCMinutes()} ${new Date(endTimeISO).getUTCHours()} ${new Date(endTimeISO).getUTCDate()} ${new Date(endTimeISO).getUTCMonth() + 1} ? ${new Date(endTimeISO).getUTCFullYear()})`;
-        // create a cron job to run in 5 minutes of the lambda execution
-        const scheduleExpression = `cron(${new Date().getUTCMinutes() + 2} ${new Date().getUTCHours()} ${new Date().getUTCDate()} ${new Date().getUTCMonth() + 1} ? ${new Date().getUTCFullYear()})`;
+        // create a cron job to run in 10 minutes of the lambda execution
+        const date = new Date();
+        date.setUTCMinutes(date.getUTCMinutes() + 10);
+        const scheduleExpression = `cron(${date.getUTCMinutes()} ${date.getUTCHours()} ${date.getUTCDate()} ${date.getUTCMonth() + 1} ? ${date.getUTCFullYear()})`;
         
         // Create or update the EventBridge rule
         await eventbridge.putRule({

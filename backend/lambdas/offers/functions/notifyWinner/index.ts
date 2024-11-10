@@ -9,24 +9,6 @@ const accountId = process.env.ACCOUNT_ID;
 const balanceTableName = "balance";
 const closedAuctionsTableName = "closed_auctions";
 
-type RequestBody = {
-    publicationId: string;
-    email: string;
-}
-
-const asserter = (body: RequestBody): string | null => {
-    if (!body) {
-        return 'Body is required';
-    }
-    if (!body.publicationId) {
-        return 'Publication ID is required';
-    }
-    if (!body.email) {
-        return 'Email is required';
-    }
-    return null;
-}
-
 export const handler = async (event: APIGatewayProxyEventV2) => 
     await offersHandler(async (client) => {
         const { publicationId, email: vendorEmail } = event;
@@ -62,9 +44,12 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             endpoint: snsEndpoint
         });
 
+        const message = user_id === null ? `The auction for publication ${publicationId} has ended with no offers.` :
+            `The winner of the auction for publication ${publicationId} is user ${user_id} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`;
+
         const snsParams = {
             TopicArn: topicArn,
-            Message: `The winner of the auction is user ${user_id} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`,
+            Message: message,
         };
 
         await snsClient.send(new PublishCommand(snsParams));

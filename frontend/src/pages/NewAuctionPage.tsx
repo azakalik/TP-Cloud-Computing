@@ -15,6 +15,7 @@ import { DatePicker } from "@mantine/dates";
 import { FileWithPath } from "@mantine/dropzone";
 import ImageDropzone from "../components/ImageDropzone";
 import { uploadNewAuction } from "../api";
+import { useNavigate } from "react-router-dom";
 
 const AuctionForm = () => {
   const [user, setUser] = useState("");
@@ -27,6 +28,7 @@ const AuctionForm = () => {
   const [files, setFiles] = useState<FileWithPath[]>([]); // Accept files as a state
   // @ts-ignore
   const [countryFlag, setCountryFlag] = useState(""); // todo: add country flag
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -44,6 +46,7 @@ const AuctionForm = () => {
     const return_value = await uploadNewAuction(user, title, description, countryFlag, initialPrice!, files, dueTime);
     if (return_value) {
       alert("Auction created successfully!");
+      navigate("/"); // Redirect to home page
     } else {
       alert("Failed to create auction :(");
     }

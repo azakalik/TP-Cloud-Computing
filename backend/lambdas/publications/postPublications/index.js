@@ -76,7 +76,7 @@ export const handler = async (event) => {
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)
-        const { user, initialPrice, endTime, title, description, images, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
+        const { user, initialPrice, endTime, title, description, contentType, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
     
         // Generate unique publication ID and timestamps
         rawPublicationId = uuidv4()
@@ -85,30 +85,21 @@ export const handler = async (event) => {
         initialTime = new Date().toISOString();
         endTimeISO = new Date(endTime).toISOString();
         
-        const filename = publicationId.replace("PUBID#", "") + "_" + "0" + "." + getExtensionFromBase64(images[0])
-        
-        const base64Image = images[0].replace(/^data:image\/\w+;base64,/, "");
-        const buffer = Buffer.from(base64Image, "base64");
-    
-        // S3 upload parameters with public-read ACL for access
+        const extension = contentType.split('/')[1];  // This will give 'jpeg' for 'image/jpeg'
+        const filename = publicationId.replace("PUBID#", "") + "_" + "0" + "." + extension;
         const bucketName = process.env.BUCKET_NAME;
-        const s3Params = {
+
+        const params = {
             Bucket: bucketName,
             Key: filename,
-            Body: buffer,
-            ContentEncoding: "base64",
-            ContentType: "image/jpeg",
-            ACL: "public-read"
+            ContentType: contentType,
+            Expires: 3600  // URL expiration time in seconds (e.g., 1 hour)
         };
-    
-        // Upload image to S3
-        await s3.send(new PutObjectCommand(s3Params));
-    
-        // Construct the URL of the uploaded image
+        
+        const presignedUrl = await s3.getSignedUrlPromise("putObject", params);
         imageUrl = `https://${bucketName}.s3.amazonaws.com/${filename}`;
-    
+        
         // Prepare DynamoDB item with image URL and country
-
         item1 = {
             TableName: tableName,
             Item: {
@@ -178,7 +169,8 @@ export const handler = async (event) => {
 
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: rawPublicationId })
+            body: JSON.stringify({ message: "Data inserted and image uploaded successfully!", publicationId: rawPublicationId, presignedUrl: presignedUrl
+             })
         };
     } catch (error) {
         console.error(error);

@@ -2,10 +2,9 @@ import { FileWithPath } from "@mantine/dropzone";
 import { API_GW_URL } from "./constants";
 import AuctionCardType from "../../shared_types/AuctionCardType";
 import AuctionDetailType from "../../shared_types/AuctionDetailType";
-import NewAuctionType from "../../shared_types/NewAuctionType";
 import AuctionInitialHighestBid from "../../shared_types/AuctionCurrentHighestBid";
 import NewBidType from "../../shared_types/NewBidType";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import {Auth} from "aws-amplify";
 import { UserBalance } from "./stores/useBalanceStore";
 
@@ -194,60 +193,55 @@ export const uploadBid = async (
     }
   }, "An error occurred while uploading the bid");
 
-
-// Return true if the auction was uploaded successfully, false otherwise
-export const uploadNewAuction = async (
-  user: string,
-  title: string,
-  description: string,
-  countryFlag: string,
-  initialPrice: number,
-  images: FileWithPath[],
-  dueTime: Date
-): Promise<boolean> => {
-  // Function to convert File to base64
-  const getBase64 = (file: FileWithPath): Promise<string | undefined> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        resolve(reader.result?.toString());
-      };
-      reader.onerror = (error) => reject(error);
-    });
+  export const uploadNewAuction = async (
+    user: string,
+    title: string,
+    description: string,
+    countryFlag: string,
+    initialPrice: number,
+    images: FileWithPath[],
+    dueTime: Date
+  ): Promise<boolean> => {
+    try {
+      // Upload auction details and get presigned URL for the image
+      const response = await api.post('/publications', {
+        user,
+        title,
+        description,
+        countryFlag,
+        initialPrice,
+        contentType: images[0].type,
+        initialTime: new Date().toISOString(),
+        endTime: dueTime.toISOString(),
+      });
+  
+      // Check if the response status is ok
+      if (response.status !== 200) {
+        throw new Error("Failed to get presigned URL");
+      }
+  
+      const presignedUrl = response.data.presignedUrl;
+  
+      // Use the presigned URL to upload the image to S3
+      const imageUploadResponse = await fetch(presignedUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': images[0].type,
+        },
+        body: images[0],
+      });
+  
+      if (!imageUploadResponse.ok) {
+        throw new Error("Failed to upload image to S3");
+      }
+  
+      return true; // Auction created successfully
+    } catch (error) {
+      console.error("Error uploading auction:", error);
+      return false; // Failure
+    }
   };
-
-  try {
-    const base64Image = await getBase64(images[0]); // Convert the first image to base64
-
-    if (!base64Image) {
-      throw new Error("Failed to convert image to base64");
-    }
-
-    const payload: NewAuctionType = {
-      user,
-      title,
-      description,
-      countryFlag,
-      initialPrice,
-      images: [base64Image], // Use the base64 encoded image
-      initialTime: new Date().toISOString(), // Current date in ISO format
-      endTime: dueTime.toISOString(), // Due time in ISO format
-    };
-
-    const response = await api.post('/publications', payload);
-
-    if (response.status === 200 || response.status === 201) {
-      return true; // Success
-    } else {
-      throw new Error(`Failed to upload auction: ${response.statusText}`);
-    }
-  } catch (error) {
-    console.error("Error uploading auction:", error);
-    return false; // Failure
-  }
-};
-
+  
 export const fetchUserBalance = async (): Promise<UserBalance> => {
   try {
     const response = await api.get('/funds');

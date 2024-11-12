@@ -12,6 +12,7 @@ done
 
 # Define directories
 CWD="$(pwd)"
+DELETE_SNS_SUB_DIR="lambdas/unsuscribeSnS"
 CHECK_SNS_SUB="lambdas/checkSnSSuscription"
 SUSCRIBE_SNS_DIR="lambdas/suscribeSnS"
 CONNECT_DIR="lambdas/websocketConnect"
@@ -37,6 +38,21 @@ fi
 
 # If --no-build is not passed, run npm install and build for the lambdas
 if [ "$NO_BUILD" = false ]; then
+
+if [ -d "$DELETE_SNS_SUB_DIR" ]; then
+    echo "Processing $DELETE_SNS_SUB_DIR..."
+    cd "$DELETE_SNS_SUB_DIR" || exit
+    
+    npm install
+
+    # Zip the function
+    zip -qr "$OUTPUT_DIR/deleteSnsSub.zip" index.js node_modules package.json package-lock.json
+    cd - || exit
+    echo "Created $OUTPUT_DIR/deleteSnsSub.zip"
+  else
+    echo "$DELETE_SNS_SUB_DIR does not exist."
+  fi
+
 
   if [ -d "$SUSCRIBE_SNS_DIR" ]; then
     echo "Processing $SUSCRIBE_SNS_DIR..."

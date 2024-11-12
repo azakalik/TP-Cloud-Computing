@@ -39,6 +39,28 @@ module "lambda_check_sns_sub" {
 }
 
 
+module "lambda_delete_sns_sub" {
+  depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]
+  source = "./iacModules/lambda"
+
+  function_name = "ezauction-lambda-delete-sns-sub"
+  filename = "./functions_zips/deleteSnsSub.zip"
+  role_arn = data.aws_iam_role.iam_role_labrole.arn
+  env_vars = { 
+    ACCOUNT_ID = data.aws_caller_identity.current.account_id
+  }
+  handler = "index.handler"
+
+  api_gw_id = aws_apigatewayv2_api.api_http.id
+  route_key = "DELETE /publications/suscribeSnS"
+  api_gw_execution_arn = aws_apigatewayv2_api.api_http.execution_arn
+
+  has_jwt_authorizer = true
+  authorizer_id = aws_apigatewayv2_authorizer.cognito_authorizer.id
+}
+
+
+
 
 module "lambda_suscribe_sns" {
   depends_on = [ aws_apigatewayv2_api.api_http, aws_s3_bucket.publication_images, aws_dynamodb_table.publications, data.aws_iam_role.iam_role_labrole ]

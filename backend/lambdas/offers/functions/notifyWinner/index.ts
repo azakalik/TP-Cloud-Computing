@@ -11,7 +11,7 @@ const closedAuctionsTableName = "closed_auctions";
 
 export const handler = async (event: APIGatewayProxyEventV2) => 
     await offersHandler(async (client) => {
-        const { publicationId, email: vendorEmail } = event;
+        const { title: publicationTitle, publicationId, email: vendorEmail } = event;
 
         // Get the highest offer for the publication
         const highestOffer = await getHighestOffer(client, publicationId);
@@ -44,8 +44,8 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             endpoint: snsEndpoint
         });
 
-        const message = user_id === null ? `The auction for publication ${publicationId} has ended with no offers.` :
-            `The winner of the auction for publication ${publicationId} is user ${user_id} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`;
+        const message = user_id === null ? `The auction for publication ${publicationTitle} with id ${publicationId} has ended with no offers.` :
+            `The winner of the auction for publication ${publicationTitle} with id ${publicationId} is user ${user_id} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`;
 
         const snsParams = {
             TopicArn: topicArn,

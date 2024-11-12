@@ -157,7 +157,7 @@ const AuctionDetailPage: React.FC = () => {
 
   const handleBid = async () => {
     setUploadingBid(true);
-    const response = await uploadBid(id!, bidAmount as number);
+    const response = await uploadBid(auctionDetail.title,id!, bidAmount as number);
     setUploadingBid(false);
 
     if ("error" in response) {

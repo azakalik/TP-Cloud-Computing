@@ -172,6 +172,7 @@ export const fetchAuctionDetail = async (
 
 // Return true if the bid was uploaded successfully, false otherwise
 export const uploadBid = async (
+  publicationTitle: string,
   publicationId: string,
   price: number
 ): Promise<Response<UserBalance>> => 
@@ -179,6 +180,7 @@ export const uploadBid = async (
     const payload: NewBidType = {
       publicationId,
       price,
+      publicationTitle,
     };
 
     const response = await api.post<Response<UserBalance>>('/offers', payload, {

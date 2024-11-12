@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { DynamoDBClient, PutItemCommand, DeleteItemCommand } from "@aws-sdk/client-dynamodb";
 import AWS from 'aws-sdk';
 import { v4 as uuidv4 } from "uuid";
@@ -91,7 +92,7 @@ export const handler = async (event) => {
         }
     }
     
-    let rawPublicationId, publicationId, initialTime, endTimeISO, item1, imageUrl, publicationTitle; 
+    let rawPublicationId, publicationId, initialTime, endTimeISO, item1, imageUrl, publicationTitle, presignedUrl; 
     
     try {
         console.log("BODY", event.body);
@@ -117,7 +118,11 @@ export const handler = async (event) => {
             Expires: 3600  // URL expiration time in seconds (e.g., 1 hour)
         };
         
-        const presignedUrl = await s3.getSignedUrlPromise("putObject", params);
+        // Create the PutObjectCommand
+        const command = new PutObjectCommand(params);
+
+        // Generate the presigned URL
+        presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
         imageUrl = `https://${bucketName}.s3.amazonaws.com/${filename}`;
         
         // Prepare DynamoDB item with image URL and country

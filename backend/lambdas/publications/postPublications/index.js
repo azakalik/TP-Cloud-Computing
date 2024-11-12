@@ -115,15 +115,18 @@ export const handler = async (event) => {
             Bucket: bucketName,
             Key: filename,
             ContentType: contentType,
-            Expires: 3600  // URL expiration time in seconds (e.g., 1 hour)
+            ACL: 'public-read' // Grant public-read access
         };
         
+        console.log("Before object")
         // Create the PutObjectCommand
         const command = new PutObjectCommand(params);
 
+        console.log("After object", params)
         // Generate the presigned URL
         presignedUrl = await getSignedUrl(s3, command, { expiresIn: 3600 });
         imageUrl = `https://${bucketName}.s3.amazonaws.com/${filename}`;
+        console.log("After signed url", presignedUrl, imageUrl)
         
         // Prepare DynamoDB item with image URL and country
         item1 = {
@@ -169,7 +172,7 @@ export const handler = async (event) => {
         // create a cron job to run in 10 minutes of the lambda execution
         const date = new Date();
         date.setUTCMinutes(date.getUTCMinutes() + 10);
-        const scheduleExpression = `cron(${date.getUTCMinutes()} ${date.getUTCHours()} ${date.getUTCDate()} ${date.getUTCMonth() + 1} ? ${date.getUTCFullYear()})`;
+        const scheduleExpression = `cron(${date.getUTCMinutes()} ${date.getUTCHours()} ${date.getUTCDate()} ${date.getUTCMonth() + 1} ? 2024)`;
         
         // Create or update the EventBridge rule
         await eventbridge.putRule({

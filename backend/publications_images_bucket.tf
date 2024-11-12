@@ -47,8 +47,7 @@ resource "aws_s3_bucket_acl" "publication_images_acl" {
   acl    = "public-read"
 }
 
-# Public read access policy
-resource "aws_s3_bucket_policy" "publication_images_public_read_policy" {
+resource "aws_s3_bucket_policy" "publication_images_public_policy" {
   bucket = aws_s3_bucket.publication_images.bucket
 
   policy = jsonencode({
@@ -60,7 +59,32 @@ resource "aws_s3_bucket_policy" "publication_images_public_read_policy" {
         Principal = "*",
         Action    = "s3:GetObject",
         Resource  = "${aws_s3_bucket.publication_images.arn}/*"
+      },
+      {
+        Sid       = "PublicUploadPutObject",
+        Effect    = "Allow",
+        Principal = "*",
+        Action    = "s3:PutObject",
+        Resource  = "${aws_s3_bucket.publication_images.arn}/*",
+        Condition = {
+          StringEquals = {
+            "s3:x-amz-acl" = "public-read"
+          }
+        }
       }
     ]
   })
+}
+
+
+resource "aws_s3_bucket_cors_configuration" "publication_images_cors" {
+  bucket = aws_s3_bucket.publication_images.id
+
+  cors_rule {
+    allowed_headers = ["*"]
+    allowed_methods = ["PUT", "GET"]
+    allowed_origins = ["*"]  # Replace with your frontend origin, e.g., ["https://example.com"]
+    expose_headers  = ["ETag"]
+    max_age_seconds = 3000
+  }
 }

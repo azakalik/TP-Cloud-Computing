@@ -71,12 +71,31 @@ async function createSNSTopic(publicationId) {
 
 
 export const handler = async (event) => {
+
+    let payload = null
+    try {
+        payload = await getJwtPayload(event);
+    } catch (error) {
+        console.error('Error while getting JWT payload', error);
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: 'Unauthorized' }),
+        };
+    }
+
+    const user = payload.email;
+    if (!user){
+        return {
+            statusCode: 400,
+            body: JSON.stringify({error: "Missing email in claims"})
+        }
+    }
     
     let rawPublicationId, publicationId, initialTime, endTimeISO, item1, imageUrl;
     
     try {
         // Parse incoming JSON (containing image as base64, filename, and other data)
-        const { user, initialPrice, endTime, title, description, images, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
+        const { initialPrice, endTime, title, description, images, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
     
         // Generate unique publication ID and timestamps
         rawPublicationId = uuidv4()

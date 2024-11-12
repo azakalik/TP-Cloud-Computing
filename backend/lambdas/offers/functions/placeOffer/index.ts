@@ -182,7 +182,7 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         const snsEmailNotificationParams = {
             TopicArn: snsEmailNotificationArn,
-            Message: `user ${userEmail.split("@")[0]} has placed an offer on publication ${publicationId}`
+            Message: `user ${userEmail.split("@")[0]} has placed an offer of $${offer.price} on publication ${publicationId}`
         }
 
         await snsClient.send(new PublishCommand(snsEmailNotificationParams))

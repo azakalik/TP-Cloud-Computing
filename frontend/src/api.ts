@@ -197,7 +197,6 @@ export const uploadBid = async (
 
 // Return true if the auction was uploaded successfully, false otherwise
 export const uploadNewAuction = async (
-  user: string,
   title: string,
   description: string,
   countryFlag: string,
@@ -225,7 +224,6 @@ export const uploadNewAuction = async (
     }
 
     const payload: NewAuctionType = {
-      user,
       title,
       description,
       countryFlag,

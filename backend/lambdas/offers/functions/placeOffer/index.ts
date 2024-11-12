@@ -58,6 +58,9 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
         // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-the-id-token.html
         const userId = payload.sub;
 
+        //@ts-ignore
+        const userEmail : string = payload.email;
+
         if (!userId) {
             console.error('User ID is missing in the JWT payload');
             return {
@@ -173,6 +176,17 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
         };
         
         await snsClient.send(new PublishCommand(snsParams));
+
+        const accountId = process.env.ACCOUNT_ID;
+        const snsEmailNotificationArn = `arn:aws:sns:${region}:${accountId}:${publicationId}`;
+
+        const snsEmailNotificationParams = {
+            TopicArn: snsEmailNotificationArn,
+            Message: `user ${userEmail.split("@")[0]} has placed an offer on publication ${publicationId}`
+        }
+
+        await snsClient.send(new PublishCommand(snsEmailNotificationParams))
+
 
         return {
             statusCode: 200,

@@ -5,7 +5,7 @@ import AuctionDetailType from "../../shared_types/AuctionDetailType";
 import NewAuctionType from "../../shared_types/NewAuctionType";
 import AuctionInitialHighestBid from "../../shared_types/AuctionCurrentHighestBid";
 import NewBidType from "../../shared_types/NewBidType";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import {Auth} from "aws-amplify";
 import { UserBalance } from "./stores/useBalanceStore";
 
@@ -73,6 +73,22 @@ export const fetchAuctions = async (): Promise<AuctionCardType[]> => {
 };
 
 
+export const deleteSubscriptionToSnS = async (publicationId: string): Promise<boolean> => {
+  try {
+    const response = await api.delete(`/publications/suscribeSnS?publicationId=${publicationId}`);
+    return response.status === 200;
+  } catch (err) {
+      if (axios.isAxiosError(err) &&  err.response?.status === 404){
+        console.log("Attempted to unsuscribe a user that was not suscribed already")
+        return true;//user is not suscribed
+      }
+    console.log(err)
+  }
+
+  throw new Error("Unexpected api response");
+}
+
+
 export const postSubscriptionToSnS = async (publicationId: string) : Promise<boolean> => {
 
   try {
@@ -86,7 +102,6 @@ export const postSubscriptionToSnS = async (publicationId: string) : Promise<boo
   } catch (error) {
     return false; // Return an empty array in case of error
   }
-
 
 }
 

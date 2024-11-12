@@ -18,7 +18,7 @@ import {
   ActionIcon,
 } from "@mantine/core";
 import { IconClock, IconMoneybag, IconBell } from "@tabler/icons-react";
-import { fetchAuctionDetail, fetchAuctionInitialHighestBid, fetchIsSubscribedToSnS, postSubscriptionToSnS, uploadBid } from "../api";
+import { deleteSubscriptionToSnS, fetchAuctionDetail, fetchAuctionInitialHighestBid, fetchIsSubscribedToSnS, postSubscriptionToSnS, uploadBid } from "../api";
 import AuctionDetailType from "../../../shared_types/AuctionDetailType";
 import {
   createHighestBidWebsocket,
@@ -192,6 +192,17 @@ const AuctionDetailPage: React.FC = () => {
     console.log("User subscribed to notifications.");
   };
 
+  const handleUnSuscribe = async () => {
+    try {
+      const successfullyUnSuscribed = await deleteSubscriptionToSnS(id!);
+      if (successfullyUnSuscribed) {
+        setisSubscribed(false);
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
     <Container mb="30">
       <Card shadow="sm" padding="lg" radius="md" withBorder>
@@ -293,14 +304,11 @@ const AuctionDetailPage: React.FC = () => {
             {isSubscribed !== null &&
               <Group>
                 <ActionIcon
-                  onClick={isSubscribed ? undefined : handleSubscribe} // Disable onClick when subscribed
+                  onClick={isSubscribed ? handleUnSuscribe : handleSubscribe} // Disable onClick when subscribed
                   size="xl"
                   radius="xl"
-                  style={{
-                    cursor: isSubscribed ? "not-allowed" : "pointer", // Change cursor to indicate clickable state
-                  }}
-                  disabled={isSubscribed} // Disable button when subscribed
                   
+                  color={isSubscribed ? "green" : "gray"} // Disable button when subscribed
                 >
                   <IconBell size={24} />
                 </ActionIcon>

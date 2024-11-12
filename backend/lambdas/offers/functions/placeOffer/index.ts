@@ -17,6 +17,7 @@ const closedAuctionsTableName = "closed_auctions";
 type RequestBody = {
     publicationId: string;
     price: number;
+    publicationTitle: string
 }
 
 type Offer = {
@@ -38,6 +39,9 @@ const asserter = (body: RequestBody): string | null => {
     if (body.price <= 0) {
         return 'Price must be greater than 0';
     }
+    if (!body.publicationTitle){
+        return "Missing publication title on the request";
+    }
     return null;
 }
 
@@ -58,6 +62,9 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
         // https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-the-id-token.html
         const userId = payload.sub;
 
+        //@ts-ignore
+        const userEmail : string = payload.email;
+
         if (!userId) {
             console.error('User ID is missing in the JWT payload');
             return {
@@ -76,6 +83,9 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
         }
 
         const requestBody = validation.params;
+
+
+        const publicationTitle = requestBody.publicationTitle;
 
         const offer: Offer = {
             publicationId: requestBody.publicationId,
@@ -173,6 +183,17 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
         };
         
         await snsClient.send(new PublishCommand(snsParams));
+
+        const accountId = process.env.ACCOUNT_ID;
+        const snsEmailNotificationArn = `arn:aws:sns:${region}:${accountId}:${publicationId}`;
+
+        const snsEmailNotificationParams = {
+            TopicArn: snsEmailNotificationArn,
+            Message: `user ${userEmail.split("@")[0]} has placed an offer of $${offer.price} on publication ${publicationTitle} with id ${publicationId}`
+        }
+
+        await snsClient.send(new PublishCommand(snsEmailNotificationParams))
+
 
         return {
             statusCode: 200,

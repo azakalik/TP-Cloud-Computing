@@ -18,7 +18,6 @@ import { uploadNewAuction } from "../api";
 import { useNavigate } from "react-router-dom";
 
 const AuctionForm = () => {
-  const [user, setUser] = useState("");
   const [initialPrice, setInitialPrice] = useState<number | undefined>(
     undefined
   );
@@ -43,7 +42,7 @@ const AuctionForm = () => {
       return;
     }
 
-    const return_value = await uploadNewAuction(user, title, description, countryFlag, initialPrice!, files, dueTime);
+    const return_value = await uploadNewAuction(title, description, countryFlag, initialPrice!, files, dueTime);
     if (return_value) {
       alert("Auction created successfully!");
       navigate("/"); // Redirect to home page
@@ -62,13 +61,6 @@ const AuctionForm = () => {
             {/* Use Grid for two-column layout */}
             <Grid.Col span={7}>
               <Stack>
-                <TextInput
-                  label="User ID or Email"
-                  placeholder="Enter user ID or email"
-                  value={user}
-                  onChange={(event) => setUser(event.currentTarget.value)}
-                  required
-                />
                 <TextInput
                   label="Title"
                   placeholder="Enter title"

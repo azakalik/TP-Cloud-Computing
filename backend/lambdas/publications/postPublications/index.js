@@ -71,13 +71,34 @@ async function createSNSTopic(publicationId) {
 
 
 export const handler = async (event) => {
+
+    let payload = null
+    try {
+        payload = await getJwtPayload(event);
+    } catch (error) {
+        console.error('Error while getting JWT payload', error);
+        return {
+            statusCode: 401,
+            body: JSON.stringify({ error: 'Unauthorized' }),
+        };
+    }
+
+    const user = payload.email;
+    if (!user){
+        return {
+            statusCode: 400,
+            body: JSON.stringify({error: "Missing email in claims"})
+        }
+    }
     
-    let rawPublicationId, publicationId, initialTime, endTimeISO, item1, imageUrl;
+    let rawPublicationId, publicationId, initialTime, endTimeISO, item1, imageUrl, publicationTitle; 
     
     try {
+        console.log("BODY", event.body);
         // Parse incoming JSON (containing image as base64, filename, and other data)
-        const { user, initialPrice, endTime, title, description, contentType, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
+        const { initialPrice, endTime, title, description, contentType, countryFlag = "AR" } = JSON.parse(event.body); // Default country to "AR" if not provided
     
+        publicationTitle = title;
         // Generate unique publication ID and timestamps
         rawPublicationId = uuidv4()
         await createSNSTopic(rawPublicationId)
@@ -162,7 +183,7 @@ export const handler = async (event) => {
                 Id: '1',
                 //Arn: targetLambdaArn,
                 Arn: targetLambdaArn,
-                Input: JSON.stringify({ publicationId: rawPublicationId, email: (await getJwtPayload(event)).email })
+                Input: JSON.stringify({ title: publicationTitle,  publicationId: rawPublicationId, email: (await getJwtPayload(event)).email })
             }
             ]
         }).promise();

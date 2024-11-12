@@ -1,17 +1,21 @@
-import { PublishCommand, SNSClient } from '@aws-sdk/client-sns';
-import { getHighestOffer } from '@shared/getHighestOffer';
-import { offersHandler } from '@shared/mainHandler';
-import { validateBody } from '@shared/validateBody';
-import { APIGatewayProxyEventV2 } from 'aws-lambda';
+import { PublishCommand, SNSClient } from "@aws-sdk/client-sns";
+import { getHighestOffer } from "@shared/getHighestOffer";
+import { offersHandler } from "@shared/mainHandler";
+import { validateBody } from "@shared/validateBody";
+import { APIGatewayProxyEventV2 } from "aws-lambda";
 
 const region = process.env.AWS_REGION;
 const accountId = process.env.ACCOUNT_ID;
 const balanceTableName = "balance";
 const closedAuctionsTableName = "closed_auctions";
 
-export const handler = async (event: APIGatewayProxyEventV2) => 
+export const handler = async (event: APIGatewayProxyEventV2) =>
     await offersHandler(async (client) => {
-        const { publicationId, email: vendorEmail } = event;
+        const {
+            title: publicationTitle,
+            publicationId,
+            email: vendorEmail,
+        } = event;
 
         // Get the highest offer for the publication
         const highestOffer = await getHighestOffer(client, publicationId);
@@ -32,20 +36,42 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
             [publicationId, user_id, price, time]
         );
 
+        let winnerEmailRows = null
+
+        if (user_id != null) {
+            //obtain the winners email
+            winnerEmailRows = await client.query(
+                `SELECT email FROM ${balanceTableName} WHERE user_id = $1`,
+                [user_id]
+            );
+
+            if (winnerEmailRows.rows.length <= 0) {
+                console.error("WINNER EMAIL NOT FOUND", winnerEmailRows);
+                return {
+                    statusCode: 401,
+                    body: { message: "Winner was not found" },
+                };
+            }
+        }
+
+        let winnerEmail = winnerEmailRows?.rows[0]?.email; // Access the email from the first row
+        console.log("winnerEmail", winnerEmail)
         // Notify the winner through sns
         const topicArn = `arn:aws:sns:${region}:${accountId}:${publicationId}`;
         const snsEndpoint = process.env.SNS_ENDPOINT;
         if (!snsEndpoint) {
-            throw new Error('SNS endpoint is not provided');
+            throw new Error("SNS endpoint is not provided");
         }
 
         const snsClient = new SNSClient({
             region,
-            endpoint: snsEndpoint
+            endpoint: snsEndpoint,
         });
 
-        const message = user_id === null ? `The auction for publication ${publicationId} has ended with no offers.` :
-            `The winner of the auction for publication ${publicationId} is user ${user_id} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`;
+        const message =
+            user_id === null
+                ? `The auction for publication ${publicationTitle} with id ${publicationId} has ended with no offers.`
+                : `The winner of the auction for publication ${publicationTitle} with id ${publicationId} is user ${winnerEmail} with a price of $${price}. Please contact the vendor at ${vendorEmail}.`;
 
         const snsParams = {
             TopicArn: topicArn,
@@ -56,6 +82,6 @@ export const handler = async (event: APIGatewayProxyEventV2) =>
 
         return {
             statusCode: 200,
-            body: {message: 'Winner notified'},
+            body: { message: "Winner notified" },
         };
     });

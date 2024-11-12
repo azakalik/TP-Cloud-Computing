@@ -138,6 +138,8 @@ module "lambda_create_offer" {
     SNS_ENDPOINT = "https://${module.vpc_endpoint_sns.endpoint}"
     COGNITO_USER_POOL_ID = aws_cognito_user_pool.ez_auction_user_pool.id
     COGNITO_CLIENT_ID = aws_cognito_user_pool_client.ez_auction_pool_client.id
+    ACCOUNT_ID = data.aws_caller_identity.current.account_id
+
   }
 
   api_gw_id = aws_apigatewayv2_api.api_http.id

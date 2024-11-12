@@ -1,5 +1,4 @@
 type NewAuctionType = {
-  user: string;
   images: string[]; // base64 encoded images
   title: string;
   description: string;

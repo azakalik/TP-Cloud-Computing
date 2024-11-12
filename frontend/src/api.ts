@@ -171,6 +171,7 @@ export const fetchAuctionDetail = async (
 
 // Return true if the bid was uploaded successfully, false otherwise
 export const uploadBid = async (
+  publicationTitle: string,
   publicationId: string,
   price: number
 ): Promise<Response<UserBalance>> => 
@@ -178,6 +179,7 @@ export const uploadBid = async (
     const payload: NewBidType = {
       publicationId,
       price,
+      publicationTitle,
     };
 
     const response = await api.post<Response<UserBalance>>('/offers', payload, {
@@ -194,7 +196,6 @@ export const uploadBid = async (
   }, "An error occurred while uploading the bid");
 
   export const uploadNewAuction = async (
-    user: string,
     title: string,
     description: string,
     countryFlag: string,
@@ -205,7 +206,6 @@ export const uploadBid = async (
     try {
       // Upload auction details and get presigned URL for the image
       const response = await api.post('/publications', {
-        user,
         title,
         description,
         countryFlag,
